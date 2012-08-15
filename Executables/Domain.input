@@ -1,0 +1,96 @@
+SubdomainStructure=
+    SphericalShells3D(BaseName=SphereA;
+		      Center=__d__/2, 0,0;
+		      L=__LA__;
+		      r-Axis=(Bounds=__R1__, __d__/3; 
+			      Extents=__NrA__;
+			      Maps=Exp;
+			      IndexMap=ChebyshevGaussLobatto;
+			      Topology=I1;
+			      ); 
+		      ),
+    SphericalShells3D(BaseName=SphereB;
+		      Center=-__d__/2, 0,0;
+		      L=__LB__;
+		      r-Axis=(Bounds=__R2__, __d__/3; 
+			      Extents=__NrB__;
+			      Maps=Exp;
+			      IndexMap=ChebyshevGaussLobatto;
+			      Topology=I1;
+			      ); 
+		      ),
+    SphericalShells3D(BaseName=SphereC;
+		      Center=0, 0,0;
+		      L=__LC__;
+		      r-Axis=(Bounds=__d__*2.5, 5*__d__, 1e10;  
+			      Extents=__NrC1__,__NrC2__;
+			      Maps=Lin,Inv;
+			      IndexMap=ChebyshevGaussLobatto;
+			      Topology=I1;
+			      ); 
+		      ),
+    Cylinders3D(BaseName=Cyl;
+		phi-Extents=__Nphi__;
+		rho-Axis=(Bounds=0.22*__d__, 2.8*__d__;  
+			Extents=__Nrho__;
+			Maps=Exp;
+			IndexMap=ChebyshevGaussLobatto;
+			Topology=I1;
+			  ); 
+		z-Axis=(Bounds=-2.8*__d__, -0.72*__d__, -0.28*__d__,
+			0.28*__d__, 0.72*__d__, 2.8*__d__;  
+			Extents=__Nz__,__Nz__,__Nz__,__Nz__,__Nz__;
+			Maps=Exp(Center=-__d__/2), Lin, Lin, Lin, 
+			     Exp(Center=__d__/2);
+			IndexMap=ChebyshevGaussLobatto;
+			Topology=I1;
+			); 
+		PHI=0; THETA=90; 
+		),
+#     FilledCylinder3D(BaseName=Center;
+# 		     Nr=__Nrho__;
+# 		     rmax=0.22*__d__;
+# 		     RadialMap=Lin;
+# 		     phi-Extents=__Nphi__;
+# 		     z-Axis=(Bounds=-2.8*__d__, -0.72*__d__, -0.28*__d__,
+# 			     0.28*__d__, 0.72*__d__, 2.8*__d__;  
+# 			     Extents=__Nz__,__Nz__,__Nz__,__Nz__,__Nz__;
+# 			     Maps=Exp(Center=-__d__/2), Lin, Lin, Lin, 
+# 			     Exp(Center=__d__/2);
+# 			     IndexMap=ChebyshevGaussLobatto;
+# 			     Topology=I1;
+# 			     Mask=1,0,1,0,1;
+# 			     );
+# 		     PHI=0; THETA=90; 
+# 		     );
+    
+    PerimBlocks(BaseName=Perim;
+		x-Axis=(Bounds=-2.8*__d__, -0.72*__d__, -0.28*__d__,
+			0.28*__d__, 0.72*__d__, 2.8*__d__;  
+			Extents=__Nz__,__Nz__,__Nz__,__Nz__,__Nz__;
+			Maps=Exp(Center=-__d__/2), Lin, Lin, Lin, 
+			Exp(Center=__d__/2);
+			IndexMap=ChebyshevGaussLobatto;
+			Topology=I1;
+			Mask=1,0,1,0,1;
+			);
+		y-Axis=(Bounds=-0.23*__d__, 0.23*__d__;
+			Extents=__Nyz__;
+			Maps=Lin;
+			IndexMap=ChebyshevGaussLobatto;
+			Topology=I1;
+			Mask=0;
+			DisableMaskError=yes;
+			);
+		z-Axis=(Bounds=-0.23*__d__, 0.23*__d__;
+			Extents=__Nyz__;
+			Maps=Lin;
+			IndexMap=ChebyshevGaussLobatto;
+			Topology=I1;
+			Mask=0;
+			DisableMaskError=yes;
+			);
+		);
+    
+    
+			      

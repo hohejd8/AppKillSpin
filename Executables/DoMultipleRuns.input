@@ -1,0 +1,91 @@
+# -*- perl -*- 
+#$last_dir="../InitialGuess0";
+$last_dir="";
+#for($k=0; $k<1; ++$k) {
+for($k=1; $k<4; ++$k) {
+    $dir="Five".$k;
+
+
+#    $d=8.5;
+#    $d=9.5;
+#    $d=10.5;
+#    $d=11.5;
+#    $d=12.5;
+#    $d=13.5;
+#    $d=14.5;
+#    $d=20.0;
+    $d=24.0;
+#    $d=30.0;
+#    $d=34.0;
+#    $d=40.0;
+#    $R1=1;
+#    $R1=0.8594997703602983;
+    $R1=0.7857981371045867;
+    # von Neumann BC
+    $C1=1.73703;
+    $M1=1.16347;
+    # Robin BC
+    #$C1=4/3
+    #M1=1.27259
+    $X=1;
+    $R2=$R1*$X;
+    $C2=$C1/($X*$X);
+    $M2=$M1*$X;
+
+    $LA=8+3*$k;
+    $NrA=9+2*$k;
+
+    $LB=8+3*$k;
+    $NrB=9+2*$k;
+
+    $LC=7+2*$k;
+    $NrC1=4+2*$k;
+    $NrC2=4+2*$k;
+
+    $Nrho=8+4*$k;
+    #$Nrho=12+4*$k; #large separation
+    $Nz=8+5*$k;
+    #$Nz=13+5*$k; #large separation
+    $Nphi=9+$k;
+    #$Nphi=11+1*$k; #large separation
+    
+    $Nyz=8+5*$k; 
+
+    &RunInDirectory($dir,
+                    {"Domain.input" => {
+			"__d__" => $d,
+			"__R1__" => $R1,
+			"__R2__" => $R2,
+			"__LA__" => $LA,
+			"__NrA__" => $NrA,
+			"__LB__" => $LB,
+			"__NrB__" => $NrB,
+			"__LC__" => $LC,
+			"__NrC1__" => $NrC1,
+			"__NrC2__" => $NrC2,
+			"__Nphi__" => $Nphi,
+			"__Nrho__" => $Nrho,
+			"__Nz__" => $Nz,
+			"__Nyz__" => $Nyz },
+		     "Elliptic.input" => {
+			 "__R1__" => $R1,
+			 #"__R2__" => $R2,
+			 "__LA__" => $LA,
+			 #"__C1__" => $C1,
+			 "__d__" => $d 	},
+		     "ApplyObservers.input" => {
+			 "__R1__" => $R1,
+			 "__R2__" => $R2,
+			 "__LA__" => $LA,
+			 #"__C1__" => $C1,
+			 "__d__" => $d 	},
+		     "EllipticItems.input" => {
+			 "__C1__" => $C1,
+			 "__M1__" => $M1,
+			 "__C2__" => $C2,
+			 "__M2__" => $M2,
+			 "__d__" => $d,
+			 "__LastDir__" => $last_dir }
+		 });
+    $last_dir="../".$dir; 
+}

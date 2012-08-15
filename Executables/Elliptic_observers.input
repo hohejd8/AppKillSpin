@@ -1,0 +1,185 @@
+#================================================================
+# $Elliptic.input$
+#================================================================
+
+VarsStructure=ConformalFactor, Shift(Symm=1;), LapseTimesConformalFactor;
+
+VolumeTerms= ExtendedConformalThinSandwich();
+
+BCs = SliceLFF.SphereA0(ApparentHorizon(),
+			InnerShift( Center=__d__/2,0,0;
+				    OmegaInnerShiftBC=OmegaInnerShiftBC),
+			#FlatVonNeumann(Var=LapseTimesConformalFactor;)
+			#ConformalImageAntiRobin(Psi=LapseTimesConformalFactor;
+			#	    Center=__d__/2,0,0;)
+                        VonNeumannPlusDirichlet(Var=LapseTimesConformalFactor;
+                                    Weight=__R1__;
+                                    InvMetric=InvConformalMetric;)
+			),
+    SliceLFF.SphereB0(ApparentHorizon(),
+			InnerShift( Center=-__d__/2,0,0;
+				    OmegaInnerShiftBC=OmegaInnerShiftBC),
+			#FlatVonNeumann(Var=LapseTimesConformalFactor;)
+			#ConformalImageAntiRobin(Psi=LapseTimesConformalFactor;
+			#	    Center=-__d__/2,0,0;)
+                        VonNeumannPlusDirichlet(Var=LapseTimesConformalFactor;
+                                    Weight=__R1__;
+                                    InvMetric=InvConformalMetric;)
+			),
+    SliceUFF.SphereC1(Dirichlet(Var=ConformalFactor; Value=1;),
+		      Dirichlet(Var=LapseTimesConformalFactor; Value=1;),
+		      Dirichlet(Var=Shift; Value=0.;)
+		      );
+
+
+Preconditioner=AllAtOnce(VolumeTerms=MinusFlatLaplacian
+			 (Vars=ConformalFactor, Shift, 
+			  LapseTimesConformalFactor);
+			 BCs=*(Identity(Vars=ConformalFactor, Shift, 
+					LapseTimesConformalFactor)));
+
+PetscResolution=Sphere*(Scale=1,1,1; Offset=0,-2,-4),
+			Cyl*(Scale=1,1,1; Offset=0,-4,0),
+			Perim*(Scale=1,1,1; Offset=0,0,0);
+
+CoreOptions = (SnesMonitorFile=snes.dat; KspMonitorFile=ksp.dat);
+
+ResidualOptions = (
+#		   DomainInterpolator=ParallelSpecified
+#		   (Parallelize=SphereC0(Procs=2,3; FracPts=0.5, 0.5); 
+#		    );
+#		   DomainInterpolator=Simple; 
+#		   DomainInterpolator=ParallelAdaptive;
+		   DomainInterpolator=ParallelAdaptive(TopologicalInterpolator=Spectral;);
+		   );
+
+Observers=
+    DumpTensors(Input=ConformalFactor,Shift,LapseTimesConformalFactor,
+		DiffConformalFactor,DiffShift,DiffLapseTimesConformalFactor),
+    NormOfTensor(Input=ResidualConformalFactor, ResidualShift,
+		 ResidualLapseTimesConformalFactor; 
+		 MetricForTensors=None; Filename=Res.dat; Op=L2),
+
+    # differences to the initial guess -- useful when doing a series
+    # of solves at different resolutions. 
+    # 'Diff+VAR' is the difference in the elliptic variable 'VAR'.
+    # 'Diff' is the square-root-sum over all elliptic variables.
+    NormOfTensor(Input=Diff, DiffConformalFactor, DiffShift, 
+		 DiffLapseTimesConformalFactor;
+		 Filename=Diff.dat; Op=L2; MetricForTensors=None),
+
+    # Diff on a subdomain by subdomain basis -- useful for 
+    # finetuning resolution
+    NormOfTensor(Input=Diff; EachSubdomainSeparately=yes; Op=L2;
+		 Filename=DiffBySubdomain.dat), 
+
+    # Compute spectral coefficient vs. basis-function index
+    # To view, 
+    # > ConvertOneD -target grace *oned 
+    # > Xmgrblock -ly *grace
+#    PowerMonitor(Input=ConformalFactor;
+#                     Subdomains=*; OutputFormat=grace),
+#    OneDPowerMonitor(Input=ConformalFactor;
+#		     Subdomains=*;
+#		     BasisFunction=0;),
+#    OneDPowerMonitor(Input=ConformalFactor;
+#		     Subdomains=Perim*, Cyl*;
+#		     BasisFunction=1;),
+#    OneDPowerMonitor(Input=ConformalFactor;
+#		     Subdomains=Perim*,Cyl*;
+#		     BasisFunction=2;),
+#    TensorYlmPowerMonitor(Input=ConformalFactor;
+#			  Subdomains=Sphere*;
+#			  ),
+
+    SliceIntegral(Input = One;
+		  SliceName = SliceLFF.Sphere*;
+		  BaseFileName = AHArea;
+		  VolumeMetric = PhysicalMetric;),
+
+
+    ObservePhysicalInitialData(
+		Items=Subdomain(Items=
+                            Trace(
+                                Input=K;Output=TrK;
+				PositionOfIndices=l,l;
+				Indices=0,1;InvMetric=Invg
+                             );
+                       ),   
+		Domain(Items=
+                             AddStrahlkorperSurface(
+                                SurfaceName=hohejd8SkS;
+                                MeshName=hohejd8SkM;
+                                Nth=__LA__;
+                                Nph=2*(__LA__);
+                                Center=__d__/2.,0.,0.;
+                                Radius=__R1__;
+                             ),
+                             ComputeSKWM(
+                                Surface=hohejd8SkS;
+                                Mesh=hohejd8SkM;
+                                SKWMName=hohejd8SkWM;
+                             ),
+                             FlatspaceCKV(
+                                Metric=g;
+                                SurfaceWithMesh=hohejd8SkWM;
+                                Output=S_x;
+                             ),
+                             FlatspaceCKV(
+                                Metric=g;
+                                SurfaceWithMesh=hohejd8SkWM;
+                                Output=S_y;
+                             ),
+                             FlatspaceCKV(
+                                Metric=g;
+                                SurfaceWithMesh=hohejd8SkWM;
+                                Output=S_z;
+                             ),
+                             ComputeAKV(
+                                StrahlkorperWithMesh=hohejd8SkWM;
+                                ConformalFactor=ConformalFactor;
+                                #AKVGuess=-3.0e-06, 6.0e-09, -0.50;
+                                AKVGuess=0.0, 0.0, 0.0;
+                                Output=hohejd8AKV;
+                             );
+               );
+#                            ProperSepHorizons(Output=ProperSep;
+#				xMin= -__d__/2 + __R2__ + 0.0000000000001;
+#				xMax=  __d__/2 - __R1__ - 0.0000000000001;
+#				Metric=g;Eps = 1.e-6););
+
+
+          Observers=NormOfTensor(Input=Ham, Mom, dtg, dtK; 
+				       MetricForTensors=None;
+				       Op=L2;Filename=AdmEqns.dat),
+
+#                TestSurfaceBasis(
+#                  SWMName=hohejd8SkWM;
+#                  ConformalFactor=ConformalFactor;
+#                ),
+
+                AdmIntegralS2(
+                   Metric=g;
+                   InvMetric=Invg;
+                   #InvConformalMetric=InvCg;
+                   ExtrinsicCurvature=K;
+                   StrahlkorperWithMesh=hohejd8SkWM;
+                    L=__LA__;
+                   Center=__d__/2,0,0;
+                   Radius=__R1__;
+                   ConformalFactor=ConformalFactor;
+                   KillingVector=S_x, S_y, S_z;
+#add these names to the output vector in the observer
+#can I give a vector of KillingVectors to this observer?
+                   #KillingVector=hohejd8AKV, S_z;
+                   InertialXi=FlatSpace),
+
+                AdmIntegrals(Sphere=SphereC1;
+         		    MonopoleTerms=ConformalFactor,
+		             Lapse;K=K; TrK=TrK;Invg=Invg;dg=dg;),
+
+		DumpTensors(Input=Ham, Mom),
+#		ObserveDoubles(Filename = PropSep.dat;
+#				  Input = ProperSep;),
+     );
+

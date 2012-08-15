@@ -1,0 +1,63 @@
+##### Options of nonlinear solver
+
+-snes_rtol 1e-3
+-snes_max_it 20
+-snes_monitor
+-snes_converged_reason
+
+
+
+##### Options for linear solver 
+-ksp_type fgmres
+#-ksp_gmres_modifiedgramschmidt
+-ksp_gmres_restart 100
+-ksp_rtol 1e-4
+-ksp_max_it 100
+#-ksp_monitor
+
+
+
+################
+#### PRECONDITIONING 
+################
+
+###### No preconditioning 
+#-spells_pc_type none
+
+###### Invert A_FD exactly
+#-spells_pc_type lu
+
+###### Perform ILU(k) on A_FD 
+#-spells_pc_type ilu
+#-spells_pc_factor_levels 2
+
+
+
+####### Performs a LU decomp on each (processor)-block
+#-spells_pc_type asm
+#-spells_sub_pc_type lu
+#-spells_pc_asm_overlap 0
+
+
+###### Approximate inversion of A_FD
+# (Note: We set the preconditioner to be bjacobi.  This is the default
+# in parallel anyway.  Using it in serial won't hurt, but will allow
+# us to use the same ilu_levels in serial and parallel.)
+-spells_pc_type ksp 
+-spells_ksp_ksp_max_it 15
+#-spells_ksp_ksp_smonitor
+-spells_ksp_pc_type bjacobi 
+-spells_ksp_sub_pc_type ilu 
+-spells_ksp_sub_pc_factor_levels 2 
+
+
+
+################################################################
+# general diagnostics stuff
+################################################################
+#-help
+#-info  
+#-ksp_converged_reason
+#-ksp_xmonitor
+#-snes_xmonitor
+#-ksp_xmonitor

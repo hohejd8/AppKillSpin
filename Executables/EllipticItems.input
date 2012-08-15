@@ -1,0 +1,99 @@
+Items=
+    Domain(Items=
+	   #ConstVectorOfDouble(Output=OmegaOrbit; Components=0,0,0.0435256276), #d=8.5
+	   #ConstVectorOfDouble(Output=OmegaOrbit; Components=0,0,0.038037431), #d=9.5
+	   #ConstVectorOfDouble(Output=OmegaOrbit; Components=0,0,0.03356387179), #d=10.5
+	   #ConstVectorOfDouble(Output=OmegaOrbit; Components=0,0,0.02987703978), #d=11.5
+	   #ConstVectorOfDouble(Output=OmegaOrbit; Components=0,0,0.02680407367), #d=12.5
+	   #ConstVectorOfDouble(Output=OmegaOrbit; Components=0,0,0.02421507216), #d=13.5
+	   #ConstVectorOfDouble(Output=OmegaOrbit; Components=0,0,0.02201202116), #d=14.5
+	   #ConstVectorOfDouble(Output=OmegaOrbit; Components=0,0,0.01418267927), #d=20.0
+	   ConstVectorOfDouble(Output=OmegaOrbit; Components=0,0,0.010990), #d=24.0
+	   #ConstVectorOfDouble(Output=OmegaOrbit; Components=0,0,0.0080083), #d=30.0
+	   #ConstVectorOfDouble(Output=OmegaOrbit; Components=0,0,0.0052966), #d=40.0
+           ConstDouble(Output=dtExpansionFactor;   Value=0),
+	   ConstVectorOfDouble(Output=OmegaInnerShiftBC;  Components=0,0,0)
+	   ),
+
+    Subdomain(Items=
+	      GlobalDifferentiator(
+                  GlobalDifferentiator=Standard(
+                     TopologicalDifferentiator=Spectral;
+                  );
+              ),
+
+	      GlobalIntegrator(Integrator=Spectral),
+
+	      EllipticInitialGuess(ImportDir= __LastDir__; 
+                         SubdomainItems=
+                         #Black hole +
+                         AnalyticEinsteinSolution(Solution=IsotropicMaxSliceSchwarzschild(C=__C1__;
+											  Mass=__M1__;
+											  Center=__d__/2,0,0;);
+                                                                                          Output=IG_SolnPlus;),
+                         # compute relevant stuff from first analytic solution
+                         AnalyticEinstein::g(Input=IG_SolnPlus; Output=IG_gPlus),
+                         Determinant(Input=IG_gPlus; Output=IG_DetgPlus),
+                         EvaluateFormula(D=IG_DetgPlus; Output=IG_PsiPlus;  Formula=D^(1./12)),
+                         AnalyticEinstein::N(Input=IG_SolnPlus; Output=IG_LapsePlus),
+                         AnalyticEinstein::Shift(Input=IG_SolnPlus; Output=IG_ShiftPlus),
+                         # Black hole -
+                         AnalyticEinsteinSolution(Solution=IsotropicMaxSliceSchwarzschild(C=__C2__;
+											  Mass=__M2__;
+											  Center=-__d__/2,0,0;);
+                                                                                          Output=IG_SolnMinus;),
+                         AnalyticEinstein::g(Input=IG_SolnMinus; Output=IG_gMinus),
+                         Determinant(Input=IG_gMinus; Output=IG_DetgMinus),
+                         EvaluateFormula(D=IG_DetgMinus; Output=IG_PsiMinus;  Formula=D^(1./12)),
+                         AnalyticEinstein::N(Input=IG_SolnMinus; Output=IG_LapseMinus),
+                         AnalyticEinstein::Shift(Input=IG_SolnMinus; Output=IG_ShiftMinus),
+                         #The initial guess
+                         EvaluateFormula(Output=IG-ConformalFactor; A=IG_PsiPlus; B=IG_PsiMinus;Formula=A+B-1),
+                         EvaluateFormula(Output=IG-Shift; A=IG_ShiftPlus; B=IG_ShiftMinus;
+                                         Formula=A+B),
+                         EvaluateFormula(Output=IG-LapseTimesConformalFactor;
+                                         A=IG_LapsePlus;    B=IG_LapseMinus;
+                                         X=IG_PsiPlus;      Y=IG_PsiMinus;
+                                         Formula=A*X+B*Y-1);
+			 ),
+
+              EvaluateMatrixFormula(Output=ConformalMetric;Dim=3; Symm=11;
+                                    M[0,0]=1; M[1,1]=1; M[2,2]=1), 
+              AddMetricItems(Metric=ConformalMetric; Prefix=Conformal),
+
+
+              EvaluateMatrixFormula(Output=dtConformalMetric;Dim=3; Symm=11;
+                                    # no components -> output==zero
+                                    ), 
+              FirstDeriv(Input=dtConformalMetric; Output=ddtConformalMetric),
+
+ 	      #For physical observers
+	      EvaluateScalarFormula(Output=One;Formula=1;),
+	      EvaluateScalarFormula(A=ConformalFactor;Output=Psi4;Formula=A*A*A*A;),
+	      BinaryOp(Output=PhysicalMetric; A=ConformalMetric; B=Psi4; Op=A*B;),
+         EvaluateScalarFormula(Output=TrExtrinsicCurvature; Formula=0),
+         EvaluateScalarFormula(Output=dtTrExtrinsicCurvature; Formula=0),
+         FirstDeriv(Input=TrExtrinsicCurvature; 
+                         Output=dTrExtrinsicCurvature);
+
+	      ),
+Boundary(Items=  
+	GlobalSliceIntegrator(Integrator=Spectral),
+	ExtractFromParent(Input=ConformalMetric,
+                                  DetConformalMetric,
+                                  InvConformalMetric,
+				  PhysicalMetric,
+                                  dtConformalMetric,
+                                  ConformalChristoffel2ndKind,
+                                  ConformalRicciScalar, 
+                                  TrExtrinsicCurvature, 
+                                  dtTrExtrinsicCurvature,
+				  One;
+                                  ),
+         ExtractDerivFromParent(Input=dConformalMetric, 
+                                dConformalChristoffel2ndKind, 
+                                dTrExtrinsicCurvature, 
+                                ddtTrExtrinsicCurvature, 
+                                ddtConformalMetric;
+                                );
+         );
