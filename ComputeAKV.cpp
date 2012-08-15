@@ -5,7 +5,7 @@
 #include "ComputeAKV.hpp"
 #include "SurfaceFinder/Strahlkorper/StrahlkorperWithMesh.hpp"
 #include "Utils/StringParsing/OptionParser.hpp"
-//#include "hohejd8/AKVsolver.hpp"
+#include "AKVsolver.hpp"
 //#include "gsl/gsl_multiroots.h"
 #include "Utils/LowLevelUtils/Position.hpp"
 #include "SurfaceFinder/StrahlkorperDataSupplier/StrahlkorperParallelInterpolation.hpp"
@@ -73,12 +73,12 @@ namespace ComputeItems {
     size_t iter=0;
 
     const size_t n = 3; //number of dimensions
-
+/*
     int subdomain=0;
     for(int sd=0; sd<box.Size(); ++sd) {
       if(box[sd].KeyExists(mConformalFactor)) subdomain=sd;
     }
-
+*/
     const StrahlkorperWithMesh& skwm = box.Get<StrahlkorperWithMesh>(mSkwm);
 
     //Psi needs to be interpolated onto the surface
@@ -179,8 +179,8 @@ namespace ComputeItems {
     DataMesh rad   = box.Get<StrahlkorperWithMesh>(mSkwm).Radius();
 
 //for testing only ------------------------------
-    const int mNth = skwm.Grid().SurfaceCoords()(0).Extents()[0];
-    const int mNph = skwm.Grid().SurfaceCoords()(0).Extents()[1];
+    //const int mNth = skwm.Grid().SurfaceCoords()(0).Extents()[0];
+    //const int mNph = skwm.Grid().SurfaceCoords()(0).Extents()[1];
 //-----------------------------------------------
 
 /*

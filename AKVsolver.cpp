@@ -533,7 +533,7 @@ MyVector<double> PathDerivs(void *params,
   double radAtPoint = sbe.Evaluate(rad, Vin[0], Vin[1]);
 
   MyVector<double> result(MV::Size(2),0.0);
-  result = sbe.VectorInterpAtPoint(xi, Vin[0], Vin[1]);
+  result = sbe.EvaluateVector(xi, Vin[0], Vin[1]);
 
   const double norm = 1.0 / (psiAtPoint*psiAtPoint*psiAtPoint*psiAtPoint
                              *radAtPoint*radAtPoint);

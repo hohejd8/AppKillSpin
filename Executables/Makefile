@@ -1,37 +1,77 @@
-##############################################################################
-# $Id: Makefile hohejd8 $
-##############################################################################
 #
-#/// \dir hohejd8
+#/// \dir AppKillSpin/Executables
 #/// General operators for initial value problem for black holes
-#/// \ingroup Elliptic
 
 CODE_HOME = ../..
 
 SUBDIRECTORIES = 
 
-LINKED_LIBS = \
-	InitialValueProblem \
-	EllipticSolver Preconditioning EllipticResidual \
-        VolumeTerms BoundaryConditions \
-	LinearizedGravity \
-        ComputeItems GrItems BackgroundMetrics Observers\
-        EinsteinSolutions TensorFunctions CoordinateTransformations\
-	StrahlkorperItems StrahlkorperResidual StrahlkorperDataSupplier\
-        StrahlkorperFinderAlgorithm Strahlkorper \
-        SurfaceFinderItems SurfaceResidual SurfaceDataSupplier Surface \
-        MinimizationAlgorithm  \
-	TensorFunctions \
-	SpatialCoordMaps \
-        SpectralFilters SpectralFunctionals BasisFunctions\
-        TensorSphericalHarmonics DfftPack SpherePack \
-        Mover Interpolators Functionals \
-        Domain Slice Subdomain CoordMap Topology DataMesh IndexMap \
-        IO DataBox Vars StringParsing Tensor Math \
-        MiscUtils MpiWrappers MyContainers LowLevelUtils ErrorHandling \
-        hohejd8 #SpherePackhohejd8
+FACTORY_LIBS = \
+#    AmrDrivers \
+#    DualFrameItems \
+#    DualFrameSystem \
+#    EllipticStateChangers \
+#    EventTriggers \
+#    Evolution \
+#    EvolutionObservers \
+#    EvolutionStateChangers \
+#    FoshAlgorithms \
+#    FoshBoundaryConditions \
+#    FoshSystem \
+#    GeneralizedHarmonic \
+#    ImexFoshAlgorithms \
+#    ImexGh \
+#    ImexScalarWaveCurved \
+#    ImexTimeSteppers \
+#    TimeSteppers \
+#    WaveEquationSolutions \
+#    EquationOfState \
+#    FIDElliptic \
+#    FIDHydro \
+#    FiniteDifference \
+#    HydroComputeItems \
+#    HydroStates \
+#    InitialValueProblem \
+#    LinearizedGravity \
+#    SurfaceFitting \
+#    NullInfComputeItems \
+#    NullInfinity \
+#    StrahlkorperFinderAlgorithm \
+#    StrahlkorperItems \
+#    StrahlkorperResidual \
+#    MinimizationAlgorithm \
+#    SpatialCoordMaps \
+#    Surface \
+    SurfaceFinderItems \
+#    BackgroundMetrics \
+#    BoundaryConditions \
+    ComputeItems \
+#    CoordMap \
+#    CoordinateTransformations \
+    DataBox \
+    Domain \
+#    EinsteinSolutions \
+#    EllipticResidual \
+#    EllipticSolver \
+#    Functionals \
+#    GrItems \
+    IO \
+#    IndexMap \
+#    Interpolators \
+#    Math \
+#    Observers \
+#    Preconditioning \
+#    Slice \
+#    SpectralFilters \
+#    SpectralFunctionals \
+#    Subdomain \
+#    TensorFunctions \
+#    Topology \
+#    VolumeTerms \
+    AppKillSpin #SpherePackhohejd8 \
+    $(NULL)
 
-EXECUTABLES = IVP_hohejd8 #TestSurfaceBasisExt #TestVectorHA  TestGslMultiroots
+EXECUTABLES = SpellsAKS #TestSurfaceBasisExt #TestVectorHA  TestGslMultiroots
 
 ##############################################################################
 # Nothing below here needs to be changed

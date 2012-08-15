@@ -2,12 +2,11 @@
 # $Id: Makefile hohejd8 $
 ##############################################################################
 #///
-#/// \dir /hohejd8
-#/// Contains code written by hohejd8
+#/// \dir /AppKillSpin
 
 CODE_HOME = ..
 
-SUBDIRECTORIES = Executables #SpherePackhohejd8
+SUBDIRECTORIES = Executables 
 
 OBJECT_FILES_INTO_LIB    = \
              AdmIntegralS2.o \
@@ -16,7 +15,6 @@ OBJECT_FILES_INTO_LIB    = \
              FlatspaceCKV.o \
              AKVsolver.o \
              ComputeAKV.o
-             #SurfaceBasisExt.o \
 
 
 ##############################################################################

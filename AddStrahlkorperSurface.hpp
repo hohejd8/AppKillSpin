@@ -39,7 +39,7 @@ namespace DataBoxAdders {
         "  Strahlkorper (surface) of input parameters.          \n";
       };
 
-      AddStrahlkorperSurface(): DataBoxAdder(ClassID())  {};
+      AddStrahlkorperSurface();//: DataBoxAdder(ClassID())  {};
       void AddToDataBoxImpl(const DataBoxInserter& box,
                             const std::string& opts) const;
   };
