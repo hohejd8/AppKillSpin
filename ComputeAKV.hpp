@@ -71,6 +71,7 @@ namespace ComputeItems {
       MyVector<double> mAKVGuess;
       std::string mDivNorm, mVortNorm, mSS, mfLNorm, mfLambdaNorm, mXiDivLNorm;
       MyVector<bool> printDiagnostic;
+      bool mVerbose;
       std::string mOutput;
       mutable result_type* mResult;
 

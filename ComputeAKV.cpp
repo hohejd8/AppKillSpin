@@ -1,7 +1,3 @@
-//============================================
-// $Id: ComputeAKV.cpp 2011-10-23 hohejd8
-//============================================
-
 #include "ComputeAKV.hpp"
 #include "SurfaceFinder/Strahlkorper/StrahlkorperWithMesh.hpp"
 #include "Utils/StringParsing/OptionParser.hpp"
@@ -21,7 +17,8 @@ namespace ComputeItems {
     OptionParser p(opts, Help());
     mSkwm       = p.Get<std::string>("StrahlkorperWithMesh");
     mConformalFactor = p.Get<std::string>("ConformalFactor","ConformalFactor");
-    mAKVGuess   = p.Get<MyVector<double> >("AKVGuess");
+    mAKVGuess   = p.Get<MyVector<double> >("AKVGuess");//must be three-dimensional
+    mVerbose    = p.Get<bool>("Verbose",false);
     mOutput     = p.Get<std::string>("Output");
 
     printDiagnostic = MyVector<bool>(MV::Size(6), false);
@@ -137,9 +134,9 @@ namespace ComputeItems {
         break;
       }
 
-      status = gsl_multiroot_test_residual(s->f, 1.e-7); //was 1.e-13 (hohejd8 value)
+      status = gsl_multiroot_test_residual(s->f, 1.e-7);
 
-    } while(status == GSL_CONTINUE && iter<1000);
+    } while(status == GSL_CONTINUE );//&& iter<1000);
 
     gsl_multiroot_fsolver_free(s); //frees all memory associated with solver
 
@@ -168,11 +165,12 @@ namespace ComputeItems {
 
     gsl_vector_free(x);
 
-    std::cout << "Solution found with : Theta  = " << THETA << "\n"
+    if(mVerbose){
+      std::cout << "Solution found with : Theta  = " << THETA << "\n"
 	      << "                      thetap = " << (180.0/M_PI)*thetap << "\n"
 	      << "                        phip = " << (180.0/M_PI)*phip 
 	      << std::endl;
-
+    }
 
     //compute L, v from minimized thetap, phip
     DataMesh phi   = box.Get<StrahlkorperWithMesh>(mSkwm).Grid().SurfaceCoords()(1);
@@ -181,8 +179,6 @@ namespace ComputeItems {
 //for testing only ------------------------------
     //const int mNth = skwm.Grid().SurfaceCoords()(0).Extents()[0];
     //const int mNph = skwm.Grid().SurfaceCoords()(0).Extents()[1];
-//-----------------------------------------------
-
 /*
     std::cout << "v before scaled " << POSITION << std::endl;
     for(int i=0; i<mNth; ++i){
@@ -193,12 +189,17 @@ namespace ComputeItems {
     }
     std::cout << "\n" << std::endl;
 */
+//-----------------------------------------------
     //determine scale factor
     double scale = normalizeKillingVector(&p, thetap, phip);
-    std::cout << "scale factor = " << scale << std::endl;
+    if(mVerbose){
+      std::cout << "scale factor = " << scale << std::endl;
+    }
 
     //scale L, v
     v *= scale;
+
+//diagnostics
 /*
     std::cout << "v scaled " << POSITION << std::endl;
     for(int i=0; i<mNth; ++i){
@@ -210,6 +211,7 @@ namespace ComputeItems {
     std::cout << "\n" << std::endl;
 */
     //L *= scale;
+//end diagnostics
 
     //create xi (1-form)
     const SurfaceBasis sbe(box.Get<StrahlkorperWithMesh>(mSkwm).Grid());
@@ -218,6 +220,8 @@ namespace ComputeItems {
        //initializes with the right structure, but also copies data.
     xi(0) = tmp_xi(1);
     xi(1) = -tmp_xi(0);
+
+//diagnostics
 //----------------------------------------
 /*
   std::cout << "xi(0) ComputeAKV" << POSITION << std::endl;
@@ -238,6 +242,8 @@ namespace ComputeItems {
   std::cout << "\n" << std::endl;
 */
 //----------------------------------------
+//end diagnostics
+
     KillingDiagnostics(skwm, L, Psi, xi, printDiagnostic);
 
     //approximate Killing vector

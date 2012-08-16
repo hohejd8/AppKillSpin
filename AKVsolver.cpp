@@ -1,12 +1,7 @@
-//============================================
-// $Id: AKVsolver.cpp 2012-03-29 hohejd8
-//============================================
-
 #include "AKVsolver.hpp"
 #include "Utils/StringParsing/OptionParser.hpp"
 #include "Utils/LowLevelUtils/Position.hpp"
-//#include "Dust/Domain/CoordMap/Rotation3D.hpp"
-//#include "Utils/DataMesh/DataMeshNorms.hpp"
+#include "Spectral/BasisFunctions/SpherePackIterator.hpp"
 #include <iomanip>
 
 //#include "Utils/DataMesh/DataMeshNorms.hpp"
@@ -52,8 +47,6 @@ TO DO:
 clean up normalizeKillingVector - add flags to evaluate/print other scale factors
 
 add rotated Psi comments to .hpp file
-
-add flags to KillingDiagnostics
 */
 //-----------------------------------------
 
@@ -81,6 +74,7 @@ int AKVsolver(const gsl_vector * x,
   const DataMesh& phi   = skwm.Grid().SurfaceCoords()(1);
   const int mNth = theta.Extents()[0];
   const int mNph = theta.Extents()[1];
+  SpherePackIterator sit(mNth,mNph);
 
   const int mdab = mNth;
   const int ndab = mNth;
@@ -101,7 +95,18 @@ int AKVsolver(const gsl_vector * x,
   L_ha = sbe.ComputeCoefficients(L);
   v_ha = sbe.ComputeCoefficients(v);
 
-  //replace with vector iterator tools
+  //replace with scalar iterator tools
+  //guarantee only l=1 modes exist in the harmonic analysis
+  for(sit.Reset(); sit; ++sit){
+    if(sit.l()==1){
+      continue;
+    } else {
+      L_ha[sit()] = 0.0;
+      v_ha[sit()] = 0.0;
+    }
+  }
+//previous method for setting l.ne.1 to zero
+/*
   L_ha[0]             = 0.0;
   L_ha[0+mdab*ndab] = 0.0;
   v_ha[0]             = 0.0;
@@ -129,6 +134,8 @@ int AKVsolver(const gsl_vector * x,
       v_ha[j+i*mdab+mdab*ndab] = 0.0;
     }
   }
+*/
+//end previous method for l.ne.1
 
   //recompute L from the 'fixed' analysis L_ha
   //this is necessary for the RHS (collocation points) in the while loop
@@ -168,14 +175,30 @@ int AKVsolver(const gsl_vector * x,
     //perform harmonic analysis on RHS
     RHS_ha = sbe.ComputeCoefficients(RHS);
 
+    //keep track of l=1 values
+    ic10 = RHS_ha[sit(1,0,SpherePackIterator::a)];
+    ic1p = RHS_ha[sit(1,1,SpherePackIterator::a)];
+    ic1m = RHS_ha[sit(1,1,SpherePackIterator::b)];
+//old version
+/*
     ic10 = RHS_ha[mdab];
     ic1p = RHS_ha[mdab+1];
     ic1m = RHS_ha[mdab*ndab + mdab+1];
+*/
+//end old version
+
 
     //remove the l=1 modes
+    RHS_ha[sit(1,0,SpherePackIterator::a)] = 0.0;
+    RHS_ha[sit(1,1,SpherePackIterator::a)] = 0.0;
+    RHS_ha[sit(1,1,SpherePackIterator::b)] = 0.0;
+//old version
+/*
     RHS_ha[mdab] = 0.0;
     RHS_ha[mdab+1] = 0.0;
     RHS_ha[mdab*ndab + mdab+1] = 0.0;
+*/
+//end old version
 
     //recompute RHS from 'fixed' analysis
     RHS = sbe.Evaluate(RHS_ha);
@@ -186,6 +209,15 @@ int AKVsolver(const gsl_vector * x,
     const double norm_RHS_L = sqrt(sqrt(2.0)*sbe.ComputeCoefficients(RHS)[0]/4.0);
 
     //invert (Laplacian + 2)
+    for(sit.Reset(); sit; ++sit){
+      if(sit.l()==1){ //must zero out n=1 modes
+        RHS_ha[sit()] = 0.0;
+      } else {
+        RHS_ha[sit()] /= 2.0 - sit.m()*(sit.m()+1.0);
+      }
+    }
+//old version
+/*
     //j=0
     RHS_ha[0] *= 0.5;
     RHS_ha[mdab*ndab + 0] *= 0.5;
@@ -211,15 +243,23 @@ int AKVsolver(const gsl_vector * x,
         RHS_ha[mdab*ndab + j + i*mdab] /= 2.0 - i*(i+1.0);
       }
     }
+*/
+//end old version
 
     //update harmonic coefficients for L = L_0 + L_1(RHS)
+    for(sit.Reset(); sit; ++sit){
+      L_ha[sit()] = RHS_ha[sit()];
+    }
+//old version
+/*
     for(int j=0; j<mdab; ++j){
       for(int i=j; i<mNth; ++i){
         L_ha[j+i*mdab] += RHS_ha[j+i*mdab];
         L_ha[mdab*ndab + j+i*mdab] += RHS_ha[mdab*ndab + j+i*mdab];
       }
     }
-
+*/
+//end old version
 
     //compute L from harmonic coefficients
     L = sbe.Evaluate(L_ha);
@@ -232,7 +272,8 @@ int AKVsolver(const gsl_vector * x,
 
     //remove the l=0 mode from RHS
     RHS_ha = sbe.ComputeCoefficients(RHS);
-    RHS_ha[0] = 0.0;
+    RHS_ha[sit(0,0,SpherePackIterator::a)] = 0.0;
+    //RHS_ha[0] = 0.0; //old version
     RHS = sbe.Evaluate(RHS_ha);
 
     //compute RHS^2
@@ -242,8 +283,17 @@ int AKVsolver(const gsl_vector * x,
     const double norm_RHS_v = sqrt(sqrt(2.0)*sbe.ComputeCoefficients(RHS)[0]/4.0);
 
     //invert (Laplacian + 0)
+    for(sit.Reset(); sit; ++sit){
+      if(sit.l()==1){
+        RHS_ha[sit()] = 0.0;
+      } else {
+        RHS_ha[sit()] /= -sit.m()*(sit.m()+1.0);
+      }
+    }
+//old version
+/*
     RHS_ha[0] = 0.0;
-    RHS_ha[(mM+1)*mNth] = 0.0;
+    RHS_ha[(mM+1)*mNth] = 0.0; //why mM+1*mNth, not mdab*ndab?
     for(int i=1; i<mNth; ++i){
       RHS_ha[i*mdab] /= -i*(i+1.0);
       RHS_ha[mdab*ndab + i*mdab] /= -i*(i+1.0);
@@ -254,16 +304,25 @@ int AKVsolver(const gsl_vector * x,
         RHS_ha[mdab*ndab + j + i*mdab] /= -i*(i+1.0);
       }
     }
+*/
+//end old version
 
     //update harmonic coefficients for v
+    for(sit.Reset(); sit; ++sit){
+      v_ha[sit()] += RHS_ha[sit()];
+    }
+//old version
+/*
     for(int j=0; j<mdab; ++j){
       for(int i=j; i<mNth; ++i){
         v_ha[j + i*mdab] += RHS_ha[j + i*mdab];
         v_ha[mdab*ndab + j + i*mdab] += RHS_ha[mdab*ndab + j + i*mdab];
       }
     }
+*/
+//end old version
 
-    //end the loop
+    //end the primary loop
     if(++iter_count > iter_max) unsolved = false;
     if((norm_RHS_L < L_resid) && (norm_RHS_v < v_resid)) {
       //              1.e-5                     1.e-9
@@ -681,7 +740,7 @@ void KillingDiagnostics(const StrahlkorperWithMesh& skwm,
 
   if(printDiagnostic[1] || printDiagnostic[2]){
     DataMesh vort = sbe.Vorticity(xi) / p2r2 - 2.0*Psi*Psi*L;
-    //DataMesh vort = sbe.Vorticity(xi);
+
 /*
   std::cout << "vort/p2r2 " << POSITION << std::endl;
   for(int i=0; i<mNph; ++i){

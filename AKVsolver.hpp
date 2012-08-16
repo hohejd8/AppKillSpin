@@ -1,14 +1,6 @@
-//=======================================
-// $Id: AKVsolver.hpp 2012-03-22 hohejd8 $
-//=======================================
-///
-/// /file
-/// Defines AKVsolver.hpp
-
 #ifndef INCLUDED_AKVsolver_hpp
 #define INCLUDED_AKVsolver_hpp
 
-//#include "hohejd8/SurfaceBasisExt.hpp"
 #include "SurfaceFinder/Strahlkorper/SurfaceBasis.hpp"
 #include "SurfaceFinder/Strahlkorper/StrahlkorperWithMesh.hpp"
 #include "Utils/DataMesh/DataMesh.hpp"
