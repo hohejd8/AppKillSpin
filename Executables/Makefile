@@ -7,71 +7,71 @@ CODE_HOME = ../..
 SUBDIRECTORIES = 
 
 FACTORY_LIBS = \
-#    AmrDrivers \
-#    DualFrameItems \
-#    DualFrameSystem \
-#    EllipticStateChangers \
-#    EventTriggers \
-#    Evolution \
-#    EvolutionObservers \
-#    EvolutionStateChangers \
-#    FoshAlgorithms \
-#    FoshBoundaryConditions \
-#    FoshSystem \
-#    GeneralizedHarmonic \
-#    ImexFoshAlgorithms \
-#    ImexGh \
-#    ImexScalarWaveCurved \
-#    ImexTimeSteppers \
-#    TimeSteppers \
-#    WaveEquationSolutions \
-#    EquationOfState \
-#    FIDElliptic \
-#    FIDHydro \
-#    FiniteDifference \
-#    HydroComputeItems \
-#    HydroStates \
-#    InitialValueProblem \
-#    LinearizedGravity \
-#    SurfaceFitting \
-#    NullInfComputeItems \
-#    NullInfinity \
-#    StrahlkorperFinderAlgorithm \
-#    StrahlkorperItems \
-#    StrahlkorperResidual \
-#    MinimizationAlgorithm \
-#    SpatialCoordMaps \
-#    Surface \
+    AmrDrivers \
+    DualFrameItems \
+    DualFrameSystem \
+    EllipticStateChangers \
+    EventTriggers \
+    Evolution \
+    EvolutionObservers \
+    EvolutionStateChangers \
+    FoshAlgorithms \
+    FoshBoundaryConditions \
+    FoshSystem \
+    GeneralizedHarmonic \
+    ImexFoshAlgorithms \
+    ImexGh \
+    ImexScalarWaveCurved \
+    ImexTimeSteppers \
+    TimeSteppers \
+    WaveEquationSolutions \
+    EquationOfState \
+    FIDElliptic \
+    FIDHydro \
+    FiniteDifference \
+    HydroComputeItems \
+    HydroStates \
+    InitialValueProblem \
+    LinearizedGravity \
+    SurfaceFitting \
+    NullInfComputeItems \
+    NullInfinity \
+    StrahlkorperFinderAlgorithm \
+    StrahlkorperItems \
+    StrahlkorperResidual \
+    MinimizationAlgorithm \
+    SpatialCoordMaps \
+    Surface \
     SurfaceFinderItems \
-#    BackgroundMetrics \
-#    BoundaryConditions \
+    BackgroundMetrics \
+    BoundaryConditions \
     ComputeItems \
-#    CoordMap \
-#    CoordinateTransformations \
+    CoordMap \
+    CoordinateTransformations \
     DataBox \
     Domain \
-#    EinsteinSolutions \
-#    EllipticResidual \
-#    EllipticSolver \
-#    Functionals \
-#    GrItems \
+    EinsteinSolutions \
+    EllipticResidual \
+    EllipticSolver \
+    Functionals \
+    GrItems \
     IO \
-#    IndexMap \
-#    Interpolators \
-#    Math \
-#    Observers \
-#    Preconditioning \
-#    Slice \
-#    SpectralFilters \
-#    SpectralFunctionals \
-#    Subdomain \
-#    TensorFunctions \
-#    Topology \
-#    VolumeTerms \
-    AppKillSpin #SpherePackhohejd8 \
+    IndexMap \
+    Interpolators \
+    Math \
+    Observers \
+    Preconditioning \
+    Slice \
+    SpectralFilters \
+    SpectralFunctionals \
+    Subdomain \
+    TensorFunctions \
+    Topology \
+    VolumeTerms \
+    AppKillSpin \
     $(NULL)
 
-EXECUTABLES = SpellsAKS #TestSurfaceBasisExt #TestVectorHA  TestGslMultiroots
+EXECUTABLES = SpellsAKS #TestSurfaceBasisExt #TestVectorHA  #TestGslMultiroots
 
 ##############################################################################
 # Nothing below here needs to be changed
