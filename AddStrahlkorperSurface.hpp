@@ -1,14 +1,7 @@
-//=======================================
-// $Id: AddStrahlkorperSurface.hpp 2011-09-09 hohejd8 $
-//=======================================
-
-
-///
-/// /file
-/// Defines DataBoxAdders::AddStrahlkorperSurface
-
-#ifndef INCLUDED_AddStrahlkorperSurface_hpp
-#define INCLUDED_AddStrahlkorperSurface_hpp
+/// \file
+/// Defines DataBoxAdders::AddStrahlkorperSurface.
+#ifndef AddStrahlkorperSurface_hpp
+#define AddStrahlkorperSurface_hpp
 
 #include "Utils/DataBox/DataBoxAdder.hpp"
 
@@ -19,13 +12,12 @@ namespace DataBoxAdders {
   /// have similar functionality to AddStrahlkorperDataBoxes.
 
   class AddStrahlkorperSurface: public DataBoxAdder,
-              private Factory::Register<AddStrahlkorperSurface> {
-
+              private Factory::Register<AddStrahlkorperSurface> 
+  {
     public:
-      static std::string ClassID() {return "AddStrahlkorperSurface"; }
+      static std::string ClassID() {return "AddStrahlkorperSurface";}
       static std::string Help() {
-        return
-        "AddStrahlkorperSurface:                                \n"
+        return ClassID()+"\n"
         "  Adds a Strahlkorper surface so that routines can     \n"
         "  have exact copies.                                   \n"
         "Options:                                               \n"
@@ -39,12 +31,10 @@ namespace DataBoxAdders {
         "  Strahlkorper (surface) of input parameters.          \n";
       };
 
-      AddStrahlkorperSurface();//: DataBoxAdder(ClassID())  {};
+      AddStrahlkorperSurface() {};
       void AddToDataBoxImpl(const DataBoxInserter& box,
-                            const std::string& opts) const;
+			    const std::string& Opts) const;
   };
 }
 
-
-
-#endif
+#endif // AddStrahlkorperSurface_hpp

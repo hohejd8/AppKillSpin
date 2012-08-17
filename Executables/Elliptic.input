@@ -134,18 +134,18 @@ Observers=
                                 Metric=g;
                                 SurfaceWithMesh=hohejd8SkWM;
                                 Output=S_z;
-                             ),
-                             ComputeAKV(
-                                StrahlkorperWithMesh=hohejd8SkWM;
-                                ConformalFactor=ConformalFactor;
-                                AKVGuess=0.0, 0.0, 0.0;
-                                Output=hohejd8AKV;
-                                DivNorm=true;
-                                VortNorm=true;
-                                SS=true;
-                                fLNorm=true;
-                                fLambdaNorm=true;
-                                XiDivLNorm=true;
+#                             ),
+#                             ComputeAKV(
+#                                StrahlkorperWithMesh=hohejd8SkWM;
+#                                ConformalFactor=ConformalFactor;
+#                                AKVGuess=0.0, 0.0, 0.0;
+#                                Output=hohejd8AKV;
+#                                DivNorm=true;
+#                                VortNorm=true;
+#                                SS=true;
+#                                fLNorm=true;
+#                                fLambdaNorm=true;
+#                                XiDivLNorm=true;
                              );
                );
 
@@ -165,8 +165,8 @@ Observers=
                    Center=__d__/2,0,0;
                    Radius=__R1__;
                    ConformalFactor=ConformalFactor;
-                   #KillingVector=S_x, S_y, S_z;
-                   KillingVector=hohejd8AKV, S_z;
+                   KillingVector=S_x, S_y, S_z;
+                   #KillingVector=hohejd8AKV, S_z;
                    InertialXi=FlatSpace),
 
                 AdmIntegrals(Sphere=SphereC1;

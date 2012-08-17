@@ -1,17 +1,15 @@
-//============================================
-// $Id: AddStrahlkorperSurface.cpp 2011-09-09 hohejd8
-//============================================
-
 #include "AddStrahlkorperSurface.hpp"
-#include "Utils/DataBox/AddToDataBox.hpp"
+//#include "Utils/DataBox/AddToDataBox.hpp"
 #include "Utils/StringParsing/OptionParser.hpp"
 #include "SurfaceFinder/Strahlkorper/Strahlkorper.hpp"
 #include "SurfaceFinder/Strahlkorper/StrahlkorperMesh.hpp"
 
-namespace DataBoxAdders{
-  void AddStrahlkorperSurface::AddToDataBoxImpl(const DataBoxInserter& box,
-                                         const std::string& opts) const {
-    OptionParser p(opts, Help());
+namespace DataBoxAdders {
+
+  void AddStrahlkorperSurface::
+  AddToDataBoxImpl(const DataBoxInserter& box,const std::string& Opts) const
+  {
+    OptionParser p(Opts, Help());
     const int mNth = p.Get<int>("Nth");
     const int mNph = p.Get<int>("Nph");
     const double mRadius = p.Get<double>("Radius");
@@ -31,3 +29,4 @@ namespace DataBoxAdders{
     box.AddVolatileItem(mMesh, sm);
   }
 }
+
