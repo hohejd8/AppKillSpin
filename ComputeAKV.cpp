@@ -14,6 +14,7 @@ namespace ComputeItems {
   ComputeAKV::ComputeAKV(const std::string& opts)
     : mResult(0)
   {
+std::cout << "begin ComputeAKV constructor " << POSITION << std::endl;
     OptionParser p(opts, Help());
     mSkwm       = p.Get<std::string>("StrahlkorperWithMesh");
     mConformalFactor = p.Get<std::string>("ConformalFactor","ConformalFactor");
@@ -41,7 +42,7 @@ namespace ComputeItems {
     if(p.OptionIsDefined("XiDivLNorm")){
       if(p.Get<std::string>("XiDivLNorm")=="true") printDiagnostic[5]=true;
     }
-
+std::cout << "end ComputeAKV constructor " << POSITION << std::endl;
   }
 
   void ComputeAKV::print_state (size_t iter, gsl_multiroot_fsolver * s) const
@@ -60,13 +61,13 @@ namespace ComputeItems {
   //==========================================================================
   
   void ComputeAKV::RecomputeData(const DataBoxAccess& box) const {
-
+std::cout << "begin ComputeAKV RecomputeData " << POSITION << std::endl;
     delete mResult;
 
     const gsl_multiroot_fsolver_type *T; //solver type
     gsl_multiroot_fsolver *s; //the actual solver itself
-
-    int status = 0;
+std::cout << "created solver " << POSITION << std::endl;
+    int status;
     size_t iter=0;
 
     const size_t n = 3; //number of dimensions
@@ -77,7 +78,7 @@ namespace ComputeItems {
     }
 */
     const StrahlkorperWithMesh& skwm = box.Get<StrahlkorperWithMesh>(mSkwm);
-
+std::cout << "created skwm " << POSITION << std::endl;
     //Psi needs to be interpolated onto the surface
     const Domain& D=box.Get<Domain>("Domain");
     MyVector<std::string> TensorsToInterp(MV::fill, mConformalFactor);
@@ -93,7 +94,7 @@ namespace ComputeItems {
     }
     DataBoxAccess lba(localBox, "AKV Recompute");
     const DataMesh& Psi(lba.Get<Tensor<DataMesh> >(mConformalFactor)());
-
+std::cout << "before initialize L,v " << POSITION << std::endl;
     //initialize L, v
     DataMesh theta = box.Get<StrahlkorperWithMesh>(mSkwm).Grid().SurfaceCoords()(0);
     DataMesh L = theta;
@@ -113,19 +114,28 @@ namespace ComputeItems {
     gsl_vector_set (x, 0, mAKVGuess[0]);
     gsl_vector_set (x, 1, mAKVGuess[1]);
     gsl_vector_set (x, 2, mAKVGuess[2]);
-
-    T = gsl_multiroot_fsolver_broyden; //declare any of the non-derivative root finders;
+std::cout << "after vector set " << POSITION << std::endl;
+    //T = gsl_multiroot_fsolver_broyden; //declare any of the non-derivative root finders;
                                        //we may want to do a study on which one
                                        //will work "best"
-    s = gsl_multiroot_fsolver_alloc(T, n);
+    T = gsl_multiroot_fsolver_dnewton;
+    //s = gsl_multiroot_fsolver_alloc(T, n); //original
+    s = gsl_multiroot_fsolver_alloc(T, 3); //new
     gsl_multiroot_fsolver_set(s, &f, x);
-
-    status = gsl_multiroot_fsolver_iterate(s); //iterates one time, sets status variable
+      print_state(iter, s);
+    //the following line may not be necessary
+    //status = gsl_multiroot_fsolver_iterate(s); //iterates one time, sets status variable
 
     do {
       iter++;
+//diagnostics
+std::cout << "iter = " << iter << std::endl;
+      if(status){ //if solver is stuck
+        std::cout << "solver is stuck at iter = " << iter << std::endl;
+        break;
+      }
+//end diagnostics
       status = gsl_multiroot_fsolver_iterate(s);
-
 
       print_state(iter, s);
 
@@ -134,16 +144,19 @@ namespace ComputeItems {
         break;
       }
 
-      status = gsl_multiroot_test_residual(s->f, 1.e-7);
+      //status = gsl_multiroot_test_residual(s->f, 1e-7); //original
+      status = gsl_multiroot_test_residual(s->f, 1e-14); //new
 
-    } while(status == GSL_CONTINUE );//&& iter<1000);
+    } while(status == GSL_CONTINUE && iter<1000);
 
     gsl_multiroot_fsolver_free(s); //frees all memory associated with solver
 
     double THETA  = gsl_vector_get(s->x,0);
     double thetap = gsl_vector_get(s->x,1);
     double phip   = gsl_vector_get(s->x,2);
-
+//diagnostics
+std::cout << "after loop " << POSITION << std::endl;
+//end diagnostics
 
     //get thetap, phip within normal bounds
     if(thetap < 0.0){

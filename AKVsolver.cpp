@@ -143,9 +143,11 @@ int AKVsolver(const gsl_vector * x,
   //this is necessary for the RHS (collocation points) in the while loop
   L = sbe.Evaluate(L_ha);
 
-  //^2R, eq. 20
-  const DataMesh& llncf = sbe.ScalarLaplacian(log(Psi));
+
 //diagnostics
+//std::cout << "log(Psi)" << std::endl;
+//std::cout << log(Psi) << std::endl;
+std::cout << "\n" << std::endl;
   std::cout << "Psi " << POSITION << std::endl;
   for(int i=0; i<mNth; ++i){
       for(int j=0; j<mNph; ++j) {
@@ -154,15 +156,21 @@ int AKVsolver(const gsl_vector * x,
       std::cout << std::endl;
   }
   std::cout << "\n" << std::endl;
+DataMesh lPsi = Psi;
   std::cout << "log(Psi) " << POSITION << std::endl;
   for(int i=0; i<mNth; ++i){
       for(int j=0; j<mNph; ++j) {
             std::cout << std::setprecision(10) << log(Psi[i*mNph+j]) << " " ;
+            lPsi[i*mNph+j] = log(Psi[i*mNph+j]);
       }
       std::cout << std::endl;
   }
   std::cout << "\n" << std::endl;
 //end diagnostics
+  //^2R, eq. 20
+  //const DataMesh& llncf = sbe.ScalarLaplacian(log(Psi)); //original
+  const DataMesh& llncf = sbe.ScalarLaplacian(lPsi); //edited
+
   const DataMesh& hR = (1.0-2.0*llncf) / (Psi*Psi*Psi*Psi*rad*rad);
 
   const Tensor<DataMesh>& hGradR = sbe.Gradient(hR);
@@ -269,7 +277,7 @@ int AKVsolver(const gsl_vector * x,
     //compute eq. 97
     RHS = -RHS + (4.0*llncf*L + hGradR(0)*Gradv(0) + hGradR(1)*Gradv(1) -2.0*L)*(1.0-THETA);
 //diagnostics
-  std::cout << "RHS Eq. 97" << POSITION << std::endl;
+  std::cout << "RHS Eq. 97 " << POSITION << std::endl;
   for(int i=0; i<mNth; ++i){
       for(int j=0; j<mNph; ++j) {
             std::cout << std::setprecision(10) << RHS[i*mNph+j] << " " ;
@@ -292,7 +300,11 @@ int AKVsolver(const gsl_vector * x,
     ic10 = RHS_ha[mdab];
     ic1p = RHS_ha[mdab+1];
     ic1m = RHS_ha[mdab*ndab + mdab+1];
-
+//diagnostics
+std::cout << "ic10 = " << ic10 << " "
+          << "ic1p = " << ic1p << " "
+          << "ic1m = " << ic1m << std::endl;
+//end diagnostics
 //end old version
 
 
