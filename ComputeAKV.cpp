@@ -19,11 +19,36 @@ std::cout << "begin ComputeAKV constructor " << POSITION << std::endl;
     mSkwm       = p.Get<std::string>("StrahlkorperWithMesh");
     mConformalFactor = p.Get<std::string>("ConformalFactor","ConformalFactor");
     mAKVGuess   = p.Get<MyVector<double> >("AKVGuess");//must be three-dimensional
+    {
+      bool thetap_moved = false;
+      REQUIRE(mAKVGuess.Size()==3,"AKVGuess has Size " << mAKVGuess.Size() 
+                                  << ", should be 3.");
+      if(mAKVGuess[1]<1.e-5){
+        mAKVGuess[1] = 1.e-5;
+        thetap_moved = true;
+      }
+      if(mAKVGuess[1]>(M_PI-1.e-5)){
+        mAKVGuess[1] = M_PI - 1.e-5;
+        thetap_moved = true;
+      }
+      if(thetap_moved){
+        std::cout << "thetap is too close to a pole; the initial guess has been \n"
+                     "moved off-axis by an amount 1.e-5." << std::endl;
+      }
+    }
+
+    mSolver     = p.Get<std::string>("Solver","Newton");
     mVerbose    = p.Get<bool>("Verbose",false);
     mOutput     = p.Get<std::string>("Output");
 
-    printDiagnostic = MyVector<bool>(MV::Size(6), false);
-
+    printDiagnostic = MyVector<bool>(MV::Size(6), true);
+    if(p.OptionIsDefined("DivNorm")) printDiagnostic[0]=p.Get<bool>("DivNorm");
+    if(p.OptionIsDefined("VortNorm")) printDiagnostic[0]=p.Get<bool>("VortNorm");
+    if(p.OptionIsDefined("SS")) printDiagnostic[0]=p.Get<bool>("SS");
+    if(p.OptionIsDefined("fLNorm")) printDiagnostic[0]=p.Get<bool>("fLNorm");
+    if(p.OptionIsDefined("fLambdaNorm")) printDiagnostic[0]=p.Get<bool>("fLambdaNorm");
+    if(p.OptionIsDefined("XiDivLNorm")) printDiagnostic[0]=p.Get<bool>("XiDivLNorm");
+/*
     if(p.OptionIsDefined("DivNorm")){
       if(p.Get<std::string>("DivNorm")=="true") printDiagnostic[0]=true;
     }
@@ -42,6 +67,9 @@ std::cout << "begin ComputeAKV constructor " << POSITION << std::endl;
     if(p.OptionIsDefined("XiDivLNorm")){
       if(p.Get<std::string>("XiDivLNorm")=="true") printDiagnostic[5]=true;
     }
+*/
+    mCheat=p.Get<bool>("Cheat",false);
+    
 std::cout << "end ComputeAKV constructor " << POSITION << std::endl;
   }
 
@@ -104,8 +132,8 @@ std::cout << "before initialize L,v " << POSITION << std::endl;
                         Psi,
                         L,
                         v,
-                        1.e-5, //set to 1.e-5
-                        1.e-9 };//see AKVsolver.hpp for definition of this struct, 1.e-9
+                        1.e-12,
+                        1.e-12 };
 
     gsl_multiroot_function f = {&AKVsolver, n, &p}; //initializes the function
 
@@ -115,25 +143,30 @@ std::cout << "before initialize L,v " << POSITION << std::endl;
     gsl_vector_set (x, 1, mAKVGuess[1]);
     gsl_vector_set (x, 2, mAKVGuess[2]);
 std::cout << "after vector set " << POSITION << std::endl;
-    //T = gsl_multiroot_fsolver_broyden; //declare any of the non-derivative root finders;
-                                       //we may want to do a study on which one
-                                       //will work "best"
-    T = gsl_multiroot_fsolver_dnewton;
-    //s = gsl_multiroot_fsolver_alloc(T, n); //original
-    s = gsl_multiroot_fsolver_alloc(T, 3); //new
+    //Declare the appropriate non-derivative root finder
+    if(mSolver=="Hybrids") T = gsl_multiroot_fsolver_hybrids;
+    else if(mSolver=="Hybrid") T = gsl_multiroot_fsolver_hybrid;
+    else if(mSolver=="Newton") T = gsl_multiroot_fsolver_dnewton;
+    else if(mSolver=="Broyden") T = gsl_multiroot_fsolver_broyden;
+    else std::cout << "Solver option '" << mSolver << "' not valid." << std::endl;
+
+    s = gsl_multiroot_fsolver_alloc(T, n); //original
     gsl_multiroot_fsolver_set(s, &f, x);
       print_state(iter, s);
     //the following line may not be necessary
-    //status = gsl_multiroot_fsolver_iterate(s); //iterates one time, sets status variable
+    status = gsl_multiroot_fsolver_iterate(s); //iterates one time, sets status variable
 
     do {
       iter++;
 //diagnostics
+/*
 std::cout << "iter = " << iter << std::endl;
       if(status){ //if solver is stuck
         std::cout << "solver is stuck at iter = " << iter << std::endl;
+        std::cout << "status is " << status << std::endl;
         break;
       }
+*/
 //end diagnostics
       status = gsl_multiroot_fsolver_iterate(s);
 
@@ -154,6 +187,18 @@ std::cout << "iter = " << iter << std::endl;
     double THETA  = gsl_vector_get(s->x,0);
     double thetap = gsl_vector_get(s->x,1);
     double phip   = gsl_vector_get(s->x,2);
+
+//---------------------------------
+//testing
+if(mCheat){
+  std::cout << "I AM CHEATING AND PUTTING THE KNOWN SOLUTION IN HERE" << std::endl;
+  THETA = -8.38295e-08*(M_PI/180.);
+  thetap = 2.20099e-06*(M_PI/180.);
+  phip = 112.398*(M_PI/180.);
+}
+//end testing
+//---------------------------------
+
 //diagnostics
 std::cout << "after loop " << POSITION << std::endl;
 //end diagnostics

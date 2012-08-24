@@ -59,6 +59,12 @@ int AKVsolver(const gsl_vector * x,
   const double thetap = gsl_vector_get (x,1);
   const double phip = gsl_vector_get (x,2);
 
+//diagnostics
+std::cout << "THETA = " << THETA << " "
+          << "thetap = " << thetap << " "
+          << "phip = " << phip << std::endl;
+//end diagnostics
+
   //for use with gsl root finder
   const StrahlkorperWithMesh& skwm = static_cast<struct rparams*>(params)->skwm;
   const DataMesh& Psi = static_cast<struct rparams*>(params)->Psi;
@@ -147,6 +153,7 @@ int AKVsolver(const gsl_vector * x,
 //diagnostics
 //std::cout << "log(Psi)" << std::endl;
 //std::cout << log(Psi) << std::endl;
+/*
 std::cout << "\n" << std::endl;
   std::cout << "Psi " << POSITION << std::endl;
   for(int i=0; i<mNth; ++i){
@@ -166,10 +173,11 @@ DataMesh lPsi = Psi;
       std::cout << std::endl;
   }
   std::cout << "\n" << std::endl;
+*/
 //end diagnostics
   //^2R, eq. 20
-  //const DataMesh& llncf = sbe.ScalarLaplacian(log(Psi)); //original
-  const DataMesh& llncf = sbe.ScalarLaplacian(lPsi); //edited
+  const DataMesh& llncf = sbe.ScalarLaplacian(log(Psi)); //original
+  //const DataMesh& llncf = sbe.ScalarLaplacian(lPsi); //edited
 
   const DataMesh& hR = (1.0-2.0*llncf) / (Psi*Psi*Psi*Psi*rad*rad);
 
@@ -212,6 +220,7 @@ DataMesh lPsi = Psi;
     //eq. 97, first term: compute Laplacian of L
     RHS = sbe.ScalarLaplacian(L_ha); //RHS is in collocation terms
 //diagnostics
+/*
   std::cout << "RHS scalar laplacian " << POSITION << std::endl;
   for(int i=0; i<mNth; ++i){
       for(int j=0; j<mNph; ++j) {
@@ -220,10 +229,12 @@ DataMesh lPsi = Psi;
       std::cout << std::endl;
   }
   std::cout << "\n" << std::endl;
+*/
 //end diagnostics
     //eq. 97, component of third term: compute gradient of v
     Gradv = sbe.Gradient(v_ha); //Gradv is in collocation terms
 //diagnostics
+/*
   std::cout << "Gradv_t " << POSITION << std::endl;
   for(int i=0; i<mNth; ++i){
       for(int j=0; j<mNph; ++j) {
@@ -240,8 +251,10 @@ DataMesh lPsi = Psi;
       std::cout << std::endl;
   }
   std::cout << "\n" << std::endl;
+*/
 //end diagnostics
 //diagnostics
+/*
   std::cout << "llncf " << POSITION << std::endl;
   for(int i=0; i<mNth; ++i){
       for(int j=0; j<mNph; ++j) {
@@ -250,8 +263,10 @@ DataMesh lPsi = Psi;
       std::cout << std::endl;
   }
   std::cout << "\n" << std::endl;
+*/
 //end diagnostics
 //diagnostics
+/*
   std::cout << "hGradR_t " << POSITION << std::endl;
   for(int i=0; i<mNth; ++i){
       for(int j=0; j<mNph; ++j) {
@@ -268,15 +283,19 @@ DataMesh lPsi = Psi;
       std::cout << std::endl;
   }
   std::cout << "\n" << std::endl;
+*/
 //end diagnostics
 //diagnostics
+/*
   std::cout << "THETA " << POSITION << std::endl;
   std::cout << std::setprecision(10) << THETA << std::endl ;
   std::cout << "\n" << std::endl;
+*/
 //end diagnostics
     //compute eq. 97
     RHS = -RHS + (4.0*llncf*L + hGradR(0)*Gradv(0) + hGradR(1)*Gradv(1) -2.0*L)*(1.0-THETA);
 //diagnostics
+/*
   std::cout << "RHS Eq. 97 " << POSITION << std::endl;
   for(int i=0; i<mNth; ++i){
       for(int j=0; j<mNph; ++j) {
@@ -285,6 +304,7 @@ DataMesh lPsi = Psi;
       std::cout << std::endl;
   }
   std::cout << "\n" << std::endl;
+*/
 //end diagnostics
     //perform harmonic analysis on RHS
     RHS_ha = sbe.ComputeCoefficients(RHS);

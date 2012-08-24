@@ -2,7 +2,7 @@
 #$last_dir="../InitialGuess0";
 $last_dir="";
 #for($k=0; $k<1; ++$k) {
-for($k=1; $k<4; ++$k) {
+for($k=2; $k<3; ++$k) {
     $dir="Five".$k;
 
 

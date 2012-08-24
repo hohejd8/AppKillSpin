@@ -39,7 +39,7 @@ namespace Observers {
 
     PrependDirectoryInPlace(mBaseFileName, Dir);
 
-
+std::cout << "AdmIntegralS2 constructor" << std::endl;
     OptionParser p(opts,Help());
     mMetric                  = p.Get<std::string>("Metric", "g");
     mInvMetric               = p.Get<std::string>("InvMetric", "Invg");
@@ -156,7 +156,9 @@ namespace Observers {
       admAngularMomentum[i] =
            sbc.Integrate(admAngMomentumIntegrand[i]*dA);
     }
-
+//testing only
+std::cout << "spin " << admAngularMomentum << std::endl;
+//end testing
     return admAngularMomentum;
   }
  
@@ -188,13 +190,24 @@ namespace Observers {
 	    Out1 << "# [" << i++ << "] = " 
 		<< mInput[var] << "(R=" 
 		<< DoubleToString(mRadius,3) << ")\n";
+//for testing only
+	    std::cout << "# [" << i++ << "] = " 
+		<< mInput[var] << "(R=" 
+		<< DoubleToString(mRadius,3) << ")\n";
+//end testing
 	}
       }
       Out1 << FirstColumnInDatFiles;
       for(int var=0;var<mInput.Size();++var) {
 	  Out1 << " " << DoubleToString(Integrals[var],16);
+//for testing only
+std::cout << " " << DoubleToString(Integrals[var],16);
+//end testing
       }
       Out1 << "\n";
+//for testing only
+std::cout << "\n";
+//end testing
     }
   }
 }

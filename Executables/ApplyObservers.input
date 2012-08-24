@@ -109,9 +109,16 @@ Observers=
                              ComputeAKV(
                                 StrahlkorperWithMesh=hohejd8SkWM;
                                 ConformalFactor=ConformalFactor;
-                                #AKVGuess=-3.0e-06, 6.0e-09, -0.50;
-                                AKVGuess=0.0, 0.0, 0.0;
+                                AKVGuess=-3.0e-06, 6.0e-09, -0.50;
+                                #AKVGuess=0.0, 0.0, 0.0;
+                                Verbose=true;
                                 Output=hohejd8AKV;
+                                DivNorm=true;
+                                VortNorm=true;
+                                SS=true;
+                                fLNorm=true;
+                                fLambdaNorm=true;
+                                XiDivLNorm=true;
                              );
                );
 #                            ProperSepHorizons(Output=ProperSep;
