@@ -14,7 +14,7 @@ namespace ComputeItems {
   ComputeAKV::ComputeAKV(const std::string& opts)
     : mResult(0)
   {
-std::cout << "begin ComputeAKV constructor " << POSITION << std::endl;
+//std::cout << "begin ComputeAKV constructor " << POSITION << std::endl;
     OptionParser p(opts, Help());
     mSkwm       = p.Get<std::string>("StrahlkorperWithMesh");
     mConformalFactor = p.Get<std::string>("ConformalFactor","ConformalFactor");
@@ -39,6 +39,7 @@ std::cout << "begin ComputeAKV constructor " << POSITION << std::endl;
 
     mSolver     = p.Get<std::string>("Solver","Newton");
     mVerbose    = p.Get<bool>("Verbose",false);
+    mPrintResiduals = p.Get<bool>("PrintResiduals",mVerbose);
     mOutput     = p.Get<std::string>("Output");
 
     printDiagnostic = MyVector<bool>(MV::Size(6), true);
@@ -48,29 +49,10 @@ std::cout << "begin ComputeAKV constructor " << POSITION << std::endl;
     if(p.OptionIsDefined("fLNorm")) printDiagnostic[0]=p.Get<bool>("fLNorm");
     if(p.OptionIsDefined("fLambdaNorm")) printDiagnostic[0]=p.Get<bool>("fLambdaNorm");
     if(p.OptionIsDefined("XiDivLNorm")) printDiagnostic[0]=p.Get<bool>("XiDivLNorm");
-/*
-    if(p.OptionIsDefined("DivNorm")){
-      if(p.Get<std::string>("DivNorm")=="true") printDiagnostic[0]=true;
-    }
-    if(p.OptionIsDefined("VortNorm")){
-      if(p.Get<std::string>("VortNorm")=="true") printDiagnostic[1]=true;
-    }
-    if(p.OptionIsDefined("SS")){
-      if(p.Get<std::string>("SS")=="true") printDiagnostic[2]=true;
-    }
-    if(p.OptionIsDefined("fLNorm")){
-      if(p.Get<std::string>("fLNorm")=="true") printDiagnostic[3]=true;
-    }
-    if(p.OptionIsDefined("fLambdaNorm")){
-      if(p.Get<std::string>("fLambdaNorm")=="true") printDiagnostic[4]=true;
-    }
-    if(p.OptionIsDefined("XiDivLNorm")){
-      if(p.Get<std::string>("XiDivLNorm")=="true") printDiagnostic[5]=true;
-    }
-*/
+
     mCheat=p.Get<bool>("Cheat",false);
     
-std::cout << "end ComputeAKV constructor " << POSITION << std::endl;
+//std::cout << "end ComputeAKV constructor " << POSITION << std::endl;
   }
 
   void ComputeAKV::print_state (size_t iter, gsl_multiroot_fsolver * s) const
@@ -89,12 +71,12 @@ std::cout << "end ComputeAKV constructor " << POSITION << std::endl;
   //==========================================================================
   
   void ComputeAKV::RecomputeData(const DataBoxAccess& box) const {
-std::cout << "begin ComputeAKV RecomputeData " << POSITION << std::endl;
+//std::cout << "begin ComputeAKV RecomputeData " << POSITION << std::endl;
     delete mResult;
 
     const gsl_multiroot_fsolver_type *T; //solver type
     gsl_multiroot_fsolver *s; //the actual solver itself
-std::cout << "created solver " << POSITION << std::endl;
+//std::cout << "created solver " << POSITION << std::endl;
     int status;
     size_t iter=0;
 
@@ -106,7 +88,7 @@ std::cout << "created solver " << POSITION << std::endl;
     }
 */
     const StrahlkorperWithMesh& skwm = box.Get<StrahlkorperWithMesh>(mSkwm);
-std::cout << "created skwm " << POSITION << std::endl;
+//std::cout << "created skwm " << POSITION << std::endl;
     //Psi needs to be interpolated onto the surface
     const Domain& D=box.Get<Domain>("Domain");
     MyVector<std::string> TensorsToInterp(MV::fill, mConformalFactor);
@@ -122,7 +104,7 @@ std::cout << "created skwm " << POSITION << std::endl;
     }
     DataBoxAccess lba(localBox, "AKV Recompute");
     const DataMesh& Psi(lba.Get<Tensor<DataMesh> >(mConformalFactor)());
-std::cout << "before initialize L,v " << POSITION << std::endl;
+//std::cout << "before initialize L,v " << POSITION << std::endl;
     //initialize L, v
     DataMesh theta = box.Get<StrahlkorperWithMesh>(mSkwm).Grid().SurfaceCoords()(0);
     DataMesh L = theta;
@@ -133,7 +115,8 @@ std::cout << "before initialize L,v " << POSITION << std::endl;
                         L,
                         v,
                         1.e-12,
-                        1.e-12 };
+                        1.e-12,// };
+                        mPrintResiduals };
 
     gsl_multiroot_function f = {&AKVsolver, n, &p}; //initializes the function
 
@@ -142,7 +125,7 @@ std::cout << "before initialize L,v " << POSITION << std::endl;
     gsl_vector_set (x, 0, mAKVGuess[0]);
     gsl_vector_set (x, 1, mAKVGuess[1]);
     gsl_vector_set (x, 2, mAKVGuess[2]);
-std::cout << "after vector set " << POSITION << std::endl;
+//std::cout << "after vector set " << POSITION << std::endl;
     //Declare the appropriate non-derivative root finder
     if(mSolver=="Hybrids") T = gsl_multiroot_fsolver_hybrids;
     else if(mSolver=="Hybrid") T = gsl_multiroot_fsolver_hybrid;
@@ -158,16 +141,7 @@ std::cout << "after vector set " << POSITION << std::endl;
 
     do {
       iter++;
-//diagnostics
-/*
-std::cout << "iter = " << iter << std::endl;
-      if(status){ //if solver is stuck
-        std::cout << "solver is stuck at iter = " << iter << std::endl;
-        std::cout << "status is " << status << std::endl;
-        break;
-      }
-*/
-//end diagnostics
+
       status = gsl_multiroot_fsolver_iterate(s);
 
       print_state(iter, s);
@@ -181,6 +155,12 @@ std::cout << "iter = " << iter << std::endl;
       status = gsl_multiroot_test_residual(s->f, 1e-14); //new
 
     } while(status == GSL_CONTINUE && iter<1000);
+
+    if(iter==1000){
+      std::cout << "Iteration was stopped at iter=1000. \n"
+                   "You may want to check the solution for validity."
+                << std::endl;
+    }
 
     gsl_multiroot_fsolver_free(s); //frees all memory associated with solver
 

@@ -72,6 +72,7 @@ struct rparams{
   DataMesh& v;
   const double L_resid;
   const double v_resid;
+  const bool PrintResiduals;
 };
 
 

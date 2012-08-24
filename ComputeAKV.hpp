@@ -42,6 +42,9 @@ namespace ComputeItems {
         "           Default Broyden.                            \n"
         "  Verbose = Prints THETA, thetap and phip solutions.   \n"
         "            Default false.                             \n"
+        "  PrintResiduals = Prints the ic10, ic1p, ic1m         \n"
+        "            residuals at each iteration of the solver. \n"
+        "            Default to Verbose value.                  \n"
         "  Output = name of solution in DataBox                 \n"
         "  DivNorm = print the L2 norm of the divergence of the \n"
         "            approximate Killing vector.  Default false.\n"
@@ -78,7 +81,7 @@ namespace ComputeItems {
       MyVector<double> mAKVGuess;
       std::string mDivNorm, mVortNorm, mSS, mfLNorm, mfLambdaNorm, mXiDivLNorm;
       MyVector<bool> printDiagnostic;
-      bool mVerbose;
+      bool mVerbose, mPrintResiduals;
       bool mCheat;
       std::string mOutput;
       mutable result_type* mResult;

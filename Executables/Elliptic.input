@@ -138,9 +138,10 @@ Observers=
                              ComputeAKV(
                                 StrahlkorperWithMesh=hohejd8SkWM;
                                 ConformalFactor=ConformalFactor;
-                                AKVGuess=0.0, 0.01, 0.0;
+                                AKVGuess=0.0, 0.0, 0.0;
                                 Solver=Broyden;
                                 Verbose=true;
+                                PrintResiduals=false;
                                 Output=hohejd8AKV;
                                 DivNorm=true;
                                 VortNorm=true;

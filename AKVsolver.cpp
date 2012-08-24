@@ -60,9 +60,11 @@ int AKVsolver(const gsl_vector * x,
   const double phip = gsl_vector_get (x,2);
 
 //diagnostics
+/*
 std::cout << "THETA = " << THETA << " "
           << "thetap = " << thetap << " "
           << "phip = " << phip << std::endl;
+*/
 //end diagnostics
 
   //for use with gsl root finder
@@ -72,7 +74,7 @@ std::cout << "THETA = " << THETA << " "
   DataMesh& v = static_cast<struct rparams*>(params)->v;
   const double L_resid = static_cast<struct rparams*>(params)->L_resid;
   const double v_resid = static_cast<struct rparams*>(params)->v_resid;
-
+  const bool verbose = static_cast<struct rparams*>(params)->PrintResiduals;
 
   const SurfaceBasis sbe(skwm.Grid());
 
@@ -320,12 +322,12 @@ DataMesh lPsi = Psi;
     ic10 = RHS_ha[mdab];
     ic1p = RHS_ha[mdab+1];
     ic1m = RHS_ha[mdab*ndab + mdab+1];
-//diagnostics
-std::cout << "ic10 = " << ic10 << " "
+//end old version
+    if(verbose){
+      std::cout << "ic10 = " << ic10 << " "
           << "ic1p = " << ic1p << " "
           << "ic1m = " << ic1m << std::endl;
-//end diagnostics
-//end old version
+    }
 
 
     //remove the l=1 modes
@@ -887,6 +889,18 @@ void KillingDiagnostics(const StrahlkorperWithMesh& skwm,
     std::cout << "L2 Norm of Divergence = "
               << std::setprecision(12) << sqrt(sqrt(2.)*div2norm[0]/4.) << std::endl;
   }
+
+//diagnostics
+DataMesh vortxi = sbe.Vorticity(xi);
+  std::cout << "vort " << POSITION << std::endl;
+  for(int i=0; i<mNph; ++i){
+      for(int j=0; j<mNth; ++j) {
+            std::cout << std::setprecision(10) << vortxi[j*mNth+i] << " " ;
+      }
+      std::cout << std::endl;
+  }
+  std::cout << "\n" << std::endl;
+//end diagnostics
 
   if(printDiagnostic[1] || printDiagnostic[2]){
     DataMesh vort = sbe.Vorticity(xi) / p2r2 - 2.0*Psi*Psi*L;
