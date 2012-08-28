@@ -144,7 +144,7 @@ namespace ComputeItems {
 
       status = gsl_multiroot_fsolver_iterate(s);
 
-      print_state(iter, s);
+      if(mVerbose) print_state(iter, s);
 
       if(status){ //if solver is stuck
         std::cout << "solver is stuck at iter = " << iter << std::endl;
@@ -178,10 +178,6 @@ if(mCheat){
 }
 //end testing
 //---------------------------------
-
-//diagnostics
-std::cout << "after loop " << POSITION << std::endl;
-//end diagnostics
 
     //get thetap, phip within normal bounds
     if(thetap < 0.0){
@@ -282,7 +278,14 @@ std::cout << "after loop " << POSITION << std::endl;
 //----------------------------------------
 //end diagnostics
 
-    KillingDiagnostics(skwm, L, Psi, xi, printDiagnostic);
+  //rotate Psi
+  DataMesh Psi_r = RotateOnSphere(Psi,
+                       skwm.Grid().SurfaceCoords()(0),
+                       skwm.Grid().SurfaceCoords()(1),
+                       sbe,
+                       thetap,
+                       phip);
+    KillingDiagnostics(skwm, L, Psi_r, xi, printDiagnostic); //original
 
     //approximate Killing vector
     const DataMesh norm = 1.0 / (Psi*Psi*Psi*Psi*rad);
