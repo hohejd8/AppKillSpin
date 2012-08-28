@@ -871,7 +871,7 @@ void KillingDiagnostics(const StrahlkorperWithMesh& skwm,
   }
 
 //diagnostics
-/*
+
 DataMesh vortxi = sbe.Vorticity(xi);
   std::cout << "\n" << std::endl;
   std::cout << "vort " << POSITION << std::endl;
@@ -882,7 +882,7 @@ DataMesh vortxi = sbe.Vorticity(xi);
       std::cout << std::endl;
   }
   std::cout << "\n" << std::endl;
-  std::cout << "L " << POSITION << std::endl;
+/*  std::cout << "L " << POSITION << std::endl;
   for(int i=0; i<mNth; ++i){
       for(int j=0; j<mNph; ++j) {
             std::cout << std::setprecision(10) << L[i*mNph+j] << " " ;
@@ -905,7 +905,7 @@ DataMesh vortxi = sbe.Vorticity(xi);
     DataMesh vort = sbe.Vorticity(xi) / p2r2 - 2.0*Psi*Psi*L;
 
 //diagnostics
-/*
+
              vortxi /= rad*rad;//diagnostics
   std::cout << "vortxi / rad*rad " << POSITION << std::endl;
   for(int i=0; i<mNth; ++i){
@@ -915,7 +915,7 @@ DataMesh vortxi = sbe.Vorticity(xi);
       std::cout << std::endl;
   }
   std::cout << "\n" << std::endl;
-  std::cout << "rad*rad " << POSITION << std::endl;
+/*  std::cout << "rad*rad " << POSITION << std::endl;
   for(int i=0; i<mNth; ++i){
       for(int j=0; j<mNph; ++j) {
             std::cout << std::setprecision(10) << rad[i*mNph+j]*rad[i*mNph+j] << " " ;
@@ -923,9 +923,17 @@ DataMesh vortxi = sbe.Vorticity(xi);
       std::cout << std::endl;
   }
   std::cout << "\n" << std::endl;
-
+*/
              vortxi /= Psi*Psi;//diagnostics
-  std::cout << "Psi*Psi " << POSITION << std::endl;
+  std::cout << "vortxi / Psi*Psi " << POSITION << std::endl;
+  for(int i=0; i<mNth; ++i){
+      for(int j=0; j<mNph; ++j) {
+            std::cout << std::setprecision(10) << vortxi[i*mNph+j] << " " ;
+      }
+      std::cout << std::endl;
+  }
+  std::cout << "\n" << std::endl;
+/*  std::cout << "Psi*Psi " << POSITION << std::endl;
   for(int i=0; i<mNth; ++i){
       for(int j=0; j<mNph; ++j) {
             std::cout << std::setprecision(10) << Psi[i*mNph+j]*Psi[i*mNph+j] << " " ;
@@ -933,9 +941,16 @@ DataMesh vortxi = sbe.Vorticity(xi);
       std::cout << std::endl;
   }
   std::cout << "\n" << std::endl;
-
-
+*/
              vortxi -= 2.0*Psi*Psi*L; //diagnostics
+  std::cout << "vortxi - 2*Psi*Psi*L " << POSITION << std::endl;
+  for(int i=0; i<mNth; ++i){
+      for(int j=0; j<mNph; ++j) {
+            std::cout << std::setprecision(10) << vortxi[i*mNph+j] << " " ;
+      }
+      std::cout << std::endl;
+  }
+  std::cout << "\n" << std::endl;
   std::cout << "2*Psi*Psi*L " << POSITION << std::endl;
   for(int i=0; i<mNth; ++i){
       for(int j=0; j<mNph; ++j) {
@@ -944,18 +959,10 @@ DataMesh vortxi = sbe.Vorticity(xi);
       std::cout << std::endl;
   }
   std::cout << "\n" << std::endl;
-  std::cout << "vort_final " << POSITION << std::endl;
+/*  std::cout << "vort*vort " << POSITION << std::endl;
   for(int i=0; i<mNth; ++i){
       for(int j=0; j<mNph; ++j) {
-            std::cout << std::setprecision(10) << vort[i*mNph+j] << " " ;
-      }
-      std::cout << std::endl;
-  }
-  std::cout << "\n" << std::endl;
-  std::cout << "vort*vort " << POSITION << std::endl;
-  for(int i=0; i<mNth; ++i){
-      for(int j=0; j<mNph; ++j) {
-            std::cout << std::setprecision(10) << vort[i*mNph+j]*vort[i*mNph+j] << " " ;
+            std::cout << std::setprecision(10) << vortxi[i*mNph+j]*vortxi[i*mNph+j] << " " ;
       }
       std::cout << std::endl;
   }
@@ -976,8 +983,43 @@ DataMesh vortxi = sbe.Vorticity(xi);
       Tensor<DataMesh> Dxphi = xi;
 
       Dxtheta = sbe.VectorColatitudeDerivative(xi);
-
+//diagnostics
+  std::cout << "vcd(xi)(0) " << POSITION << std::endl;
+  for(int i=0; i<mNth; ++i){
+      for(int j=0; j<mNph; ++j) {
+            std::cout << std::setprecision(10) << Dxtheta(0)[i*mNph+j] << " " ;
+      }
+      std::cout << std::endl;
+  }
+  std::cout << "\n" << std::endl;
+  std::cout << "vcd(xi)(1) " << POSITION << std::endl;
+  for(int i=0; i<mNth; ++i){
+      for(int j=0; j<mNph; ++j) {
+            std::cout << std::setprecision(10) << Dxtheta(1)[i*mNph+j] << " " ;
+      }
+      std::cout << std::endl;
+  }
+  std::cout << "\n" << std::endl;
+//end diagnostics
       Tensor<DataMesh> gradlncf = sbe.Gradient(log(Psi));
+//diagnostics
+  std::cout << "gradlncf(0) " << POSITION << std::endl;
+  for(int i=0; i<mNth; ++i){
+      for(int j=0; j<mNph; ++j) {
+            std::cout << std::setprecision(10) << gradlncf(0)[i*mNph+j] << " " ;
+      }
+      std::cout << std::endl;
+  }
+  std::cout << "\n" << std::endl;
+  std::cout << "gradlncf(1) " << POSITION << std::endl;
+  for(int i=0; i<mNth; ++i){
+      for(int j=0; j<mNph; ++j) {
+            std::cout << std::setprecision(10) << gradlncf(1)[i*mNph+j] << " " ;
+      }
+      std::cout << std::endl;
+  }
+  std::cout << "\n" << std::endl;
+//end diagnostics
 
       Dxtheta(0) -= 2.0*( xi(0)*gradlncf(0) - xi(1)*gradlncf(1) );
       Dxtheta(1) -= 2.0*( xi(0)*gradlncf(1) + xi(1)*gradlncf(0) );
@@ -988,7 +1030,16 @@ DataMesh vortxi = sbe.Vorticity(xi);
                    + Dxtheta(1)*Dxtheta(1)
                    + Dxphi(0)*Dxphi(0)
                    + Dxphi(1)*Dxphi(1);
-
+//diagnostics
+  std::cout << "SS " << POSITION << std::endl;
+  for(int i=0; i<mNth; ++i){
+      for(int j=0; j<mNph; ++j) {
+            std::cout << std::setprecision(10) << SS[i*mNph+j] << " " ;
+      }
+      std::cout << std::endl;
+  }
+  std::cout << "\n" << std::endl;
+//end diagnostics
       const DataMesh p4r2 = rad*rad*Psi*Psi*Psi*Psi;
       SS /= p4r2;
       SS -= 2.0*p4r2*L*L;
