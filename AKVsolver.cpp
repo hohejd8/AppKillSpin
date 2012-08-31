@@ -84,13 +84,14 @@ std::cout << "THETA = " << THETA << " "
   const int mNph = theta.Extents()[1];
   SpherePackIterator sit(mNth,mNph);
 
-  const int mdab = mNth;
+  //const int mdab = mNth;
   const int ndab = mNth;
+  const int mdab = (mNth < mNph/2+1) ? mNth : mNph/2+1;
   const int mM   = ((mNth-1 < mNph/2)  ? mNth-1 : mNph/2);
   const DataMesh& rad   = skwm.Radius();
 
-  DataMesh L_ha(theta);
-  DataMesh v_ha(theta);
+  DataMesh L_ha(sbe.CoefficientMesh()); //(theta);
+  DataMesh v_ha(sbe.CoefficientMesh()); //(theta);
 
   //eq. 78, 93
   L = cos(thetap)*cos(theta)
@@ -151,32 +152,6 @@ std::cout << "THETA = " << THETA << " "
   //this is necessary for the RHS (collocation points) in the while loop
   L = sbe.Evaluate(L_ha);
 
-
-//diagnostics
-//std::cout << "log(Psi)" << std::endl;
-//std::cout << log(Psi) << std::endl;
-/*
-std::cout << "\n" << std::endl;
-  std::cout << "Psi " << POSITION << std::endl;
-  for(int i=0; i<mNth; ++i){
-      for(int j=0; j<mNph; ++j) {
-            std::cout << std::setprecision(10) << Psi[i*mNph+j] << " " ;
-      }
-      std::cout << std::endl;
-  }
-  std::cout << "\n" << std::endl;
-DataMesh lPsi = Psi;
-  std::cout << "log(Psi) " << POSITION << std::endl;
-  for(int i=0; i<mNth; ++i){
-      for(int j=0; j<mNph; ++j) {
-            std::cout << std::setprecision(10) << log(Psi[i*mNph+j]) << " " ;
-            lPsi[i*mNph+j] = log(Psi[i*mNph+j]);
-      }
-      std::cout << std::endl;
-  }
-  std::cout << "\n" << std::endl;
-*/
-//end diagnostics
   //^2R, eq. 20
   const DataMesh& llncf = sbe.ScalarLaplacian(log(Psi)); //original
   //const DataMesh& llncf = sbe.ScalarLaplacian(lPsi); //edited
@@ -196,7 +171,7 @@ DataMesh lPsi = Psi;
   double ic1p = 0.0;
   double ic1m = 0.0;
   DataMesh RHS = theta; //dummy initialization.  RHS=right hand side of eq. 97, collocation
-  DataMesh RHS_ha = RHS; //dummy initialization.  harmonic coefficients
+  DataMesh RHS_ha(sbe.CoefficientMesh());//= RHS; //dummy initialization.  harmonic coefficients
   Tensor<DataMesh> Gradv = hGradR; //dummy initialization. Gradient of v, eq. 97
 //diagnostics
 /*
@@ -358,7 +333,7 @@ DataMesh lPsi = Psi;
       if(sit.l()==1){ //must zero out n=1 modes
         RHS_ha[sit()] = 0.0;
       } else {
-        RHS_ha[sit()] /= 2.0 - sit.m()*(sit.m()+1.0);
+        RHS_ha[sit()] /= 2.0 - sit.l()*(sit.l()+1.0);
       }
     }
 */
@@ -436,14 +411,15 @@ DataMesh lPsi = Psi;
       if(sit.l()==1){
         RHS_ha[sit()] = 0.0;
       } else {
-        RHS_ha[sit()] /= -sit.m()*(sit.m()+1.0);
+        RHS_ha[sit()] /= -sit.l()*(sit.l()+1.0);
       }
     }
 */
 //old version
 
     RHS_ha[0] = 0.0;
-    RHS_ha[(mM+1)*mNth] = 0.0; //why mM+1*mNth, not mdab*ndab?
+    //RHS_ha[(mM+1)*mNth] = 0.0; //why mM+1*mNth, not mdab*ndab?
+    RHS_ha[mdab*ndab] = 0.0;
     for(int i=1; i<mNth; ++i){
       RHS_ha[i*mdab] /= -i*(i+1.0);
       RHS_ha[mdab*ndab + i*mdab] /= -i*(i+1.0);

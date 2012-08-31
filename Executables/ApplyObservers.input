@@ -113,6 +113,7 @@ Observers=
                                 #AKVGuess=0.0, 0.0, 0.0;
                                 Verbose=true;
                                 Output=hohejd8AKV;
+                                Solver=Broyden;
                                 DivNorm=true;
                                 VortNorm=true;
                                 SS=true;

@@ -211,8 +211,8 @@ if(mCheat){
     DataMesh rad   = box.Get<StrahlkorperWithMesh>(mSkwm).Radius();
 
 //for testing only ------------------------------
-    //const int mNth = skwm.Grid().SurfaceCoords()(0).Extents()[0];
-    //const int mNph = skwm.Grid().SurfaceCoords()(0).Extents()[1];
+    const int mNth = skwm.Grid().SurfaceCoords()(0).Extents()[0];
+    const int mNph = skwm.Grid().SurfaceCoords()(0).Extents()[1];
 /*
     std::cout << "v before scaled " << POSITION << std::endl;
     for(int i=0; i<mNth; ++i){
@@ -232,19 +232,18 @@ if(mCheat){
 
     //scale L, v
     v *= scale;
-
+    L *= scale;
 //diagnostics
-/*
-    std::cout << "v scaled " << POSITION << std::endl;
+
+    std::cout << "L scaled " << POSITION << std::endl;
     for(int i=0; i<mNth; ++i){
       for(int j=0; j<mNph; ++j) {
-        std::cout << std::setprecision(10) << v[i*mNph+j] << " " ;
+        std::cout << std::setprecision(10) << L[i*mNph+j] << " " ;
       }
       std::cout << std::endl;
     }
     std::cout << "\n" << std::endl;
-*/
-    //L *= scale;
+
 //end diagnostics
 
     //create xi (1-form)
