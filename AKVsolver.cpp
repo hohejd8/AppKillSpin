@@ -858,14 +858,7 @@ DataMesh vortxi = sbe.Vorticity(xi);
       std::cout << std::endl;
   }
   std::cout << "\n" << std::endl;
-/*  std::cout << "L " << POSITION << std::endl;
-  for(int i=0; i<mNth; ++i){
-      for(int j=0; j<mNph; ++j) {
-            std::cout << std::setprecision(10) << L[i*mNph+j] << " " ;
-      }
-      std::cout << std::endl;
-  }
-  std::cout << "\n" << std::endl;
+/*
   std::cout << "Psi " << POSITION << std::endl;
   for(int i=0; i<mNth; ++i){
       for(int j=0; j<mNph; ++j) {

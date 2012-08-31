@@ -49,8 +49,6 @@ namespace ComputeItems {
     if(p.OptionIsDefined("fLNorm")) printDiagnostic[0]=p.Get<bool>("fLNorm");
     if(p.OptionIsDefined("fLambdaNorm")) printDiagnostic[0]=p.Get<bool>("fLambdaNorm");
     if(p.OptionIsDefined("XiDivLNorm")) printDiagnostic[0]=p.Get<bool>("XiDivLNorm");
-
-    mCheat=p.Get<bool>("Cheat",false);
     
 //std::cout << "end ComputeAKV constructor " << POSITION << std::endl;
   }
@@ -152,7 +150,7 @@ namespace ComputeItems {
       }
 
       //status = gsl_multiroot_test_residual(s->f, 1e-7); //original
-      status = gsl_multiroot_test_residual(s->f, 1e-14); //new
+      status = gsl_multiroot_test_residual(s->f, 1e-13); //new
 
     } while(status == GSL_CONTINUE && iter<1000);
 
@@ -167,17 +165,6 @@ namespace ComputeItems {
     double THETA  = gsl_vector_get(s->x,0);
     double thetap = gsl_vector_get(s->x,1);
     double phip   = gsl_vector_get(s->x,2);
-
-//---------------------------------
-//testing
-if(mCheat){
-  std::cout << "I AM CHEATING AND PUTTING THE KNOWN SOLUTION IN HERE" << std::endl;
-  THETA = -8.38295e-08*(M_PI/180.);
-  thetap = 2.20099e-06*(M_PI/180.);
-  phip = 112.398*(M_PI/180.);
-}
-//end testing
-//---------------------------------
 
     //get thetap, phip within normal bounds
     if(thetap < 0.0){
@@ -213,8 +200,8 @@ if(mCheat){
 //for testing only ------------------------------
     const int mNth = skwm.Grid().SurfaceCoords()(0).Extents()[0];
     const int mNph = skwm.Grid().SurfaceCoords()(0).Extents()[1];
-/*
-    std::cout << "v before scaled " << POSITION << std::endl;
+
+    std::cout << "v unscaled, unrotated " << POSITION << std::endl;
     for(int i=0; i<mNth; ++i){
       for(int j=0; j<mNph; ++j) {
         std::cout << std::setprecision(10) << v[i*mNph+j] << " " ;
@@ -222,7 +209,7 @@ if(mCheat){
       std::cout << std::endl;
     }
     std::cout << "\n" << std::endl;
-*/
+
 //-----------------------------------------------
     //determine scale factor
     double scale = normalizeKillingVector(&p, thetap, phip);

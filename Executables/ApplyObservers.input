@@ -120,7 +120,6 @@ Observers=
                                 fLNorm=true;
                                 fLambdaNorm=true;
                                 XiDivLNorm=true;
-                                Cheat=false;
                              );
                );
 #                            ProperSepHorizons(Output=ProperSep;
