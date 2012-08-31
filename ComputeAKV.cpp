@@ -14,7 +14,6 @@ namespace ComputeItems {
   ComputeAKV::ComputeAKV(const std::string& opts)
     : mResult(0)
   {
-//std::cout << "begin ComputeAKV constructor " << POSITION << std::endl;
     OptionParser p(opts, Help());
     mSkwm       = p.Get<std::string>("StrahlkorperWithMesh");
     mConformalFactor = p.Get<std::string>("ConformalFactor","ConformalFactor");
@@ -49,8 +48,6 @@ namespace ComputeItems {
     if(p.OptionIsDefined("fLNorm")) printDiagnostic[0]=p.Get<bool>("fLNorm");
     if(p.OptionIsDefined("fLambdaNorm")) printDiagnostic[0]=p.Get<bool>("fLambdaNorm");
     if(p.OptionIsDefined("XiDivLNorm")) printDiagnostic[0]=p.Get<bool>("XiDivLNorm");
-    
-//std::cout << "end ComputeAKV constructor " << POSITION << std::endl;
   }
 
   void ComputeAKV::print_state (size_t iter, gsl_multiroot_fsolver * s) const
@@ -69,12 +66,10 @@ namespace ComputeItems {
   //==========================================================================
   
   void ComputeAKV::RecomputeData(const DataBoxAccess& box) const {
-//std::cout << "begin ComputeAKV RecomputeData " << POSITION << std::endl;
     delete mResult;
 
     const gsl_multiroot_fsolver_type *T; //solver type
     gsl_multiroot_fsolver *s; //the actual solver itself
-//std::cout << "created solver " << POSITION << std::endl;
     int status;
     size_t iter=0;
 
@@ -102,7 +97,7 @@ namespace ComputeItems {
     }
     DataBoxAccess lba(localBox, "AKV Recompute");
     const DataMesh& Psi(lba.Get<Tensor<DataMesh> >(mConformalFactor)());
-//std::cout << "before initialize L,v " << POSITION << std::endl;
+
     //initialize L, v
     DataMesh theta = box.Get<StrahlkorperWithMesh>(mSkwm).Grid().SurfaceCoords()(0);
     DataMesh L = theta;
@@ -123,7 +118,7 @@ namespace ComputeItems {
     gsl_vector_set (x, 0, mAKVGuess[0]);
     gsl_vector_set (x, 1, mAKVGuess[1]);
     gsl_vector_set (x, 2, mAKVGuess[2]);
-//std::cout << "after vector set " << POSITION << std::endl;
+
     //Declare the appropriate non-derivative root finder
     if(mSolver=="Hybrids") T = gsl_multiroot_fsolver_hybrids;
     else if(mSolver=="Hybrid") T = gsl_multiroot_fsolver_hybrid;
@@ -200,7 +195,7 @@ namespace ComputeItems {
 //for testing only ------------------------------
     const int mNth = skwm.Grid().SurfaceCoords()(0).Extents()[0];
     const int mNph = skwm.Grid().SurfaceCoords()(0).Extents()[1];
-
+/*
     std::cout << "v unscaled, unrotated " << POSITION << std::endl;
     for(int i=0; i<mNth; ++i){
       for(int j=0; j<mNph; ++j) {
@@ -209,7 +204,7 @@ namespace ComputeItems {
       std::cout << std::endl;
     }
     std::cout << "\n" << std::endl;
-
+*/
 //-----------------------------------------------
     //determine scale factor
     double scale = normalizeKillingVector(&p, thetap, phip);
@@ -240,29 +235,6 @@ namespace ComputeItems {
        //initializes with the right structure, but also copies data.
     xi(0) = tmp_xi(1);
     xi(1) = -tmp_xi(0);
-
-//diagnostics
-//----------------------------------------
-/*
-  std::cout << "xi(0) ComputeAKV" << POSITION << std::endl;
-  for(int i=0; i<mNth; ++i){
-      for(int j=0; j<mNph; ++j) {
-            std::cout << std::setprecision(10) << xi(0)[i*mNph+j] << " " ;
-      }
-      std::cout << std::endl;
-  }
-  std::cout << "\n" << std::endl;
-  std::cout << "xi(1) ComputeAKV" << POSITION << std::endl;
-  for(int i=0; i<mNth; ++i){
-      for(int j=0; j<mNph; ++j) {
-            std::cout << std::setprecision(10) << xi(1)[i*mNph+j] << " " ;
-      }
-      std::cout << std::endl;
-  }
-  std::cout << "\n" << std::endl;
-*/
-//----------------------------------------
-//end diagnostics
 
   //rotate Psi
   DataMesh Psi_r = RotateOnSphere(Psi,

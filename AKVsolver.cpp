@@ -90,8 +90,8 @@ std::cout << "THETA = " << THETA << " "
   const int mM   = ((mNth-1 < mNph/2)  ? mNth-1 : mNph/2);
   const DataMesh& rad   = skwm.Radius();
 
-  DataMesh L_ha(sbe.CoefficientMesh()); //(theta);
-  DataMesh v_ha(sbe.CoefficientMesh()); //(theta);
+  DataMesh L_ha(sbe.CoefficientMesh());
+  DataMesh v_ha(sbe.CoefficientMesh());
 
   //eq. 78, 93
   L = cos(thetap)*cos(theta)
@@ -183,85 +183,16 @@ std::cout << "THETA = " << THETA << " "
       std::cout << std::endl;
   }
   std::cout << "\n" << std::endl;
-  std::cout << "v before big loop " << POSITION << std::endl;
-  for(int i=0; i<mNth; ++i){
-      for(int j=0; j<mNph; ++j) {
-            std::cout << std::setprecision(10) << v[i*mNph+j] << " " ;
-      }
-      std::cout << std::endl;
-  }
-  std::cout << "\n" << std::endl;
 */
 //end diagnostics
   while(unsolved){
     //eq. 97, first term: compute Laplacian of L
     RHS = sbe.ScalarLaplacian(L_ha); //RHS is in collocation terms
-//diagnostics
-/*
-  std::cout << "RHS scalar laplacian " << POSITION << std::endl;
-  for(int i=0; i<mNth; ++i){
-      for(int j=0; j<mNph; ++j) {
-            std::cout << std::setprecision(10) << RHS[i*mNph+j] << " " ;
-      }
-      std::cout << std::endl;
-  }
-  std::cout << "\n" << std::endl;
-*/
-//end diagnostics
+
     //eq. 97, component of third term: compute gradient of v
     Gradv = sbe.Gradient(v_ha); //Gradv is in collocation terms
-//diagnostics
-/*
-  std::cout << "Gradv_t " << POSITION << std::endl;
-  for(int i=0; i<mNth; ++i){
-      for(int j=0; j<mNph; ++j) {
-            std::cout << std::setprecision(10) << Gradv(0)[i*mNph+j] << " " ;
-      }
-      std::cout << std::endl;
-  }
-  std::cout << "\n" << std::endl;
-  std::cout << "Gradv_p " << POSITION << std::endl;
-  for(int i=0; i<mNth; ++i){
-      for(int j=0; j<mNph; ++j) {
-            std::cout << std::setprecision(10) << Gradv(1)[i*mNph+j] << " " ;
-      }
-      std::cout << std::endl;
-  }
-  std::cout << "\n" << std::endl;
-*/
-//end diagnostics
-//diagnostics
-/*
-  std::cout << "llncf " << POSITION << std::endl;
-  for(int i=0; i<mNth; ++i){
-      for(int j=0; j<mNph; ++j) {
-            std::cout << std::setprecision(10) << llncf[i*mNph+j] << " " ;
-      }
-      std::cout << std::endl;
-  }
-  std::cout << "\n" << std::endl;
-*/
-//end diagnostics
-//diagnostics
-/*
-  std::cout << "hGradR_t " << POSITION << std::endl;
-  for(int i=0; i<mNth; ++i){
-      for(int j=0; j<mNph; ++j) {
-            std::cout << std::setprecision(10) << hGradR(0)[i*mNph+j] << " " ;
-      }
-      std::cout << std::endl;
-  }
-  std::cout << "\n" << std::endl;
-  std::cout << "hGradR_p " << POSITION << std::endl;
-  for(int i=0; i<mNth; ++i){
-      for(int j=0; j<mNph; ++j) {
-            std::cout << std::setprecision(10) << hGradR(1)[i*mNph+j] << " " ;
-      }
-      std::cout << std::endl;
-  }
-  std::cout << "\n" << std::endl;
-*/
-//end diagnostics
+
+
 //diagnostics
 /*
   std::cout << "THETA " << POSITION << std::endl;
@@ -271,18 +202,7 @@ std::cout << "THETA = " << THETA << " "
 //end diagnostics
     //compute eq. 97
     RHS = -RHS + (4.0*llncf*L + hGradR(0)*Gradv(0) + hGradR(1)*Gradv(1) -2.0*L)*(1.0-THETA);
-//diagnostics
-/*
-  std::cout << "RHS Eq. 97 " << POSITION << std::endl;
-  for(int i=0; i<mNth; ++i){
-      for(int j=0; j<mNph; ++j) {
-            std::cout << std::setprecision(10) << RHS[i*mNph+j] << " " ;
-      }
-      std::cout << std::endl;
-  }
-  std::cout << "\n" << std::endl;
-*/
-//end diagnostics
+
     //perform harmonic analysis on RHS
     RHS_ha = sbe.ComputeCoefficients(RHS);
 
