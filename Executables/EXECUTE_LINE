@@ -1,0 +1,8 @@
+NOTE: be sure to make apprpriate changes to DoMultipleRuns and EllipticInfo before every run
+
+DoMultipleRuns -c "/usr/local/mpi/bin/mpirun /home/hohejd8/SpEC/AppKillSpin/Executables/SpellsAKS > Spells.out 2>&1"
+
+DoMultipleRuns -c "/usr/local/mpi/bin/mpirun -np 2 /home/hohejd8/SpEC/AppKillSpin/Executables/SpellsAKS > Spells.out 2>&1"
+
+//for ApplyObservers
+/home/hohejd8/SpEC/Support/ApplyObservers/Executables/ApplyObservers -t ConformalFactor,Shift,LapseTimesConformalFactor -r Scalar,1,Scalar -NoDomainHistory ApplyObservers.input
