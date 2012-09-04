@@ -484,51 +484,49 @@ double normalizeKillingVector(void *params,
 
 } //end normalizeKillingVector
 
-bool KillingPathNew(void *params){
-  const gsl_odeiv2_step_type * T = gsl_odeiv2_step_rk8pd;
+bool KillingPathNew(double & t, const double theta, other stuff) {
+
+  struct ODEparams {
+  } params;
+
+  const gsl_odeiv2_step_type *cosnt T = gsl_odeiv2_step_rkck;
+  gsl_odeiv2_step *const s = gsl_odeiv2_step_alloc (T, 2);
+  gsl_odeiv2_control *const c = gsl_odeiv2_control_y_new (1e-6, 0.0);
+  gsl_odeiv2_evolve *const e = gsl_odeiv2_evolve_alloc (2);
      
-  gsl_odeiv2_step * s = gsl_odeiv2_step_alloc (T, 2);
-  gsl_odeiv2_control * c = gsl_odeiv2_control_y_new (1e-6, 0.0);
-  gsl_odeiv2_evolve * e = gsl_odeiv2_evolve_alloc (2);
+  gsl_odeiv2_system sys = {func, NULL, 2, &params};
      
-  gsl_odeiv2_system sys = {func, NULL, 2, params};
-     
-  double t = 0.0, t1 = 100.0;
-//of what use is t1 since we don't know the exact path length?
-//can I cheat and define t1=2*Pi-phi, or similar?
+  double t = 0.0, t1 = 1.e10;
   double h = 1e-6;
   double y[2] = { theta, 0.0 };
+  bool limit_h = false;
+  double hmax = h;
      
-  //while (t < t1){
-  while (true){
-  //-------------------------------under development
-    if(fabs(y[1] - 2.*M_PI) < 1.e-10){
-      ds += h;
-      break;
-    } else if(y[1]+h > 2.*M_PI){
-      h *= 0.5;
-    } else {
-      ds += h;
+  while (true) {
+    const double ysave[2] = {y[0],y[1]}; 
+    const double tsave = t;
+    const int status = gsl_odeiv2_evolve_apply (e, c, s,
+						&sys, 
+						&t, t1,
+						&h, y);
+    if(limit_h && h > hmax) h = hmax;
+    ASSERT(status==GSL_SUCCESS,"Path Integration failed");
+    if(fabs(y[1] - 2.*M_PI) < 1.e-10) break;
+    else if(y[1]+h > 2.*M_PI) {
+      if(!limit_h) hmax = h;
+      limit_h = true;
+      h = hmax *= 0.5;
+      y[0] = ysave[0];y[1] = ysave[1]; t = tsave;
+      gsl_odeiv2_evolve_reset(e);
     } //end ifs
-  //-------------------------------
-
-    int status = gsl_odeiv2_evolve_apply (e, c, s,
-                                          &sys, 
-                                          &t, t1,
-                                          &h, y);
-     
-    //if (status != GSL_SUCCESS)
-      //break;
-     
     printf ("%.5e %.5e %.5e\n", t, y[0], y[1]);
-
   }
 
   gsl_odeiv2_evolve_free (e);
   gsl_odeiv2_control_free (c);
   gsl_odeiv2_step_free (s);
 
-  const bool closedPath = (fabs(Vout[0] - theta) < 1.e-6);
+  const bool closedPath = (fabs(y[0] - theta) < 1.e-6);
   if(!closedPath){
     std::cout << "##> Theta diff: " << std::setprecision(6) << y[0] - theta << std::endl;
   }
