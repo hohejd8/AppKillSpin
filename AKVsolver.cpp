@@ -512,7 +512,9 @@ double normalizeKillingVector(void *params,
 
 } //end normalizeKillingVector
 
+bool KillingPathNew(){
 
+}
 
 bool KillingPath(void *params,
                  const DataMesh& Psi, //rotated Psi
@@ -587,9 +589,9 @@ void PathRKQC(const double& ds,
     MyVector<double> Vout(MV::Size(2));
     MyVector<double> error(MV::Size(2));
     hdid = h;
-
+//std::cout << "error " << error << " " << POSITION << std::endl << std::flush;
     PathRKCK(h,Vin,Vout,Vp,params,Psi,xi,error);
-
+std::cout << "error " << error << " " << POSITION << std::endl << std::flush;
     double errmax = 0.0;
 
     for(int i=0; i<error.Size(); ++i){

@@ -74,14 +74,9 @@ namespace ComputeItems {
     size_t iter=0;
 
     const size_t n = 3; //number of dimensions
-/*
-    int subdomain=0;
-    for(int sd=0; sd<box.Size(); ++sd) {
-      if(box[sd].KeyExists(mConformalFactor)) subdomain=sd;
-    }
-*/
+
     const StrahlkorperWithMesh& skwm = box.Get<StrahlkorperWithMesh>(mSkwm);
-//std::cout << "created skwm " << POSITION << std::endl;
+
     //Psi needs to be interpolated onto the surface
     const Domain& D=box.Get<Domain>("Domain");
     MyVector<std::string> TensorsToInterp(MV::fill, mConformalFactor);
@@ -129,7 +124,7 @@ namespace ComputeItems {
     s = gsl_multiroot_fsolver_alloc(T, n); //original
     gsl_multiroot_fsolver_set(s, &f, x);
       print_state(iter, s);
-    //the following line may not be necessary
+
     status = gsl_multiroot_fsolver_iterate(s); //iterates one time, sets status variable
 
     do {
@@ -144,8 +139,7 @@ namespace ComputeItems {
         break;
       }
 
-      //status = gsl_multiroot_test_residual(s->f, 1e-7); //original
-      status = gsl_multiroot_test_residual(s->f, 1e-13); //new
+      status = gsl_multiroot_test_residual(s->f, 1e-13);
 
     } while(status == GSL_CONTINUE && iter<1000);
 
@@ -195,17 +189,8 @@ namespace ComputeItems {
 //for testing only ------------------------------
     const int mNth = skwm.Grid().SurfaceCoords()(0).Extents()[0];
     const int mNph = skwm.Grid().SurfaceCoords()(0).Extents()[1];
-/*
-    std::cout << "v unscaled, unrotated " << POSITION << std::endl;
-    for(int i=0; i<mNth; ++i){
-      for(int j=0; j<mNph; ++j) {
-        std::cout << std::setprecision(10) << v[i*mNph+j] << " " ;
-      }
-      std::cout << std::endl;
-    }
-    std::cout << "\n" << std::endl;
-*/
 //-----------------------------------------------
+
     //determine scale factor
     double scale = normalizeKillingVector(&p, thetap, phip);
     if(mVerbose){
@@ -215,18 +200,6 @@ namespace ComputeItems {
     //scale L, v
     v *= scale;
     L *= scale;
-//diagnostics
-
-    std::cout << "L scaled " << POSITION << std::endl;
-    for(int i=0; i<mNth; ++i){
-      for(int j=0; j<mNph; ++j) {
-        std::cout << std::setprecision(10) << L[i*mNph+j] << " " ;
-      }
-      std::cout << std::endl;
-    }
-    std::cout << "\n" << std::endl;
-
-//end diagnostics
 
     //create xi (1-form)
     const SurfaceBasis sbe(box.Get<StrahlkorperWithMesh>(mSkwm).Grid());
@@ -236,14 +209,7 @@ namespace ComputeItems {
     xi(0) = tmp_xi(1);
     xi(1) = -tmp_xi(0);
 
-  //rotate Psi
-  DataMesh Psi_r = RotateOnSphere(Psi,
-                       skwm.Grid().SurfaceCoords()(0),
-                       skwm.Grid().SurfaceCoords()(1),
-                       sbe,
-                       thetap,
-                       phip);
-    KillingDiagnostics(skwm, L, Psi_r, xi, printDiagnostic); //original
+    KillingDiagnostics(skwm, L, Psi, xi, printDiagnostic); //original
 
     //approximate Killing vector
     const DataMesh norm = 1.0 / (Psi*Psi*Psi*Psi*rad);
@@ -251,8 +217,6 @@ namespace ComputeItems {
     xi_vec(0) =  norm * ( cos(theta)*cos(phi)*xi(0) - sin(phi)*xi(1) );
     xi_vec(1) =  norm * ( cos(theta)*sin(phi)*xi(0) + cos(phi)*xi(1) );
     xi_vec(2) = -norm * ( sin(theta)*xi(0) );
-
-
 
     mResult = new Tensor<DataMesh>(xi_vec);
 
