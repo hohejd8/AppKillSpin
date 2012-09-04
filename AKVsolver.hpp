@@ -22,10 +22,16 @@ DataMesh RotateOnSphere
          (const DataMesh& collocationvalues,
           const DataMesh& thetaGrid,
           const DataMesh& phiGrid,
-          //const SurfaceBasisExt& sbe,
           const SurfaceBasis& sbe,
           const double Theta,
           const double Phi);
+
+bool KillingPathNew(void *params);
+
+int func(double t, 
+         const double y[],
+         double f[],
+         void *params);
 
 bool KillingPath(void *params,
                  const DataMesh& Psi, //rotated Psi
@@ -75,5 +81,9 @@ struct rparams{
   const bool PrintResiduals;
 };
 
+struct ODEparams{
+  const SurfaceBasis& sb;
+  const DataMesh& Psi_r;
+};
 
 #endif

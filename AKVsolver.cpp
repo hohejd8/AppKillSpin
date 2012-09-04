@@ -2,6 +2,7 @@
 #include "Utils/StringParsing/OptionParser.hpp"
 #include "Utils/LowLevelUtils/Position.hpp"
 #include "Spectral/BasisFunctions/SpherePackIterator.hpp"
+#include "gsl/gsl_odeiv2.h"
 #include <iomanip>
 
 //#include "Utils/DataMesh/DataMeshNorms.hpp"
@@ -44,9 +45,8 @@ HELPFUL DIAGNOSTIC TOOLS WHEN COMPARING TO AppKillSpin:
 //-----------------------------------------
 /*
 TO DO:
-clean up normalizeKillingVector - add flags to evaluate/print other scale factors
 
-add rotated Psi comments to .hpp file
+
 */
 //-----------------------------------------
 
@@ -58,14 +58,6 @@ int AKVsolver(const gsl_vector * x,
   const double THETA = gsl_vector_get (x,0);
   const double thetap = gsl_vector_get (x,1);
   const double phip = gsl_vector_get (x,2);
-
-//diagnostics
-/*
-std::cout << "THETA = " << THETA << " "
-          << "thetap = " << thetap << " "
-          << "phip = " << phip << std::endl;
-*/
-//end diagnostics
 
   //for use with gsl root finder
   const StrahlkorperWithMesh& skwm = static_cast<struct rparams*>(params)->skwm;
@@ -173,18 +165,7 @@ std::cout << "THETA = " << THETA << " "
   DataMesh RHS = theta; //dummy initialization.  RHS=right hand side of eq. 97, collocation
   DataMesh RHS_ha(sbe.CoefficientMesh());//= RHS; //dummy initialization.  harmonic coefficients
   Tensor<DataMesh> Gradv = hGradR; //dummy initialization. Gradient of v, eq. 97
-//diagnostics
-/*
-  std::cout << "L before big loop " << POSITION << std::endl;
-  for(int i=0; i<mNth; ++i){
-      for(int j=0; j<mNph; ++j) {
-            std::cout << std::setprecision(10) << L[i*mNph+j] << " " ;
-      }
-      std::cout << std::endl;
-  }
-  std::cout << "\n" << std::endl;
-*/
-//end diagnostics
+
   while(unsolved){
     //eq. 97, first term: compute Laplacian of L
     RHS = sbe.ScalarLaplacian(L_ha); //RHS is in collocation terms
@@ -192,14 +173,6 @@ std::cout << "THETA = " << THETA << " "
     //eq. 97, component of third term: compute gradient of v
     Gradv = sbe.Gradient(v_ha); //Gradv is in collocation terms
 
-
-//diagnostics
-/*
-  std::cout << "THETA " << POSITION << std::endl;
-  std::cout << std::setprecision(10) << THETA << std::endl ;
-  std::cout << "\n" << std::endl;
-*/
-//end diagnostics
     //compute eq. 97
     RHS = -RHS + (4.0*llncf*L + hGradR(0)*Gradv(0) + hGradR(1)*Gradv(1) -2.0*L)*(1.0-THETA);
 
@@ -338,7 +311,6 @@ std::cout << "THETA = " << THETA << " "
 //old version
 
     RHS_ha[0] = 0.0;
-    //RHS_ha[(mM+1)*mNth] = 0.0; //why mM+1*mNth, not mdab*ndab?
     RHS_ha[mdab*ndab] = 0.0;
     for(int i=1; i<mNth; ++i){
       RHS_ha[i*mdab] /= -i*(i+1.0);
@@ -512,8 +484,81 @@ double normalizeKillingVector(void *params,
 
 } //end normalizeKillingVector
 
-bool KillingPathNew(){
+bool KillingPathNew(void *params){
+  const gsl_odeiv2_step_type * T = gsl_odeiv2_step_rk8pd;
+     
+  gsl_odeiv2_step * s = gsl_odeiv2_step_alloc (T, 2);
+  gsl_odeiv2_control * c = gsl_odeiv2_control_y_new (1e-6, 0.0);
+  gsl_odeiv2_evolve * e = gsl_odeiv2_evolve_alloc (2);
+     
+  gsl_odeiv2_system sys = {func, NULL, 2, params};
+     
+  double t = 0.0, t1 = 100.0;
+//of what use is t1 since we don't know the exact path length?
+//can I cheat and define t1=2*Pi-phi, or similar?
+  double h = 1e-6;
+  double y[2] = { theta, 0.0 };
+     
+  //while (t < t1){
+  while (true){
+  //-------------------------------under development
+    if(fabs(y[1] - 2.*M_PI) < 1.e-10){
+      ds += h;
+      break;
+    } else if(y[1]+h > 2.*M_PI){
+      h *= 0.5;
+    } else {
+      ds += h;
+    } //end ifs
+  //-------------------------------
 
+    int status = gsl_odeiv2_evolve_apply (e, c, s,
+                                          &sys, 
+                                          &t, t1,
+                                          &h, y);
+     
+    //if (status != GSL_SUCCESS)
+      //break;
+     
+    printf ("%.5e %.5e %.5e\n", t, y[0], y[1]);
+
+  }
+
+  gsl_odeiv2_evolve_free (e);
+  gsl_odeiv2_control_free (c);
+  gsl_odeiv2_step_free (s);
+
+  const bool closedPath = (fabs(Vout[0] - theta) < 1.e-6);
+  if(!closedPath){
+    std::cout << "##> Theta diff: " << std::setprecision(6) << y[0] - theta << std::endl;
+  }
+  return closedPath;
+}
+
+//need to rename this function
+int func(double t, const double y[], double f[], void *params){
+//f is the function value <- result[]
+//y are the independent variables <- Vin[]
+//t is the stepper
+//params needs to include sbe, xi, Psi, rad
+
+  const StrahlkorperWithMesh& skwm = static_cast<struct ODEparams*>(params)->skwm;
+
+  const SurfaceBasis sbe(skwm.Grid());
+  const DataMesh& rad = skwm.Radius();
+
+  double psiAtPoint = sbe.Evaluate(Psi, y[0], y[1]);
+  double radAtPoint = sbe.Evaluate(rad, y[0], y[1]);
+
+  //reference YlmSpherepack directly?
+  MyVector<double> result = sbe.EvaluateVector(xi, y[0], y[1]);
+
+  const double norm = 1.0 / (psiAtPoint*psiAtPoint*psiAtPoint*psiAtPoint
+                             *radAtPoint*radAtPoint);
+  f[0] = y[0]*norm;
+  f[1] = y[1]*norm/sin(y[0]);
+
+  return GSL_SUCCESS;
 }
 
 bool KillingPath(void *params,
@@ -531,7 +576,7 @@ bool KillingPath(void *params,
   ds = 0.0; //affine path length
 
   int counter = 0;
-  while(true){ //this is the correct one
+  while(true){
     counter++;
 
     Vout = Vin;
@@ -540,8 +585,8 @@ bool KillingPath(void *params,
 
     MyVector<double> scale(MV::Size(2));
     for(int i=0; i<Vout.Size(); ++i){
+      //takes current position, adds some fraction from the scaled Killing vector
       scale[i] = fabs(Vout[i]) + fabs(h*Vp[i]) + 1.e-30;
-            //takes current position, adds some fraction from the scaled Killing vector
     }
 
     double hdid = 0.0;
@@ -564,9 +609,8 @@ bool KillingPath(void *params,
 
   const bool closedPath = (fabs(Vout[0] - theta) < 1.e-6);
   if(!closedPath){
-    std::cout << "##> Theta diff: " << std::setprecision(3) << Vout[0] - theta << std::endl;
+    std::cout << "##> Theta diff: " << std::setprecision(6) << Vout[0] - theta << std::endl;
   }
-
 
   return closedPath;
 } //end KillingPath
@@ -589,7 +633,7 @@ void PathRKQC(const double& ds,
     MyVector<double> Vout(MV::Size(2));
     MyVector<double> error(MV::Size(2));
     hdid = h;
-//std::cout << "error " << error << " " << POSITION << std::endl << std::flush;
+
     PathRKCK(h,Vin,Vout,Vp,params,Psi,xi,error);
 std::cout << "error " << error << " " << POSITION << std::endl << std::flush;
     double errmax = 0.0;
@@ -633,16 +677,15 @@ MyVector<double> PathDerivs(void *params,
 
   const StrahlkorperWithMesh& skwm = static_cast<struct rparams*>(params)->skwm;
 
-  //const SurfaceBasisExt sbe(skwm.Grid());
   const SurfaceBasis sbe(skwm.Grid());
   const DataMesh& rad = skwm.Radius();
-
 
   double psiAtPoint = sbe.Evaluate(Psi, Vin[0], Vin[1]);
   double radAtPoint = sbe.Evaluate(rad, Vin[0], Vin[1]);
 
-  MyVector<double> result(MV::Size(2),0.0);
-  result = sbe.EvaluateVector(xi, Vin[0], Vin[1]);
+  //MyVector<double> result(MV::Size(2),0.0);
+  //result = sbe.EvaluateVector(xi, Vin[0], Vin[1]);
+  MyVector<double> result = sbe.EvaluateVector(xi, Vin[0], Vin[1]);
 
   const double norm = 1.0 / (psiAtPoint*psiAtPoint*psiAtPoint*psiAtPoint
                              *radAtPoint*radAtPoint);
@@ -735,28 +778,8 @@ void KillingDiagnostics(const StrahlkorperWithMesh& skwm,
   const DataMesh& p2r2 = rad*rad*Psi*Psi;
 
 //for testing only below here------------------------------
-
-    const int mNth = skwm.Grid().SurfaceCoords()(0).Extents()[0];
-    const int mNph = skwm.Grid().SurfaceCoords()(0).Extents()[1];
-/*
-  std::cout << "xi(0) " << POSITION << std::endl;
-  for(int i=0; i<mNth; ++i){
-      for(int j=0; j<mNph; ++j) {
-            std::cout << std::setprecision(10) << xi(0)[i*mNph+j] << " " ;
-      }
-      std::cout << std::endl;
-  }
-  std::cout << "\n" << std::endl;
-  std::cout << "xi(1) " << POSITION << std::endl;
-  for(int i=0; i<mNth; ++i){
-      for(int j=0; j<mNph; ++j) {
-            std::cout << std::setprecision(10) << xi(1)[i*mNph+j] << " " ;
-      }
-      std::cout << std::endl;
-  }
-  std::cout << "\n" << std::endl;
-*/
-
+    //const int mNth = skwm.Grid().SurfaceCoords()(0).Extents()[0];
+    //const int mNph = skwm.Grid().SurfaceCoords()(0).Extents()[1];
 //for testing only above here-----------------------------------------------
 
   DataMesh div = sbe.Divergence(xi) / p2r2;
@@ -768,98 +791,10 @@ void KillingDiagnostics(const StrahlkorperWithMesh& skwm,
               << std::setprecision(12) << sqrt(sqrt(2.)*div2norm[0]/4.) << std::endl;
   }
 
-//diagnostics
-
-DataMesh vortxi = sbe.Vorticity(xi);
-  std::cout << "\n" << std::endl;
-  std::cout << "vort " << POSITION << std::endl;
-  for(int i=0; i<mNth; ++i){
-      for(int j=0; j<mNph; ++j) {
-            std::cout << std::setprecision(10) << vortxi[i*mNph+j] << " " ;
-      }
-      std::cout << std::endl;
-  }
-  std::cout << "\n" << std::endl;
-/*
-  std::cout << "Psi " << POSITION << std::endl;
-  for(int i=0; i<mNth; ++i){
-      for(int j=0; j<mNph; ++j) {
-            std::cout << std::setprecision(10) << Psi[i*mNph+j] << " " ;
-      }
-      std::cout << std::endl;
-  }
-  std::cout << "\n" << std::endl;
-*/
-//end diagnostics
 
   if(printDiagnostic[1] || printDiagnostic[2]){
     DataMesh vort = sbe.Vorticity(xi) / p2r2 - 2.0*Psi*Psi*L;
 
-//diagnostics
-
-             vortxi /= rad*rad;//diagnostics
-  std::cout << "vortxi / rad*rad " << POSITION << std::endl;
-  for(int i=0; i<mNth; ++i){
-      for(int j=0; j<mNph; ++j) {
-            std::cout << std::setprecision(10) << vortxi[i*mNph+j] << " " ;
-      }
-      std::cout << std::endl;
-  }
-  std::cout << "\n" << std::endl;
-/*  std::cout << "rad*rad " << POSITION << std::endl;
-  for(int i=0; i<mNth; ++i){
-      for(int j=0; j<mNph; ++j) {
-            std::cout << std::setprecision(10) << rad[i*mNph+j]*rad[i*mNph+j] << " " ;
-      }
-      std::cout << std::endl;
-  }
-  std::cout << "\n" << std::endl;
-*/
-             vortxi /= Psi*Psi;//diagnostics
-  std::cout << "vortxi / Psi*Psi " << POSITION << std::endl;
-  for(int i=0; i<mNth; ++i){
-      for(int j=0; j<mNph; ++j) {
-            std::cout << std::setprecision(10) << vortxi[i*mNph+j] << " " ;
-      }
-      std::cout << std::endl;
-  }
-  std::cout << "\n" << std::endl;
-/*  std::cout << "Psi*Psi " << POSITION << std::endl;
-  for(int i=0; i<mNth; ++i){
-      for(int j=0; j<mNph; ++j) {
-            std::cout << std::setprecision(10) << Psi[i*mNph+j]*Psi[i*mNph+j] << " " ;
-      }
-      std::cout << std::endl;
-  }
-  std::cout << "\n" << std::endl;
-*/
-             vortxi -= 2.0*Psi*Psi*L; //diagnostics
-  std::cout << "vortxi - 2*Psi*Psi*L " << POSITION << std::endl;
-  for(int i=0; i<mNth; ++i){
-      for(int j=0; j<mNph; ++j) {
-            std::cout << std::setprecision(10) << vortxi[i*mNph+j] << " " ;
-      }
-      std::cout << std::endl;
-  }
-  std::cout << "\n" << std::endl;
-  std::cout << "2*Psi*Psi*L " << POSITION << std::endl;
-  for(int i=0; i<mNth; ++i){
-      for(int j=0; j<mNph; ++j) {
-            std::cout << std::setprecision(10) << 2.0*Psi[i*mNph+j]*Psi[i*mNph+j]*L[i*mNph+j] << " " ;
-      }
-      std::cout << std::endl;
-  }
-  std::cout << "\n" << std::endl;
-/*  std::cout << "vort*vort " << POSITION << std::endl;
-  for(int i=0; i<mNth; ++i){
-      for(int j=0; j<mNph; ++j) {
-            std::cout << std::setprecision(10) << vortxi[i*mNph+j]*vortxi[i*mNph+j] << " " ;
-      }
-      std::cout << std::endl;
-  }
-  std::cout << "\n" << std::endl;
-*/
-//end diagnostics
     //-----Vorticity-------
     if(printDiagnostic[1]){
       const DataMesh vort2norm = sbe.ComputeCoefficients(vort*vort);
@@ -874,43 +809,9 @@ DataMesh vortxi = sbe.Vorticity(xi);
       Tensor<DataMesh> Dxphi = xi;
 
       Dxtheta = sbe.VectorColatitudeDerivative(xi);
-//diagnostics
-  std::cout << "vcd(xi)(0) " << POSITION << std::endl;
-  for(int i=0; i<mNth; ++i){
-      for(int j=0; j<mNph; ++j) {
-            std::cout << std::setprecision(10) << Dxtheta(0)[i*mNph+j] << " " ;
-      }
-      std::cout << std::endl;
-  }
-  std::cout << "\n" << std::endl;
-  std::cout << "vcd(xi)(1) " << POSITION << std::endl;
-  for(int i=0; i<mNth; ++i){
-      for(int j=0; j<mNph; ++j) {
-            std::cout << std::setprecision(10) << Dxtheta(1)[i*mNph+j] << " " ;
-      }
-      std::cout << std::endl;
-  }
-  std::cout << "\n" << std::endl;
-//end diagnostics
+
       Tensor<DataMesh> gradlncf = sbe.Gradient(log(Psi));
-//diagnostics
-  std::cout << "gradlncf(0) " << POSITION << std::endl;
-  for(int i=0; i<mNth; ++i){
-      for(int j=0; j<mNph; ++j) {
-            std::cout << std::setprecision(10) << gradlncf(0)[i*mNph+j] << " " ;
-      }
-      std::cout << std::endl;
-  }
-  std::cout << "\n" << std::endl;
-  std::cout << "gradlncf(1) " << POSITION << std::endl;
-  for(int i=0; i<mNth; ++i){
-      for(int j=0; j<mNph; ++j) {
-            std::cout << std::setprecision(10) << gradlncf(1)[i*mNph+j] << " " ;
-      }
-      std::cout << std::endl;
-  }
-  std::cout << "\n" << std::endl;
-//end diagnostics
+
 
       Dxtheta(0) -= 2.0*( xi(0)*gradlncf(0) - xi(1)*gradlncf(1) );
       Dxtheta(1) -= 2.0*( xi(0)*gradlncf(1) + xi(1)*gradlncf(0) );
@@ -921,16 +822,7 @@ DataMesh vortxi = sbe.Vorticity(xi);
                    + Dxtheta(1)*Dxtheta(1)
                    + Dxphi(0)*Dxphi(0)
                    + Dxphi(1)*Dxphi(1);
-//diagnostics
-  std::cout << "SS " << POSITION << std::endl;
-  for(int i=0; i<mNth; ++i){
-      for(int j=0; j<mNph; ++j) {
-            std::cout << std::setprecision(10) << SS[i*mNph+j] << " " ;
-      }
-      std::cout << std::endl;
-  }
-  std::cout << "\n" << std::endl;
-//end diagnostics
+
       const DataMesh p4r2 = rad*rad*Psi*Psi*Psi*Psi;
       SS /= p4r2;
       SS -= 2.0*p4r2*L*L;
