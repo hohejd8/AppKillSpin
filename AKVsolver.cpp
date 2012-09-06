@@ -552,7 +552,7 @@ bool KillingPathNew(const StrahlkorperWithMesh& skwm,
 
   const gsl_odeiv2_step_type *const T = gsl_odeiv2_step_rkck;
   gsl_odeiv2_step *const s = gsl_odeiv2_step_alloc (T, 2);
-  gsl_odeiv2_control *const c = gsl_odeiv2_control_y_new (1e-13, 0.0);
+  gsl_odeiv2_control *const c = gsl_odeiv2_control_y_new (1e-8, 0.0);
   gsl_odeiv2_evolve *const e = gsl_odeiv2_evolve_alloc (2);
      
   gsl_odeiv2_system sys = {PathDerivNew, NULL, 2, &params};
@@ -565,22 +565,24 @@ bool KillingPathNew(const StrahlkorperWithMesh& skwm,
   double hmax = h;
      
   while (true) {
-    std::cout << "t = " << std::setprecision(8) << std::setw(10) << t << std::endl;
     const double ysave[2] = {y[0],y[1]}; 
     const double tsave = t;
+    //std::cout << "t = " << std::setprecision(8) << std::setw(10) << t << std::endl;
     const int status = gsl_odeiv2_evolve_apply (e, c, s,
 						&sys, 
 						&t, t1,
 						&h, y);
-
-    if(limit_h && h > hmax) h = hmax;
+    //std::cout << "t = " << std::setprecision(8) << std::setw(10) << t 
+              //<< " y[1]-2*Pi = " << std::setprecision(8) 
+              //<< std::setw(10) << y[1] - 2.*M_PI << std::endl;
     ASSERT(status==GSL_SUCCESS,"Path Integration failed");
+    if(limit_h && h > hmax) h = hmax;
     if(fabs(y[1] - 2.*M_PI) < 1.e-10) break;
-    else if(y[1]+h > 2.*M_PI) {
+    else if(y[1] > 2.*M_PI) {
       if(!limit_h) hmax = h;
       limit_h = true;
       h = hmax *= 0.5;
-      y[0] = ysave[0];y[1] = ysave[1]; t = tsave;
+      y[0] = ysave[0]; y[1] = ysave[1]; t = tsave;
       gsl_odeiv2_evolve_reset(e);
     } //end ifs
   } //end while
@@ -649,7 +651,13 @@ bool KillingPath(void *params,
 
     double hdid = 0.0;
 
+    //std::cout << "ds = " << std::setprecision(8) << std::setw(10) << ds << std::endl;
+
     PathRKQC(ds, h, hmax, hdid, Vout, Vp, params, Psi, xi, scale, 1.e-12);
+
+    //std::cout << "ds = " << std::setprecision(8) << std::setw(10) << ds 
+              //<< " Vout[1]-2*Pi = " << std::setprecision(8) 
+              //<< std::setw(10) << Vout[1] - 2.*M_PI << std::endl;
 
     if(fabs(Vout[1] - 2.*M_PI) < 1.e-10){
       ds += hdid;

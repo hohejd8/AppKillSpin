@@ -57,17 +57,18 @@ namespace ComputeItems {
     if(p.OptionIsDefined("XiDivLNorm")) printDiagnostic[0]=p.Get<bool>("XiDivLNorm");
   }
 
+  //rewrite in C++ terms
   void ComputeAKV::print_state (size_t iter, gsl_multiroot_fsolver * s) const
   {
-  printf ("iter = %3u x = % .3f % .3f % .3f "
-          "f(x) = % .3e % .3e % .3e\n",
-          iter,
-          gsl_vector_get (s->x, 0), 
-          gsl_vector_get (s->x, 1),
-          gsl_vector_get (s->x, 2),
-          gsl_vector_get (s->f, 0), 
-          gsl_vector_get (s->f, 1),
-          gsl_vector_get (s->f, 2));
+    printf ("iter = %3u x = % .3f % .3f % .3f "
+            "f(x) = % .3e % .3e % .3e\n",
+            iter,
+            gsl_vector_get (s->x, 0), 
+            gsl_vector_get (s->x, 1),
+            gsl_vector_get (s->x, 2),
+            gsl_vector_get (s->f, 0), 
+            gsl_vector_get (s->f, 1),
+            gsl_vector_get (s->f, 2));
   }
 
   //==========================================================================
