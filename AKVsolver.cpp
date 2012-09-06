@@ -552,7 +552,7 @@ bool KillingPathNew(const StrahlkorperWithMesh& skwm,
 
   const gsl_odeiv2_step_type *const T = gsl_odeiv2_step_rkck;
   gsl_odeiv2_step *const s = gsl_odeiv2_step_alloc (T, 2);
-  gsl_odeiv2_control *const c = gsl_odeiv2_control_y_new (1e-8, 0.0);
+  gsl_odeiv2_control *const c = gsl_odeiv2_control_y_new (1e-12, 1.e-12);
   gsl_odeiv2_evolve *const e = gsl_odeiv2_evolve_alloc (2);
      
   gsl_odeiv2_system sys = {PathDerivNew, NULL, 2, &params};
@@ -563,6 +563,13 @@ bool KillingPathNew(const StrahlkorperWithMesh& skwm,
   double y[2] = { theta, 0.0 };
   bool limit_h = false;
   double hmax = h;
+  const double hmax2 = 2.0*M_PI/100.0;
+
+  std::cout << "START: y = ( " 
+	    << std::setprecision(8) << std::setw(10) << y[0] << " , " 
+	    << std::setprecision(8) << std::setw(10) << y[1] << " ); h = " 
+	    << std::setprecision(8) << std::setw(10) << h 
+	    << std::endl; 
      
   while (true) {
     const double ysave[2] = {y[0],y[1]}; 
@@ -572,6 +579,13 @@ bool KillingPathNew(const StrahlkorperWithMesh& skwm,
 						&sys, 
 						&t, t1,
 						&h, y);
+    std::cout << "t = " 
+	      << std::setprecision(8) << std::setw(10) << t 
+	      << " : y = ( " 
+	      << std::setprecision(8) << std::setw(10) << y[0] << " , " 
+	      << std::setprecision(8) << std::setw(10) << y[1] << " ); h = " 
+	      << std::setprecision(8) << std::setw(10) << h 
+	      << std::endl;
     //std::cout << "t = " << std::setprecision(8) << std::setw(10) << t 
               //<< " y[1]-2*Pi = " << std::setprecision(8) 
               //<< std::setw(10) << y[1] - 2.*M_PI << std::endl;
@@ -585,6 +599,7 @@ bool KillingPathNew(const StrahlkorperWithMesh& skwm,
       y[0] = ysave[0]; y[1] = ysave[1]; t = tsave;
       gsl_odeiv2_evolve_reset(e);
     } //end ifs
+    if(h > hmax2) h = hmax2;
   } //end while
 
   gsl_odeiv2_evolve_free (e);
@@ -722,8 +737,8 @@ void PathRKQC(const double& ds,
         continue;
       }
     } else {
-      double hnext = 0.9*h*pow(errmax, -0.2); //increase h
-      if(errmax > 1.89e-4) hnext = 5.0*h; //but not by more than 5
+      double hnext = 5.0*h; //increase h, but not by more than 5
+      if(errmax > 1.89e-4) hnext = 0.9*h*pow(errmax, -0.2); //increase h
       if(hnext > hmax) hnext = hmax; //and not more than hmax
       //accept and move on
       for(int i=0; i<Vin.Size(); ++i) Vin[i] = Vout[i];
