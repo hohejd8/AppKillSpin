@@ -45,8 +45,10 @@ HELPFUL DIAGNOSTIC TOOLS WHEN COMPARING TO AppKillSpin:
 //-----------------------------------------
 /*
 TO DO:
-
-
+eliminate small MyVectors
+enable iterators
+remote unnecessary diagnostic printing
+fix tensor<datamesh> constructors
 */
 //-----------------------------------------
 
@@ -79,7 +81,7 @@ int AKVsolver(const gsl_vector * x,
   //const int mdab = mNth;
   const int ndab = mNth;
   const int mdab = (mNth < mNph/2+1) ? mNth : mNph/2+1;
-  const int mM   = ((mNth-1 < mNph/2)  ? mNth-1 : mNph/2);
+  //const int mM   = ((mNth-1 < mNph/2)  ? mNth-1 : mNph/2);
   const DataMesh& rad   = skwm.Radius();
 
   DataMesh L_ha(sbe.CoefficientMesh());
@@ -192,9 +194,9 @@ int AKVsolver(const gsl_vector * x,
     ic1m = RHS_ha[mdab*ndab + mdab+1];
 //end old version
     if(verbose){
-      std::cout << "ic10 = " << ic10 << " "
-          << "ic1p = " << ic1p << " "
-          << "ic1m = " << ic1m << std::endl;
+      //std::cout << "ic10 = " << ic10 << " "
+      //    << "ic1p = " << ic1p << " "
+      //    << "ic1m = " << ic1m << std::endl;
     }
 
 
@@ -414,11 +416,19 @@ DataMesh RotateOnSphere
   return result;
 }
 
+//change argument input
 
 double normalizeKillingVector(void *params,
                               const double thetap,
                               const double phip){
-
+/*
+double normalizeKillingVector(const StrahlkorperWithMesh& skwm,
+                              const DataMesh& Psi,
+                              DataMesh& v,
+                              const double thetap,
+                              const double phip)
+{
+*/
   const StrahlkorperWithMesh& skwm = static_cast<struct rparams*>(params)->skwm;
   const DataMesh& Psi = static_cast<struct rparams*>(params)->Psi;
   DataMesh& v = static_cast<struct rparams*>(params)->v;
@@ -439,10 +449,11 @@ double normalizeKillingVector(void *params,
                        thetap,
                        phip);
 
-  Tensor<DataMesh> gradv = sbe.Gradient(v);
+  //Tensor<DataMesh> gradv = sbe.Gradient(v);
 
   //create xi
   Tensor<DataMesh> tmp_xi = sbe.Gradient(rotated_v);//rotated v
+  //use the standard constructor here
   Tensor<DataMesh> xi = tmp_xi;
        //initializes with the right structure, but also copies data.
   xi(0) = tmp_xi(1);
@@ -452,15 +463,27 @@ double normalizeKillingVector(void *params,
   //the affine path length should be 2*Pi.  Also, test various
   //paths to ensure we have an actual Killing field
   double ds; //affine path length
-  bool goodtheta = KillingPath(params, rotated_Psi, ds, M_PI/2.0, xi);
+  double t; //affine path length
 
+  std::cout << "GSL version" << std::endl;
+  bool goodtheta = KillingPathNew(skwm, Psi, xi, t, M_PI/2.0);
   REQUIRE(goodtheta, "Killing trajectory did not close " << POSITION);
+  const double scale1 = t/(2.0*M_PI);
+  std::cout << "Theta = " << std::setprecision(8) << std::setw(10)
+            << M_PI/2.0 << " : T = "
+            << std::setprecision(10) << t
+            << " (" << scale1 << ")" << std::endl;
 
+
+  std::cout << "old version" << std::endl;
+  goodtheta = KillingPath(params, rotated_Psi, ds, M_PI/2.0, xi);
+  REQUIRE(goodtheta, "Killing trajectory did not close " << POSITION);
   const double scale = ds/(2.0*M_PI);
   std::cout << "Theta = " << std::setprecision(8) << std::setw(10)
             << M_PI/2.0 << " : T = "
             << std::setprecision(10) << ds
             << " (" << scale << ")" << std::endl;
+
 
   goodtheta = KillingPath(params, rotated_Psi, ds, 0.5*M_PI/2.0, xi);
   std::cout << "Theta = " << std::setprecision(8) << std::setw(10)
@@ -484,31 +507,27 @@ double normalizeKillingVector(void *params,
 
 } //end normalizeKillingVector
 
-bool KillingPathNew(double & t, const double theta, other stuff) {
-
-  struct ODEparams {
-  } params;
-
-  const gsl_odeiv2_step_type *cosnt T = gsl_odeiv2_step_rkck;
-  gsl_odeiv2_step *const s = gsl_odeiv2_step_alloc (T, 2);
-  gsl_odeiv2_control *const c = gsl_odeiv2_control_y_new (1e-6, 0.0);
-  gsl_odeiv2_evolve *const e = gsl_odeiv2_evolve_alloc (2);
-     
-  gsl_odeiv2_system sys = {func, NULL, 2, &params};
-     
-  double t = 0.0, t1 = 1.e10;
-  double h = 1e-6;
+/*
+bool KillingPathNewDriver(const StrahlkorperWithMesh& skwm,
+                    const DataMesh& Psi_r,
+                    const Tensor<DataMesh>& xi,
+                    double& t,
+                    const double theta)
+{
+  struct ODEparams params = {skwm, Psi_r, xi};
+  gsl_odeiv2_system sys = {PathDerivNew, NULL, 2, &params};
+  gsl_odeiv2_driver * d = gsl_odeiv2_driver_alloc_y_new (&sys, gsl_odeiv2_step_rkck,
+     				  1e-6, 1e-6, 0.0);
+  t = 0.0;
+  double t1 = 1.e10;
   double y[2] = { theta, 0.0 };
-  bool limit_h = false;
-  double hmax = h;
-     
-  while (true) {
+
+
+  while(true){
+    std::cout << "t = " << std::setprecision(8) << std::setw(10) << t << std::endl;
     const double ysave[2] = {y[0],y[1]}; 
     const double tsave = t;
-    const int status = gsl_odeiv2_evolve_apply (e, c, s,
-						&sys, 
-						&t, t1,
-						&h, y);
+
     if(limit_h && h > hmax) h = hmax;
     ASSERT(status==GSL_SUCCESS,"Path Integration failed");
     if(fabs(y[1] - 2.*M_PI) < 1.e-10) break;
@@ -519,8 +538,52 @@ bool KillingPathNew(double & t, const double theta, other stuff) {
       y[0] = ysave[0];y[1] = ysave[1]; t = tsave;
       gsl_odeiv2_evolve_reset(e);
     } //end ifs
-    printf ("%.5e %.5e %.5e\n", t, y[0], y[1]);
   }
+}
+*/
+
+bool KillingPathNew(const StrahlkorperWithMesh& skwm,
+                    const DataMesh& Psi_r,
+                    const Tensor<DataMesh>& xi,
+                    double& t,
+                    const double theta)
+{
+  struct ODEparams params = {skwm, Psi_r, xi};
+
+  const gsl_odeiv2_step_type *const T = gsl_odeiv2_step_rkck;
+  gsl_odeiv2_step *const s = gsl_odeiv2_step_alloc (T, 2);
+  gsl_odeiv2_control *const c = gsl_odeiv2_control_y_new (1e-13, 0.0);
+  gsl_odeiv2_evolve *const e = gsl_odeiv2_evolve_alloc (2);
+     
+  gsl_odeiv2_system sys = {PathDerivNew, NULL, 2, &params};
+     
+  t = 0.0;
+  double t1 = 1.e10;
+  double h = 1e-6;
+  double y[2] = { theta, 0.0 };
+  bool limit_h = false;
+  double hmax = h;
+     
+  while (true) {
+    std::cout << "t = " << std::setprecision(8) << std::setw(10) << t << std::endl;
+    const double ysave[2] = {y[0],y[1]}; 
+    const double tsave = t;
+    const int status = gsl_odeiv2_evolve_apply (e, c, s,
+						&sys, 
+						&t, t1,
+						&h, y);
+
+    if(limit_h && h > hmax) h = hmax;
+    ASSERT(status==GSL_SUCCESS,"Path Integration failed");
+    if(fabs(y[1] - 2.*M_PI) < 1.e-10) break;
+    else if(y[1]+h > 2.*M_PI) {
+      if(!limit_h) hmax = h;
+      limit_h = true;
+      h = hmax *= 0.5;
+      y[0] = ysave[0];y[1] = ysave[1]; t = tsave;
+      gsl_odeiv2_evolve_reset(e);
+    } //end ifs
+  } //end while
 
   gsl_odeiv2_evolve_free (e);
   gsl_odeiv2_control_free (c);
@@ -534,18 +597,15 @@ bool KillingPathNew(double & t, const double theta, other stuff) {
 }
 
 //need to rename this function
-int func(double t, const double y[], double f[], void *params){
-//f is the function value <- result[]
-//y are the independent variables <- Vin[]
-//t is the stepper
-//params needs to include sbe, xi, Psi, rad
-
+int PathDerivNew(double t, const double y[], double f[], void *params){
   const StrahlkorperWithMesh& skwm = static_cast<struct ODEparams*>(params)->skwm;
+  const DataMesh& Psi_r = static_cast<struct ODEparams*>(params)->Psi_r;
+  const Tensor<DataMesh>& xi = static_cast<struct ODEparams*>(params)->xi;
 
   const SurfaceBasis sbe(skwm.Grid());
   const DataMesh& rad = skwm.Radius();
 
-  double psiAtPoint = sbe.Evaluate(Psi, y[0], y[1]);
+  double psiAtPoint = sbe.Evaluate(Psi_r, y[0], y[1]);
   double radAtPoint = sbe.Evaluate(rad, y[0], y[1]);
 
   //reference YlmSpherepack directly?
@@ -553,19 +613,19 @@ int func(double t, const double y[], double f[], void *params){
 
   const double norm = 1.0 / (psiAtPoint*psiAtPoint*psiAtPoint*psiAtPoint
                              *radAtPoint*radAtPoint);
-  f[0] = y[0]*norm;
-  f[1] = y[1]*norm/sin(y[0]);
+  f[0] = result[0]*norm;
+  f[1] = result[1]*norm/sin(y[0]);
 
   return GSL_SUCCESS;
 }
 
+
 bool KillingPath(void *params,
                  const DataMesh& Psi, //rotated Psi
                  double& ds,
-                 double theta,
+                 const double theta,
                  const Tensor<DataMesh>& xi){
   const int n = 100; //number of steps around the circumference (when theta=Pi/2)
-
 
   double hmax = 2.0*M_PI/n; //stepsize around circumference
   double h = hmax;
@@ -589,7 +649,7 @@ bool KillingPath(void *params,
 
     double hdid = 0.0;
 
-    PathRKQC(ds, h, hmax, hdid, Vout, Vp, params, Psi, xi, scale, 1.e-7);
+    PathRKQC(ds, h, hmax, hdid, Vout, Vp, params, Psi, xi, scale, 1.e-12);
 
     if(fabs(Vout[1] - 2.*M_PI) < 1.e-10){
       ds += hdid;
@@ -633,7 +693,6 @@ void PathRKQC(const double& ds,
     hdid = h;
 
     PathRKCK(h,Vin,Vout,Vp,params,Psi,xi,error);
-std::cout << "error " << error << " " << POSITION << std::endl << std::flush;
     double errmax = 0.0;
 
     for(int i=0; i<error.Size(); ++i){

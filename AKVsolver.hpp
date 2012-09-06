@@ -17,7 +17,13 @@ int AKVsolver(const gsl_vector * x,
 double normalizeKillingVector(void *params,
                               const double thetap,
                               const double phip);
-
+/*
+double normalizeKillingVector(const StrahlkorperWithMesh& skwm,
+                              const DataMesh& Psi,
+                              DataMesh& v,
+                              const double thetap,
+                              const double phip);
+*/
 DataMesh RotateOnSphere
          (const DataMesh& collocationvalues,
           const DataMesh& thetaGrid,
@@ -26,9 +32,13 @@ DataMesh RotateOnSphere
           const double Theta,
           const double Phi);
 
-bool KillingPathNew(void *params);
+bool KillingPathNew(const StrahlkorperWithMesh& skwm,
+                    const DataMesh& Psi_r,
+                    const Tensor<DataMesh>& xi,
+                    double& t,
+                    const double theta);
 
-int func(double t, 
+int PathDerivNew(double t, 
          const double y[],
          double f[],
          void *params);
@@ -82,8 +92,9 @@ struct rparams{
 };
 
 struct ODEparams{
-  const SurfaceBasis& sb;
+  const StrahlkorperWithMesh& skwm;
   const DataMesh& Psi_r;
+  const Tensor<DataMesh>& xi;
 };
 
 #endif

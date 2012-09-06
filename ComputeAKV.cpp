@@ -2,12 +2,19 @@
 #include "SurfaceFinder/Strahlkorper/StrahlkorperWithMesh.hpp"
 #include "Utils/StringParsing/OptionParser.hpp"
 #include "AKVsolver.hpp"
-//#include "gsl/gsl_multiroots.h"
 #include "Utils/LowLevelUtils/Position.hpp"
 #include "SurfaceFinder/StrahlkorperDataSupplier/StrahlkorperParallelInterpolation.hpp"
 #include "Dust/Domain/Domain.hpp"
 #include "Utils/DataBox/DataBox.hpp"
 #include <iomanip>
+
+//TO EDIT
+/*
+print statment for solver loop
+
+
+
+*/
 
 namespace ComputeItems {
 
@@ -186,13 +193,9 @@ namespace ComputeItems {
     DataMesh phi   = box.Get<StrahlkorperWithMesh>(mSkwm).Grid().SurfaceCoords()(1);
     DataMesh rad   = box.Get<StrahlkorperWithMesh>(mSkwm).Radius();
 
-//for testing only ------------------------------
-    const int mNth = skwm.Grid().SurfaceCoords()(0).Extents()[0];
-    const int mNph = skwm.Grid().SurfaceCoords()(0).Extents()[1];
-//-----------------------------------------------
-
     //determine scale factor
     double scale = normalizeKillingVector(&p, thetap, phip);
+    //double scale = normalizeKillingVector(skwm, Psi, v, thetap, phip);
     if(mVerbose){
       std::cout << "scale factor = " << scale << std::endl;
     }
