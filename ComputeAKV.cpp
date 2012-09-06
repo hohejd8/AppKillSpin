@@ -64,9 +64,9 @@ namespace ComputeItems {
               << " x = " << std::setprecision(12) << std::setw(14) << gsl_vector_get(s->x,0)
               << " " << std::setprecision(12) << std::setw(14) << gsl_vector_get(s->x,1)
               << " " << std::setprecision(12) << std::setw(14) << gsl_vector_get(s->x,2)
-              << " f(x) = " << std::setprecision(12) << std::setw(14) << gsl_vector_get(s->x,0)
-              << " " << std::setprecision(12) << std::setw(14) << gsl_vector_get(s->x,1)
-              << " " << std::setprecision(12) << std::setw(14) << gsl_vector_get(s->x,2)
+              << " f(x) = " << std::setprecision(12) << std::setw(14) << gsl_vector_get(s->f,0)
+              << " " << std::setprecision(12) << std::setw(14) << gsl_vector_get(s->f,1)
+              << " " << std::setprecision(12) << std::setw(14) << gsl_vector_get(s->f,2)
               << std::endl << std::flush;
   }
 
@@ -156,11 +156,11 @@ namespace ComputeItems {
                 << std::endl;
     }
 
-    gsl_multiroot_fsolver_free(s); //frees all memory associated with solver
-
     double THETA  = gsl_vector_get(s->x,0);
     double thetap = gsl_vector_get(s->x,1);
     double phip   = gsl_vector_get(s->x,2);
+
+    gsl_multiroot_fsolver_free(s); //frees all memory associated with solver
 
     //get thetap, phip within normal bounds
     if(thetap < 0.0){

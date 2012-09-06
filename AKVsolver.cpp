@@ -435,19 +435,21 @@ double normalizeKillingVector(const StrahlkorperWithMesh& skwm,
   const SurfaceBasis sbe(skwm.Grid());
 
   //rotate v
-  DataMesh rotated_v = RotateOnSphere(v,
-                       skwm.Grid().SurfaceCoords()(0),
-                       skwm.Grid().SurfaceCoords()(1),
-                       sbe,
-                       thetap,
-                       phip);
+//-:  DataMesh rotated_v = RotateOnSphere(v,
+//-:                       skwm.Grid().SurfaceCoords()(0),
+//-:                       skwm.Grid().SurfaceCoords()(1),
+//-:                       sbe,
+//-:                       thetap,
+//-:                       phip);
+  DataMesh rotated_v = v;
   //rotate Psi
-  DataMesh rotated_Psi = RotateOnSphere(Psi,
-                       skwm.Grid().SurfaceCoords()(0),
-                       skwm.Grid().SurfaceCoords()(1),
-                       sbe,
-                       thetap,
-                       phip);
+//-:  DataMesh rotated_Psi = RotateOnSphere(Psi,
+//-:                       skwm.Grid().SurfaceCoords()(0),
+//-:                       skwm.Grid().SurfaceCoords()(1),
+//-:                       sbe,
+//-:                       thetap,
+//-:                       phip);
+  DataMesh rotated_Psi = Psi;
 
   //Tensor<DataMesh> gradv = sbe.Gradient(v);
 
@@ -466,7 +468,7 @@ double normalizeKillingVector(const StrahlkorperWithMesh& skwm,
   double t; //affine path length
 
   std::cout << "GSL version" << std::endl;
-  bool goodtheta = KillingPathNew(skwm, Psi, xi, t, M_PI/2.0);
+  bool goodtheta = KillingPathNew(skwm, rotated_Psi, xi, t, M_PI/2.0);
   REQUIRE(goodtheta, "Killing trajectory did not close " << POSITION);
   const double scale1 = t/(2.0*M_PI);
   std::cout << "Theta = " << std::setprecision(8) << std::setw(10)
