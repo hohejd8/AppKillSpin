@@ -46,9 +46,10 @@ HELPFUL DIAGNOSTIC TOOLS WHEN COMPARING TO AppKillSpin:
 /*
 TO DO:
 eliminate small MyVectors
-enable iterators
 remote unnecessary diagnostic printing
 fix tensor<datamesh> constructors
+put in 1D root finding, try testing (1,0), 
+eliminate skwm
 */
 //-----------------------------------------
 
@@ -63,29 +64,23 @@ int AKVsolver(const gsl_vector * x,
 
   //for use with gsl root finder
   const StrahlkorperWithMesh& skwm = static_cast<struct rparams*>(params)->skwm;
+  //const DataMesh& theta = static_cast<struct rparams*>(params)->theta;
+  //const DataMesh& phi = static_cast<struct rparams*>(params)->phi;
+  //const double& rad = static_cast<struct rparams*>(params)->rad;
   const DataMesh& Psi = static_cast<struct rparams*>(params)->Psi;
   DataMesh& L = static_cast<struct rparams*>(params)->L;
   DataMesh& v = static_cast<struct rparams*>(params)->v;
-  const double L_resid = static_cast<struct rparams*>(params)->L_resid;
-  const double v_resid = static_cast<struct rparams*>(params)->v_resid;
+  const double L_resid_tol = static_cast<struct rparams*>(params)->L_resid_tol;
+  const double v_resid_tol = static_cast<struct rparams*>(params)->v_resid_tol;
   const bool verbose = static_cast<struct rparams*>(params)->PrintResiduals;
 
-  const SurfaceBasis sbe(skwm.Grid());
+  const SurfaceBasis sb(skwm.Grid());
 
   const DataMesh& theta = skwm.Grid().SurfaceCoords()(0);
   const DataMesh& phi   = skwm.Grid().SurfaceCoords()(1);
-  const int mNth = theta.Extents()[0];
-  const int mNph = theta.Extents()[1];
-  SpherePackIterator sit(mNth,mNph);
+  SpherePackIterator sit(theta.Extents()[0],theta.Extents()[1]);
 
-  //const int mdab = mNth;
-  const int ndab = mNth;
-  const int mdab = (mNth < mNph/2+1) ? mNth : mNph/2+1;
-  //const int mM   = ((mNth-1 < mNph/2)  ? mNth-1 : mNph/2);
   const DataMesh& rad   = skwm.Radius();
-
-  DataMesh L_ha(sbe.CoefficientMesh());
-  DataMesh v_ha(sbe.CoefficientMesh());
 
   //eq. 78, 93
   L = cos(thetap)*cos(theta)
@@ -95,12 +90,12 @@ int AKVsolver(const gsl_vector * x,
   v = L*rad*rad;
 
   //eq. 94, make sure only l=1 mode exists by setting all l!=1 modes to zero
-  L_ha = sbe.ComputeCoefficients(L);
-  v_ha = sbe.ComputeCoefficients(v);
+  DataMesh L_ha = sb.ComputeCoefficients(L);
+  DataMesh v_ha = sb.ComputeCoefficients(v);
 
   //replace with scalar iterator tools
   //guarantee only l=1 modes exist in the harmonic analysis
-/*
+
   for(sit.Reset(); sit; ++sit){
     if(sit.l()==1){
       continue;
@@ -109,121 +104,66 @@ int AKVsolver(const gsl_vector * x,
       v_ha[sit()] = 0.0;
     }
   }
-*/
-//previous method for setting l.ne.1 to zero
-
-  L_ha[0]             = 0.0;
-  L_ha[0+mdab*ndab] = 0.0;
-  v_ha[0]             = 0.0;
-  v_ha[0+mdab*ndab] = 0.0;
-
-  for(int i=2; i<mNth; ++i){
-    L_ha[i*mdab] = 0.0;
-    v_ha[i*mdab] = 0.0;
-    L_ha[i*mdab+mdab*ndab] = 0.0;
-    v_ha[i*mdab+mdab*ndab] = 0.0;
-  }
-
-  for(int i=2; i<mNth; ++i){
-    L_ha[1+i*mdab] = 0.0;
-    v_ha[1+i*mdab] = 0.0;
-    L_ha[1+i*mdab+mdab*ndab] = 0.0;
-    v_ha[1+i*mdab+mdab*ndab] = 0.0;
-  }
-
-  for(int j=2; j<mdab; ++j){
-    for(int i=j; i<mNth; ++i){
-      L_ha[j+i*mdab] = 0.0;
-      v_ha[j+i*mdab] = 0.0;
-      L_ha[j+i*mdab+mdab*ndab] = 0.0;
-      v_ha[j+i*mdab+mdab*ndab] = 0.0;
-    }
-  }
-
-//end previous method for l.ne.1
 
   //recompute L from the 'fixed' analysis L_ha
   //this is necessary for the RHS (collocation points) in the while loop
-  L = sbe.Evaluate(L_ha);
+  L = sb.Evaluate(L_ha);
 
   //^2R, eq. 20
-  const DataMesh& llncf = sbe.ScalarLaplacian(log(Psi)); //original
-  //const DataMesh& llncf = sbe.ScalarLaplacian(lPsi); //edited
+  const DataMesh& llncf = sb.ScalarLaplacian(log(Psi)); //original
 
   const DataMesh& hR = (1.0-2.0*llncf) / (Psi*Psi*Psi*Psi*rad*rad);
 
-  const Tensor<DataMesh>& hGradR = sbe.Gradient(hR);
+  const Tensor<DataMesh>& hGradR = sb.Gradient(hR);
 
 
   //The main loop
   bool unsolved = true;
   bool refining = false;
-  int refine_count = 0;
-  int iter_count = 0;
-  const int iter_max = 50;
-  double ic10 = 0.0;
-  double ic1p = 0.0;
-  double ic1m = 0.0;
-  DataMesh RHS = theta; //dummy initialization.  RHS=right hand side of eq. 97, collocation
-  DataMesh RHS_ha(sbe.CoefficientMesh());//= RHS; //dummy initialization.  harmonic coefficients
+  int refine_count = 0; int iter_count = 0; const int iter_max = 50;
+  double ic10 = 0.0; double ic1p = 0.0; double ic1m = 0.0;
+  DataMesh RHS(DataMesh::Empty);//RHS=right hand side of eq. 97
+  DataMesh RHS_ha(sb.CoefficientMesh());
   Tensor<DataMesh> Gradv = hGradR; //dummy initialization. Gradient of v, eq. 97
 
   while(unsolved){
     //eq. 97, first term: compute Laplacian of L
-    RHS = sbe.ScalarLaplacian(L_ha); //RHS is in collocation terms
+    RHS = sb.ScalarLaplacian(L_ha); //RHS is in collocation terms
 
     //eq. 97, component of third term: compute gradient of v
-    Gradv = sbe.Gradient(v_ha); //Gradv is in collocation terms
+    Gradv = sb.Gradient(v_ha); //Gradv is in collocation terms
 
     //compute eq. 97
     RHS = -RHS + (4.0*llncf*L + hGradR(0)*Gradv(0) + hGradR(1)*Gradv(1) -2.0*L)*(1.0-THETA);
 
     //perform harmonic analysis on RHS
-    RHS_ha = sbe.ComputeCoefficients(RHS);
+    RHS_ha = sb.ComputeCoefficients(RHS);
 
     //keep track of l=1 values
-/*
     ic10 = RHS_ha[sit(1,0,SpherePackIterator::a)];
     ic1p = RHS_ha[sit(1,1,SpherePackIterator::a)];
     ic1m = RHS_ha[sit(1,1,SpherePackIterator::b)];
-*/
-//old version
 
-    ic10 = RHS_ha[mdab];
-    ic1p = RHS_ha[mdab+1];
-    ic1m = RHS_ha[mdab*ndab + mdab+1];
-//end old version
     if(verbose){
       //std::cout << "ic10 = " << ic10 << " "
       //    << "ic1p = " << ic1p << " "
       //    << "ic1m = " << ic1m << std::endl;
     }
 
-
     //remove the l=1 modes
-/*
     RHS_ha[sit(1,0,SpherePackIterator::a)] = 0.0;
     RHS_ha[sit(1,1,SpherePackIterator::a)] = 0.0;
     RHS_ha[sit(1,1,SpherePackIterator::b)] = 0.0;
-*/
-//old version
-
-    RHS_ha[mdab] = 0.0;
-    RHS_ha[mdab+1] = 0.0;
-    RHS_ha[mdab*ndab + mdab+1] = 0.0;
-
-//end old version
 
     //recompute RHS from 'fixed' analysis
-    RHS = sbe.Evaluate(RHS_ha);
+    RHS = sb.Evaluate(RHS_ha);
     //compute RHS^2
     RHS *= RHS;
 
     //evaluate normalization factor
-    const double norm_RHS_L = sqrt(sqrt(2.0)*sbe.ComputeCoefficients(RHS)[0]/4.0);
+    const double norm_RHS_L = sqrt(sqrt(2.0)*sb.ComputeCoefficients(RHS)[0]/4.0);
 
     //invert (Laplacian + 2)
-/*
     for(sit.Reset(); sit; ++sit){
       if(sit.l()==1){ //must zero out n=1 modes
         RHS_ha[sit()] = 0.0;
@@ -231,123 +171,49 @@ int AKVsolver(const gsl_vector * x,
         RHS_ha[sit()] /= 2.0 - sit.l()*(sit.l()+1.0);
       }
     }
-*/
-//old version
-
-    //j=0
-    RHS_ha[0] *= 0.5;
-    RHS_ha[mdab*ndab + 0] *= 0.5;
-    RHS_ha[mdab] = 0.0; //must zero out n=1 modes
-    RHS_ha[mdab*ndab + mdab] = 0.0; //must zero out n=1 modes
-    for(int i=2; i<mNth; ++i){
-      RHS_ha[i*mdab] /= 2.0 - i*(i+1.0);
-      RHS_ha[mdab*ndab +i*mdab] /= 2.0 - i*(i+1.0);
-    }
-
-    //j=1
-    RHS_ha[1+mdab] = 0.0; //must zero out n=1 modes
-    RHS_ha[mdab*ndab + 1 + mdab] = 0.0; //must zero out n=1 modes
-    for(int i=2; i<mNth; ++i){
-      RHS_ha[1 + i*mdab] /= 2.0 - i*(i+1.0);
-      RHS_ha[mdab*ndab + 1 + i*mdab] /= 2.0 - i*(i+1.0);
-    }
-
-    //all other j
-    for(int j=2; j<mdab; ++j){
-      for(int i=j; i<mNth; ++i){
-        RHS_ha[j + i*mdab] /= 2.0 - i*(i+1.0);
-        RHS_ha[mdab*ndab + j + i*mdab] /= 2.0 - i*(i+1.0);
-      }
-    }
-
-//end old version
 
     //update harmonic coefficients for L = L_0 + L_1(RHS)
-/*
     for(sit.Reset(); sit; ++sit){
-      L_ha[sit()] = RHS_ha[sit()];
+      L_ha[sit()] += RHS_ha[sit()];
     }
-*/
-//old version
-
-    for(int j=0; j<mdab; ++j){
-      for(int i=j; i<mNth; ++i){
-        L_ha[j+i*mdab] += RHS_ha[j+i*mdab];
-        L_ha[mdab*ndab + j+i*mdab] += RHS_ha[mdab*ndab + j+i*mdab];
-      }
-    }
-
-//end old version
 
     //compute L from harmonic coefficients
-    L = sbe.Evaluate(L_ha);
+    L = sb.Evaluate(L_ha);
 
-    //eq. 99, compute laplacian of delta v
+    //compute laplacian of delta v
     //NOTE: RHS changes definitions here
-    RHS = sbe.ScalarLaplacian(v_ha); //collocation
+    RHS = sb.ScalarLaplacian(v_ha); //collocation
     const DataMesh twocf4r2 = 2.0*Psi*Psi*Psi*Psi*rad*rad;
     RHS = -RHS - twocf4r2*L; //collocation
 
     //remove the l=0 mode from RHS
-    RHS_ha = sbe.ComputeCoefficients(RHS);
+    RHS_ha = sb.ComputeCoefficients(RHS);
     RHS_ha[sit(0,0,SpherePackIterator::a)] = 0.0;
-    //RHS_ha[0] = 0.0; //old version
-    RHS = sbe.Evaluate(RHS_ha);
+    RHS = sb.Evaluate(RHS_ha);
 
     //compute RHS^2
     RHS *= RHS;
 
     //compute norm
-    const double norm_RHS_v = sqrt(sqrt(2.0)*sbe.ComputeCoefficients(RHS)[0]/4.0);
+    const double norm_RHS_v = sqrt(sqrt(2.0)*sb.ComputeCoefficients(RHS)[0]/4.0);
 
     //invert (Laplacian + 0)
-/*
     for(sit.Reset(); sit; ++sit){
-      if(sit.l()==1){
+      if(sit.l()==0){
         RHS_ha[sit()] = 0.0;
       } else {
         RHS_ha[sit()] /= -sit.l()*(sit.l()+1.0);
       }
     }
-*/
-//old version
-
-    RHS_ha[0] = 0.0;
-    RHS_ha[mdab*ndab] = 0.0;
-    for(int i=1; i<mNth; ++i){
-      RHS_ha[i*mdab] /= -i*(i+1.0);
-      RHS_ha[mdab*ndab + i*mdab] /= -i*(i+1.0);
-    }
-    for(int j=1; j<mdab; ++j){
-      for(int i=j; i<mNth; ++i){
-        RHS_ha[j + i*mdab] /= -i*(i+1.0);
-        RHS_ha[mdab*ndab + j + i*mdab] /= -i*(i+1.0);
-      }
-    }
-
-//end old version
 
     //update harmonic coefficients for v
-/*
     for(sit.Reset(); sit; ++sit){
       v_ha[sit()] += RHS_ha[sit()];
     }
-*/
-//old version
-
-    for(int j=0; j<mdab; ++j){
-      for(int i=j; i<mNth; ++i){
-        v_ha[j + i*mdab] += RHS_ha[j + i*mdab];
-        v_ha[mdab*ndab + j + i*mdab] += RHS_ha[mdab*ndab + j + i*mdab];
-      }
-    }
-
-//end old version
 
     //end the primary loop
     if(++iter_count > iter_max) unsolved = false;
-    if((norm_RHS_L < L_resid) && (norm_RHS_v < v_resid)) {
-      //              1.e-5                     1.e-9
+    if((norm_RHS_L < L_resid_tol) && (norm_RHS_v < v_resid_tol)) {
       refining = true;
       ++refine_count;
     } else if(refining){
@@ -359,8 +225,8 @@ int AKVsolver(const gsl_vector * x,
 
   } //end the main while loop
 
-  //return to program
-  v = sbe.Evaluate(v_ha);
+  //return to calling program
+  v = sb.Evaluate(v_ha);
 
   gsl_vector_set (f, 0, ic10);
   gsl_vector_set (f, 1, ic1p);
@@ -370,16 +236,16 @@ int AKVsolver(const gsl_vector * x,
 } //end AKVsolver
 
 
-//takes a DataMesh on the sphere and rotates it by some amount theta', phip'
+//takes a DataMesh on the sphere and rotates it by some amount Theta, Phi
 DataMesh RotateOnSphere
          (const DataMesh& collocationvalues,
           const DataMesh& thetaGrid,
           const DataMesh& phiGrid,
-          const SurfaceBasis& sbe,
+          const SurfaceBasis& sb,
           const double Theta,
           const double Phi) 
 {
-  DataMesh result = collocationvalues; //gives correct structure
+  DataMesh result(DataMesh::Empty);
 
   const double Cb = cos(Theta);
   const double Sb = sin(Theta);
@@ -394,7 +260,7 @@ DataMesh RotateOnSphere
 
     double CTheta = Cb*Ctp - Sb*Stp*Cpp;
 
-    if(CTheta > 1.0) CTheta = 1.0;  // don't let roundoff error cause prob's
+    if(CTheta > 1.0) CTheta = 1.0;  // don't let roundoff error cause problems
     const double STheta = sqrt(1.0 - CTheta*CTheta);
     double newTheta;
     double newPhi;
@@ -410,19 +276,19 @@ DataMesh RotateOnSphere
       newTheta = M_PI;
       newPhi = 0.0;
     }
-    result[i] = sbe.Evaluate(collocationvalues, newTheta, newPhi);
+    result[i] = sb.Evaluate(collocationvalues, newTheta, newPhi);
   }
 
   return result;
 }
 
-//change argument input
-
 double normalizeKillingVector(void *params,
                               const double thetap,
                               const double phip){
 /*
-double normalizeKillingVector(const StrahlkorperWithMesh& skwm,
+double normalizeKillingVector(const DataMesh& theta,
+                              const DataMesh& phi,
+                              const SurfaceBasis& sb,
                               const DataMesh& Psi,
                               DataMesh& v,
                               const double thetap,
@@ -432,13 +298,13 @@ double normalizeKillingVector(const StrahlkorperWithMesh& skwm,
   const StrahlkorperWithMesh& skwm = static_cast<struct rparams*>(params)->skwm;
   const DataMesh& Psi = static_cast<struct rparams*>(params)->Psi;
   DataMesh& v = static_cast<struct rparams*>(params)->v;
-  const SurfaceBasis sbe(skwm.Grid());
+  const SurfaceBasis sb(skwm.Grid());
 
   //rotate v
 //-:  DataMesh rotated_v = RotateOnSphere(v,
 //-:                       skwm.Grid().SurfaceCoords()(0),
 //-:                       skwm.Grid().SurfaceCoords()(1),
-//-:                       sbe,
+//-:                       sb,
 //-:                       thetap,
 //-:                       phip);
   DataMesh rotated_v = v;
@@ -446,18 +312,14 @@ double normalizeKillingVector(const StrahlkorperWithMesh& skwm,
 //-:  DataMesh rotated_Psi = RotateOnSphere(Psi,
 //-:                       skwm.Grid().SurfaceCoords()(0),
 //-:                       skwm.Grid().SurfaceCoords()(1),
-//-:                       sbe,
+//-:                       sb,
 //-:                       thetap,
 //-:                       phip);
   DataMesh rotated_Psi = Psi;
 
-  //Tensor<DataMesh> gradv = sbe.Gradient(v);
-
   //create xi
-  Tensor<DataMesh> tmp_xi = sbe.Gradient(rotated_v);//rotated v
-  //use the standard constructor here
-  Tensor<DataMesh> xi = tmp_xi;
-       //initializes with the right structure, but also copies data.
+  Tensor<DataMesh> tmp_xi = sb.Gradient(rotated_v);//rotated v
+  Tensor<DataMesh> xi(2,"1",DataMesh::Empty);
   xi(0) = tmp_xi(1);
   xi(1) = -tmp_xi(0);
 
@@ -509,41 +371,6 @@ double normalizeKillingVector(const StrahlkorperWithMesh& skwm,
 
 } //end normalizeKillingVector
 
-/*
-bool KillingPathNewDriver(const StrahlkorperWithMesh& skwm,
-                    const DataMesh& Psi_r,
-                    const Tensor<DataMesh>& xi,
-                    double& t,
-                    const double theta)
-{
-  struct ODEparams params = {skwm, Psi_r, xi};
-  gsl_odeiv2_system sys = {PathDerivNew, NULL, 2, &params};
-  gsl_odeiv2_driver * d = gsl_odeiv2_driver_alloc_y_new (&sys, gsl_odeiv2_step_rkck,
-     				  1e-6, 1e-6, 0.0);
-  t = 0.0;
-  double t1 = 1.e10;
-  double y[2] = { theta, 0.0 };
-
-
-  while(true){
-    std::cout << "t = " << std::setprecision(8) << std::setw(10) << t << std::endl;
-    const double ysave[2] = {y[0],y[1]}; 
-    const double tsave = t;
-
-    if(limit_h && h > hmax) h = hmax;
-    ASSERT(status==GSL_SUCCESS,"Path Integration failed");
-    if(fabs(y[1] - 2.*M_PI) < 1.e-10) break;
-    else if(y[1]+h > 2.*M_PI) {
-      if(!limit_h) hmax = h;
-      limit_h = true;
-      h = hmax *= 0.5;
-      y[0] = ysave[0];y[1] = ysave[1]; t = tsave;
-      gsl_odeiv2_evolve_reset(e);
-    } //end ifs
-  }
-}
-*/
-
 bool KillingPathNew(const StrahlkorperWithMesh& skwm,
                     const DataMesh& Psi_r,
                     const Tensor<DataMesh>& xi,
@@ -576,7 +403,6 @@ bool KillingPathNew(const StrahlkorperWithMesh& skwm,
   while (true) {
     const double ysave[2] = {y[0],y[1]}; 
     const double tsave = t;
-    //std::cout << "t = " << std::setprecision(8) << std::setw(10) << t << std::endl;
     const int status = gsl_odeiv2_evolve_apply (e, c, s,
 						&sys, 
 						&t, t1,
@@ -588,9 +414,7 @@ bool KillingPathNew(const StrahlkorperWithMesh& skwm,
 	      << std::setprecision(8) << std::setw(10) << y[1] << " ); h = " 
 	      << std::setprecision(8) << std::setw(10) << h 
 	      << std::endl;
-    //std::cout << "t = " << std::setprecision(8) << std::setw(10) << t 
-              //<< " y[1]-2*Pi = " << std::setprecision(8) 
-              //<< std::setw(10) << y[1] - 2.*M_PI << std::endl;
+
     ASSERT(status==GSL_SUCCESS,"Path Integration failed");
     if(limit_h && h > hmax) h = hmax;
     if(fabs(y[1] - 2.*M_PI) < 1.e-10) break;
@@ -621,14 +445,14 @@ int PathDerivNew(double t, const double y[], double f[], void *params){
   const DataMesh& Psi_r = static_cast<struct ODEparams*>(params)->Psi_r;
   const Tensor<DataMesh>& xi = static_cast<struct ODEparams*>(params)->xi;
 
-  const SurfaceBasis sbe(skwm.Grid());
+  const SurfaceBasis sb(skwm.Grid());
   const DataMesh& rad = skwm.Radius();
 
-  double psiAtPoint = sbe.Evaluate(Psi_r, y[0], y[1]);
-  double radAtPoint = sbe.Evaluate(rad, y[0], y[1]);
+  double psiAtPoint = sb.Evaluate(Psi_r, y[0], y[1]);
+  double radAtPoint = sb.Evaluate(rad, y[0], y[1]);
 
   //reference YlmSpherepack directly?
-  MyVector<double> result = sbe.EvaluateVector(xi, y[0], y[1]);
+  MyVector<double> result = sb.EvaluateVector(xi, y[0], y[1]);
 
   const double norm = 1.0 / (psiAtPoint*psiAtPoint*psiAtPoint*psiAtPoint
                              *radAtPoint*radAtPoint);
@@ -759,15 +583,15 @@ MyVector<double> PathDerivs(void *params,
 
   const StrahlkorperWithMesh& skwm = static_cast<struct rparams*>(params)->skwm;
 
-  const SurfaceBasis sbe(skwm.Grid());
+  const SurfaceBasis sb(skwm.Grid());
   const DataMesh& rad = skwm.Radius();
 
-  double psiAtPoint = sbe.Evaluate(Psi, Vin[0], Vin[1]);
-  double radAtPoint = sbe.Evaluate(rad, Vin[0], Vin[1]);
+  double psiAtPoint = sb.Evaluate(Psi, Vin[0], Vin[1]);
+  double radAtPoint = sb.Evaluate(rad, Vin[0], Vin[1]);
 
   //MyVector<double> result(MV::Size(2),0.0);
-  //result = sbe.EvaluateVector(xi, Vin[0], Vin[1]);
-  MyVector<double> result = sbe.EvaluateVector(xi, Vin[0], Vin[1]);
+  //result = sb.EvaluateVector(xi, Vin[0], Vin[1]);
+  MyVector<double> result = sb.EvaluateVector(xi, Vin[0], Vin[1]);
 
   const double norm = 1.0 / (psiAtPoint*psiAtPoint*psiAtPoint*psiAtPoint
                              *radAtPoint*radAtPoint);
@@ -855,7 +679,7 @@ void KillingDiagnostics(const StrahlkorperWithMesh& skwm,
                         const Tensor<DataMesh>& xi,
                         const MyVector<bool>& printDiagnostic){
 
-  const SurfaceBasis sbe(skwm.Grid());
+  const SurfaceBasis sb(skwm.Grid());
   const DataMesh& rad = skwm.Radius();
   const DataMesh& p2r2 = rad*rad*Psi*Psi;
 
@@ -864,23 +688,22 @@ void KillingDiagnostics(const StrahlkorperWithMesh& skwm,
     //const int mNph = skwm.Grid().SurfaceCoords()(0).Extents()[1];
 //for testing only above here-----------------------------------------------
 
-  DataMesh div = sbe.Divergence(xi) / p2r2;
+  DataMesh div = sb.Divergence(xi) / p2r2;
 
   //-----Divergence-------
   if(printDiagnostic[0]){
-    const DataMesh& div2norm = sbe.ComputeCoefficients(div*div);
+    const DataMesh& div2norm = sb.ComputeCoefficients(div*div);
     std::cout << "L2 Norm of Divergence = "
               << std::setprecision(12) << sqrt(sqrt(2.)*div2norm[0]/4.) << std::endl;
   }
 
 
   if(printDiagnostic[1] || printDiagnostic[2]){
-    DataMesh vort = sbe.Vorticity(xi) / p2r2 - 2.0*Psi*Psi*L;
+    DataMesh vort = sb.Vorticity(xi) / p2r2 - 2.0*Psi*Psi*L;
 
     //-----Vorticity-------
     if(printDiagnostic[1]){
-      const DataMesh vort2norm = sbe.ComputeCoefficients(vort*vort);
-      std::cout << "vort_a[0] " << vort2norm[0] << std::endl;
+      const DataMesh vort2norm = sb.ComputeCoefficients(vort*vort);
       std::cout << "L2 Norm of Vorticity = "
                 << std::setprecision(12) << sqrt(sqrt(2.)*vort2norm[0]/4.) << std::endl;
     }
@@ -890,9 +713,9 @@ void KillingDiagnostics(const StrahlkorperWithMesh& skwm,
       Tensor<DataMesh> Dxtheta = xi;
       Tensor<DataMesh> Dxphi = xi;
 
-      Dxtheta = sbe.VectorColatitudeDerivative(xi);
+      Dxtheta = sb.VectorColatitudeDerivative(xi);
 
-      Tensor<DataMesh> gradlncf = sbe.Gradient(log(Psi));
+      Tensor<DataMesh> gradlncf = sb.Gradient(log(Psi));
 
 
       Dxtheta(0) -= 2.0*( xi(0)*gradlncf(0) - xi(1)*gradlncf(1) );
@@ -909,7 +732,7 @@ void KillingDiagnostics(const StrahlkorperWithMesh& skwm,
       SS /= p4r2;
       SS -= 2.0*p4r2*L*L;
 
-      DataMesh SS_ha = sbe.ComputeCoefficients(SS);
+      DataMesh SS_ha = sb.ComputeCoefficients(SS);
 
       std::cout << "Surface Average S_{ij}S^{ij} = "
                 << std::setprecision(12) << sqrt(2.)*SS_ha[0]/4. << std::endl;
@@ -917,20 +740,20 @@ void KillingDiagnostics(const StrahlkorperWithMesh& skwm,
   }
 
   if(printDiagnostic[3] || printDiagnostic[4] || printDiagnostic[5]){
-    Tensor<DataMesh> GradL = sbe.Gradient(L);
+    Tensor<DataMesh> GradL = sb.Gradient(L);
     DataMesh xiGradL = xi(0)*GradL(0) + xi(1)*GradL(1);
-    const DataMesh& llncf = sbe.ScalarLaplacian(log(Psi));
+    const DataMesh& llncf = sb.ScalarLaplacian(log(Psi));
     const DataMesh Rm1 = Psi*Psi*Psi*Psi / (1.-2.*llncf);
     GradL(0) *= Rm1;
     GradL(1) *= Rm1;
 
     //-----Norm of f_L-------
     if(printDiagnostic[3]){
-      DataMesh f_L = sbe.Divergence(GradL);
+      DataMesh f_L = sb.Divergence(GradL);
       f_L *= 0.5/(Psi*Psi);
       f_L += Psi*Psi*L;
 
-      const DataMesh fL_ha = sbe.ComputeCoefficients(f_L*f_L);
+      const DataMesh fL_ha = sb.ComputeCoefficients(f_L*f_L);
 
       std::cout << "L2 Norm of f_L= "
                 << std::setprecision(12) << sqrt(sqrt(2.)*fL_ha[0]/4.) << std::endl;
@@ -938,11 +761,11 @@ void KillingDiagnostics(const StrahlkorperWithMesh& skwm,
 
     //-----Norm of f_Lambda-------
     if(printDiagnostic[4]){
-      const Tensor<DataMesh> GradRm1 = sbe.Gradient(Rm1);
+      const Tensor<DataMesh> GradRm1 = sb.Gradient(Rm1);
       DataMesh f_lam = GradRm1(0)*GradL(1) - GradRm1(1)*GradL(0);
       f_lam *= 0.5/(Psi*Psi);
 
-      const DataMesh flam_ha = sbe.ComputeCoefficients(f_lam*f_lam);
+      const DataMesh flam_ha = sb.ComputeCoefficients(f_lam*f_lam);
 
       std::cout << "L2 Norm of f_lam= "
                 << std::setprecision(12) << sqrt(sqrt(2.)*flam_ha[0]/4.) << std::endl;
@@ -953,7 +776,7 @@ void KillingDiagnostics(const StrahlkorperWithMesh& skwm,
       xiGradL = xi(0)*GradL(0) + xi(1)*GradL(1);
       xiGradL /= (rad*rad*Psi*Psi);
 
-      const DataMesh xiGradL_ha = sbe.ComputeCoefficients(xiGradL*xiGradL);
+      const DataMesh xiGradL_ha = sb.ComputeCoefficients(xiGradL*xiGradL);
 
       std::cout << "L2 Norm of xi*Div(L) = "
                 << std::setprecision(12) << sqrt(sqrt(2.)*xiGradL_ha[0]/4.) << std::endl;

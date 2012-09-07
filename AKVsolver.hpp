@@ -83,11 +83,15 @@ void KillingDiagnostics(const StrahlkorperWithMesh& skwm,
 
 struct rparams{
   const StrahlkorperWithMesh& skwm;
+  //const DataMesh& theta;
+  //const DataMesh& phi;
+  //const double& rad;
+  //const SurfaceBasis& sb;
   const DataMesh& Psi;
   DataMesh& L;
   DataMesh& v;
-  const double & L_resid;
-  const double & v_resid;
+  const double & L_resid_tol;
+  const double & v_resid_tol;
   const bool PrintResiduals;
 };
 

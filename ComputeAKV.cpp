@@ -10,9 +10,6 @@
 
 //TO EDIT
 /*
-print statment for solver loop
-
-
 
 */
 
@@ -83,6 +80,7 @@ namespace ComputeItems {
     const size_t n = 3; //number of dimensions
 
     const StrahlkorperWithMesh& skwm = box.Get<StrahlkorperWithMesh>(mSkwm);
+    const SurfaceBasis sb(skwm.Grid());
 
     //Psi needs to be interpolated onto the surface
     const Domain& D=box.Get<Domain>("Domain");
@@ -102,16 +100,22 @@ namespace ComputeItems {
 
     //initialize L, v
     DataMesh theta = box.Get<StrahlkorperWithMesh>(mSkwm).Grid().SurfaceCoords()(0);
-    DataMesh L = theta;
-    DataMesh v = theta;
+    DataMesh phi = box.Get<StrahlkorperWithMesh>(mSkwm).Grid().SurfaceCoords()(1);
+    DataMesh L(DataMesh::Empty);
+    DataMesh v(DataMesh::Empty);
 
-    struct rparams p = {skwm,
-                        Psi,
-                        L,
-                        v,
-                        1.e-12,
-                        1.e-12,// };
-                        mPrintResiduals };
+    //struct rparams p = {skwm,
+    rparams p = {skwm,
+                 //theta,
+                 //phi,
+                 //rad,
+                 //sb,
+                 Psi,
+                 L,
+                 v,
+                 1.e-12,
+                 1.e-12,
+                 mPrintResiduals };
 
     gsl_multiroot_function f = {&AKVsolver, n, &p}; //initializes the function
 
@@ -142,11 +146,11 @@ namespace ComputeItems {
       if(mVerbose) print_state(iter, s);
 
       if(status){ //if solver is stuck
-        std::cout << "solver is stuck at iter = " << iter << std::endl;
+        std::cout << "GSL multiroot solver is stuck at iter = " << iter << std::endl;
         break;
       }
 
-      status = gsl_multiroot_test_residual(s->f, 1e-13);
+      status = gsl_multiroot_test_residual(s->f, 1e-11);
 
     } while(status == GSL_CONTINUE && iter<1000);
 
@@ -160,6 +164,7 @@ namespace ComputeItems {
     double thetap = gsl_vector_get(s->x,1);
     double phip   = gsl_vector_get(s->x,2);
 
+    gsl_vector_free(x);
     gsl_multiroot_fsolver_free(s); //frees all memory associated with solver
 
     //get thetap, phip within normal bounds
@@ -180,7 +185,7 @@ namespace ComputeItems {
       phip -= 2.0*m*M_PI;
     }
 
-    gsl_vector_free(x);
+    //gsl_vector_free(x);
 
     if(mVerbose){
       std::cout << "Solution found with : Theta  = " << THETA << "\n"
@@ -190,7 +195,6 @@ namespace ComputeItems {
     }
 
     //compute L, v from minimized thetap, phip
-    DataMesh phi   = box.Get<StrahlkorperWithMesh>(mSkwm).Grid().SurfaceCoords()(1);
     DataMesh rad   = box.Get<StrahlkorperWithMesh>(mSkwm).Radius();
 
     //determine scale factor
