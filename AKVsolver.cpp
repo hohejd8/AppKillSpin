@@ -5,9 +5,6 @@
 #include "gsl/gsl_odeiv2.h"
 #include <iomanip>
 
-//#include "Utils/DataMesh/DataMeshNorms.hpp"
-
-//-----------------------------------------
 /*
 HELPFUL DIAGNOSTIC TOOLS WHEN COMPARING TO AppKillSpin:
 
@@ -21,35 +18,12 @@ HELPFUL DIAGNOSTIC TOOLS WHEN COMPARING TO AppKillSpin:
   }
   std::cout << "\n" << std::endl;
 
-  //print xi (or other Tensor<DataMesh>)
-  std::cout << "xi(0) " << POSITION << std::endl;
-  for(int i=0; i<mNth; ++i){
-      for(int j=0; j<mNph; ++j) {
-            std::cout << std::setprecision(10) << xi(0)[i*mNph+j] << " " ;
-      }
-      std::cout << std::endl;
-  }
-  std::cout << "\n" << std::endl;
-  std::cout << "xi(1) " << POSITION << std::endl;
-  for(int i=0; i<mNth; ++i){
-      for(int j=0; j<mNph; ++j) {
-            std::cout << std::setprecision(10) << xi(1)[i*mNph+j] << " " ;
-      }
-      std::cout << std::endl;
-  }
-  std::cout << "\n" << std::endl;
-
 */
-//-----------------------------------------
 
-//-----------------------------------------
 /*
 TO DO:
 eliminate small MyVectors
-remote unnecessary diagnostic printing
-fix tensor<datamesh> constructors
 put in 1D root finding, try testing (1,0), 
-eliminate skwm
 */
 //-----------------------------------------
 
@@ -63,24 +37,18 @@ int AKVsolver(const gsl_vector * x,
   const double phip = gsl_vector_get (x,2);
 
   //for use with gsl root finder
-  const StrahlkorperWithMesh& skwm = static_cast<struct rparams*>(params)->skwm;
-  //const DataMesh& theta = static_cast<struct rparams*>(params)->theta;
-  //const DataMesh& phi = static_cast<struct rparams*>(params)->phi;
-  //const double& rad = static_cast<struct rparams*>(params)->rad;
+  const DataMesh& theta = static_cast<struct rparams*>(params)->theta;
+  const DataMesh& phi = static_cast<struct rparams*>(params)->phi;
+  const double& rad = static_cast<struct rparams*>(params)->rad;
+  const SurfaceBasis& sb = static_cast<struct rparams*>(params)->sb;
   const DataMesh& Psi = static_cast<struct rparams*>(params)->Psi;
   DataMesh& L = static_cast<struct rparams*>(params)->L;
   DataMesh& v = static_cast<struct rparams*>(params)->v;
   const double L_resid_tol = static_cast<struct rparams*>(params)->L_resid_tol;
   const double v_resid_tol = static_cast<struct rparams*>(params)->v_resid_tol;
-  const bool verbose = static_cast<struct rparams*>(params)->PrintResiduals;
+  const bool printResiduals = static_cast<struct rparams*>(params)->printResiduals;
 
-  const SurfaceBasis sb(skwm.Grid());
-
-  const DataMesh& theta = skwm.Grid().SurfaceCoords()(0);
-  const DataMesh& phi   = skwm.Grid().SurfaceCoords()(1);
   SpherePackIterator sit(theta.Extents()[0],theta.Extents()[1]);
-
-  const DataMesh& rad   = skwm.Radius();
 
   //eq. 78, 93
   L = cos(thetap)*cos(theta)
@@ -93,9 +61,7 @@ int AKVsolver(const gsl_vector * x,
   DataMesh L_ha = sb.ComputeCoefficients(L);
   DataMesh v_ha = sb.ComputeCoefficients(v);
 
-  //replace with scalar iterator tools
   //guarantee only l=1 modes exist in the harmonic analysis
-
   for(sit.Reset(); sit; ++sit){
     if(sit.l()==1){
       continue;
@@ -116,7 +82,6 @@ int AKVsolver(const gsl_vector * x,
 
   const Tensor<DataMesh>& hGradR = sb.Gradient(hR);
 
-
   //The main loop
   bool unsolved = true;
   bool refining = false;
@@ -124,14 +89,14 @@ int AKVsolver(const gsl_vector * x,
   double ic10 = 0.0; double ic1p = 0.0; double ic1m = 0.0;
   DataMesh RHS(DataMesh::Empty);//RHS=right hand side of eq. 97
   DataMesh RHS_ha(sb.CoefficientMesh());
-  Tensor<DataMesh> Gradv = hGradR; //dummy initialization. Gradient of v, eq. 97
+  Tensor<DataMesh> Gradv(2,"1",DataMesh::Empty); //Gradient of v, eq. 97
 
   while(unsolved){
     //eq. 97, first term: compute Laplacian of L
-    RHS = sb.ScalarLaplacian(L_ha); //RHS is in collocation terms
+    RHS = sb.ScalarLaplacian(L_ha);
 
     //eq. 97, component of third term: compute gradient of v
-    Gradv = sb.Gradient(v_ha); //Gradv is in collocation terms
+    Gradv = sb.Gradient(v_ha);
 
     //compute eq. 97
     RHS = -RHS + (4.0*llncf*L + hGradR(0)*Gradv(0) + hGradR(1)*Gradv(1) -2.0*L)*(1.0-THETA);
@@ -144,10 +109,11 @@ int AKVsolver(const gsl_vector * x,
     ic1p = RHS_ha[sit(1,1,SpherePackIterator::a)];
     ic1m = RHS_ha[sit(1,1,SpherePackIterator::b)];
 
-    if(verbose){
-      //std::cout << "ic10 = " << ic10 << " "
-      //    << "ic1p = " << ic1p << " "
-      //    << "ic1m = " << ic1m << std::endl;
+    //print residuals
+    if(printResiduals){
+      std::cout << "ic10 = " << ic10
+                << " ic1p = " << ic1p
+                << " ic1m = " << ic1m << std::endl;
     }
 
     //remove the l=1 modes
@@ -157,6 +123,7 @@ int AKVsolver(const gsl_vector * x,
 
     //recompute RHS from 'fixed' analysis
     RHS = sb.Evaluate(RHS_ha);
+
     //compute RHS^2
     RHS *= RHS;
 
@@ -182,9 +149,9 @@ int AKVsolver(const gsl_vector * x,
 
     //compute laplacian of delta v
     //NOTE: RHS changes definitions here
-    RHS = sb.ScalarLaplacian(v_ha); //collocation
+    RHS = sb.ScalarLaplacian(v_ha);
     const DataMesh twocf4r2 = 2.0*Psi*Psi*Psi*Psi*rad*rad;
-    RHS = -RHS - twocf4r2*L; //collocation
+    RHS = -RHS - twocf4r2*L;
 
     //remove the l=0 mode from RHS
     RHS_ha = sb.ComputeCoefficients(RHS);
@@ -221,8 +188,6 @@ int AKVsolver(const gsl_vector * x,
       refine_count = 0;
     }
     if(refine_count > 2) unsolved = false;
-
-
   } //end the main while loop
 
   //return to calling program
@@ -282,24 +247,11 @@ DataMesh RotateOnSphere
   return result;
 }
 
-double normalizeKillingVector(void *params,
-                              const double thetap,
-                              const double phip){
-/*
-double normalizeKillingVector(const DataMesh& theta,
-                              const DataMesh& phi,
-                              const SurfaceBasis& sb,
+double normalizeKillingVector(const SurfaceBasis& sb,
                               const DataMesh& Psi,
                               DataMesh& v,
-                              const double thetap,
-                              const double phip)
+                              const double& rad)
 {
-*/
-  const StrahlkorperWithMesh& skwm = static_cast<struct rparams*>(params)->skwm;
-  const DataMesh& Psi = static_cast<struct rparams*>(params)->Psi;
-  DataMesh& v = static_cast<struct rparams*>(params)->v;
-  const SurfaceBasis sb(skwm.Grid());
-
   //rotate v
 //-:  DataMesh rotated_v = RotateOnSphere(v,
 //-:                       skwm.Grid().SurfaceCoords()(0),
@@ -326,65 +278,57 @@ double normalizeKillingVector(const DataMesh& theta,
   //Rescale the Killing vector. For a rotational Killing vector,
   //the affine path length should be 2*Pi.  Also, test various
   //paths to ensure we have an actual Killing field
-  double ds; //affine path length
   double t; //affine path length
 
-  std::cout << "GSL version" << std::endl;
-  bool goodtheta = KillingPathNew(skwm, rotated_Psi, xi, t, M_PI/2.0);
+  bool goodtheta = KillingPath(sb, rotated_Psi, xi, rad, t, M_PI/2.0);
   REQUIRE(goodtheta, "Killing trajectory did not close " << POSITION);
-  const double scale1 = t/(2.0*M_PI);
+  const double scale = t/(2.0*M_PI);
   std::cout << "Theta = " << std::setprecision(8) << std::setw(10)
             << M_PI/2.0 << " : T = "
             << std::setprecision(10) << t
-            << " (" << scale1 << ")" << std::endl;
-
-
-  std::cout << "old version" << std::endl;
-  goodtheta = KillingPath(params, rotated_Psi, ds, M_PI/2.0, xi);
-  REQUIRE(goodtheta, "Killing trajectory did not close " << POSITION);
-  const double scale = ds/(2.0*M_PI);
-  std::cout << "Theta = " << std::setprecision(8) << std::setw(10)
-            << M_PI/2.0 << " : T = "
-            << std::setprecision(10) << ds
             << " (" << scale << ")" << std::endl;
 
-
-  goodtheta = KillingPath(params, rotated_Psi, ds, 0.5*M_PI/2.0, xi);
+  KillingPath(sb, rotated_Psi, xi, rad, t, 0.5*M_PI/2.0);
   std::cout << "Theta = " << std::setprecision(8) << std::setw(10)
             << 0.5*M_PI/2.0 << " : T = "
-            << std::setprecision(10) << ds
-            << " (" << ds/(2.0*M_PI*scale) << ")" << std::endl;
+            << std::setprecision(10) << t
+            << " (" << t/(2.0*M_PI*scale) << ")" << std::endl;
 
-  goodtheta = KillingPath(params, rotated_Psi, ds, 0.25*M_PI/2.0, xi);
+  KillingPath(sb, rotated_Psi, xi, rad, t, 0.25*M_PI/2.0);
   std::cout << "Theta = " << std::setprecision(8) << std::setw(10)
             << 0.25*M_PI/2.0 << " : T = "
-            << std::setprecision(10) << ds
-            << " (" << ds/(2.0*M_PI*scale) << ")" << std::endl;
+            << std::setprecision(10) << t
+            << " (" << t/(2.0*M_PI*scale) << ")" << std::endl;
 
-  goodtheta = KillingPath(params, rotated_Psi, ds, 0.125*M_PI/2.0, xi);
+  KillingPath(sb, rotated_Psi, xi, rad, t, 0.125*M_PI/2.0);
   std::cout << "Theta = " << std::setprecision(8) << std::setw(10)
             << 0.125*M_PI/2.0 << " : T = "
-            << std::setprecision(10) << ds
-            << " (" << ds/(2.0*M_PI*scale) << ")" << std::endl;
+            << std::setprecision(10) << t
+            << " (" << t/(2.0*M_PI*scale) << ")" << std::endl;
 
   return scale;
-
 } //end normalizeKillingVector
 
-bool KillingPathNew(const StrahlkorperWithMesh& skwm,
-                    const DataMesh& Psi_r,
+bool KillingPath(const SurfaceBasis& sb,
+                    const DataMesh& Psi,
                     const Tensor<DataMesh>& xi,
+                    const double& rad,
                     double& t,
                     const double theta)
 {
-  struct ODEparams params = {skwm, Psi_r, xi};
+  bool printSteps = false;
+  //perform harmonic analysis on Psi, xi to save from repetitive computation
+  //to save from repetitive computation in PathDerivs
+  const DataMesh Psi_ha = sb.Evaluate(Psi);
+  //const Tensor<DataMesh> xi_ha = sb.EvaluateVector(xi);
+  //struct ODEparams params = {sb, Psi_ha, xi_ha, rad};
+  struct ODEparams params = {sb, Psi_ha, xi, rad};
 
   const gsl_odeiv2_step_type *const T = gsl_odeiv2_step_rkck;
   gsl_odeiv2_step *const s = gsl_odeiv2_step_alloc (T, 2);
   gsl_odeiv2_control *const c = gsl_odeiv2_control_y_new (1e-12, 1.e-12);
   gsl_odeiv2_evolve *const e = gsl_odeiv2_evolve_alloc (2);
-     
-  gsl_odeiv2_system sys = {PathDerivNew, NULL, 2, &params};
+  gsl_odeiv2_system sys = {PathDerivs, NULL, 2, &params};
      
   t = 0.0;
   double t1 = 1.e10;
@@ -394,11 +338,13 @@ bool KillingPathNew(const StrahlkorperWithMesh& skwm,
   double hmax = h;
   const double hmax2 = 2.0*M_PI/100.0;
 
-  std::cout << "START: y = ( " 
-	    << std::setprecision(8) << std::setw(10) << y[0] << " , " 
-	    << std::setprecision(8) << std::setw(10) << y[1] << " ); h = " 
-	    << std::setprecision(8) << std::setw(10) << h 
-	    << std::endl; 
+  if(printSteps){
+    std::cout << "START: y = ( " 
+	      << std::setprecision(8) << std::setw(10) << y[0] << " , " 
+	      << std::setprecision(8) << std::setw(10) << y[1] << " ); h = " 
+	      << std::setprecision(8) << std::setw(10) << h 
+	      << std::endl; 
+  }
      
   while (true) {
     const double ysave[2] = {y[0],y[1]}; 
@@ -407,23 +353,25 @@ bool KillingPathNew(const StrahlkorperWithMesh& skwm,
 						&sys, 
 						&t, t1,
 						&h, y);
-    std::cout << "t = " 
-	      << std::setprecision(8) << std::setw(10) << t 
-	      << " : y = ( " 
-	      << std::setprecision(8) << std::setw(10) << y[0] << " , " 
-	      << std::setprecision(8) << std::setw(10) << y[1] << " ); h = " 
-	      << std::setprecision(8) << std::setw(10) << h 
-	      << std::endl;
+    if(printSteps){
+      std::cout << "t = " 
+    	        << std::setprecision(8) << std::setw(10) << t 
+  	        << " : y = ( " 
+  	        << std::setprecision(8) << std::setw(10) << y[0] << " , " 
+  	        << std::setprecision(8) << std::setw(10) << y[1] << " ); h = " 
+  	        << std::setprecision(8) << std::setw(10) << h 
+  	        << std::endl;
+    }
 
     ASSERT(status==GSL_SUCCESS,"Path Integration failed");
     if(limit_h && h > hmax) h = hmax;
     if(fabs(y[1] - 2.*M_PI) < 1.e-10) break;
-    else if(y[1] > 2.*M_PI) {
+    else if(y[1] > 2.*M_PI) { //if solver went too far...
       if(!limit_h) hmax = h;
       limit_h = true;
-      h = hmax *= 0.5;
-      y[0] = ysave[0]; y[1] = ysave[1]; t = tsave;
-      gsl_odeiv2_evolve_reset(e);
+      h = hmax *= 0.5; //...reset h, hmax
+      y[0] = ysave[0]; y[1] = ysave[1]; t = tsave; //return variables to previous state
+      gsl_odeiv2_evolve_reset(e); //return solver to previous state
     } //end ifs
     if(h > hmax2) h = hmax2;
   } //end while
@@ -439,254 +387,35 @@ bool KillingPathNew(const StrahlkorperWithMesh& skwm,
   return closedPath;
 }
 
-//need to rename this function
-int PathDerivNew(double t, const double y[], double f[], void *params){
-  const StrahlkorperWithMesh& skwm = static_cast<struct ODEparams*>(params)->skwm;
-  const DataMesh& Psi_r = static_cast<struct ODEparams*>(params)->Psi_r;
-  const Tensor<DataMesh>& xi = static_cast<struct ODEparams*>(params)->xi;
-
-  const SurfaceBasis sb(skwm.Grid());
-  const DataMesh& rad = skwm.Radius();
-
-  double psiAtPoint = sb.Evaluate(Psi_r, y[0], y[1]);
-  double radAtPoint = sb.Evaluate(rad, y[0], y[1]);
-
-  //reference YlmSpherepack directly?
-  MyVector<double> result = sb.EvaluateVector(xi, y[0], y[1]);
-
+int PathDerivs(double t, const double y[], double f[], void *params)
+{
+  const SurfaceBasis& sb = static_cast<struct ODEparams*>(params)->sb;
+  const DataMesh& Psi_ha = static_cast<struct ODEparams*>(params)->Psi_ha;
+  const Tensor<DataMesh>& xi_ha = static_cast<struct ODEparams*>(params)->xi_ha;
+  const double& rad = static_cast<struct ODEparams*>(params)->rad;
+//std::cout << POSITION << std::endl;
+  double psiAtPoint = sb.EvaluateFromCoefficients(Psi_ha, y[0], y[1]);
+  //double psiAtPoint = sb.Evaluate(Psi_ha, y[0], y[1]);
+std::cout << psiAtPoint << " " << POSITION << std::endl;
+  //MyVector<double> result = sb.EvaluateVectorFromCoefficients(xi_ha, y[0], y[1]);
+  MyVector<double> result = sb.EvaluateVector(xi_ha, y[0], y[1]);
+std::cout << result << " " << POSITION << std::endl;
   const double norm = 1.0 / (psiAtPoint*psiAtPoint*psiAtPoint*psiAtPoint
-                             *radAtPoint*radAtPoint);
+                             *rad*rad);
   f[0] = result[0]*norm;
   f[1] = result[1]*norm/sin(y[0]);
 
   return GSL_SUCCESS;
 }
 
-
-bool KillingPath(void *params,
-                 const DataMesh& Psi, //rotated Psi
-                 double& ds,
-                 const double theta,
-                 const Tensor<DataMesh>& xi){
-  const int n = 100; //number of steps around the circumference (when theta=Pi/2)
-
-  double hmax = 2.0*M_PI/n; //stepsize around circumference
-  double h = hmax;
-  MyVector<double> Vin(MV::fill, theta, 0.0); //(theta,phi) coords
-  MyVector<double> Vout(MV::Size(2));
-  ds = 0.0; //affine path length
-
-  int counter = 0;
-  while(true){
-    counter++;
-
-    Vout = Vin;
-
-    MyVector<double> Vp = PathDerivs(params, Psi, Vout, xi); //vector harmonic synthesis at a point
-
-    MyVector<double> scale(MV::Size(2));
-    for(int i=0; i<Vout.Size(); ++i){
-      //takes current position, adds some fraction from the scaled Killing vector
-      scale[i] = fabs(Vout[i]) + fabs(h*Vp[i]) + 1.e-30;
-    }
-
-    double hdid = 0.0;
-
-    //std::cout << "ds = " << std::setprecision(8) << std::setw(10) << ds << std::endl;
-
-    PathRKQC(ds, h, hmax, hdid, Vout, Vp, params, Psi, xi, scale, 1.e-12);
-
-    //std::cout << "ds = " << std::setprecision(8) << std::setw(10) << ds 
-              //<< " Vout[1]-2*Pi = " << std::setprecision(8) 
-              //<< std::setw(10) << Vout[1] - 2.*M_PI << std::endl;
-
-    if(fabs(Vout[1] - 2.*M_PI) < 1.e-10){
-      ds += hdid;
-      Vin[0] = Vout[0];
-      Vin[1] = Vout[1];
-      break;
-    } else if(Vout[1] > 2.*M_PI){
-      hmax = h *= 0.5;
-    } else {
-      ds += hdid;
-      Vin[0] = Vout[0];
-      Vin[1] = Vout[1];
-    } //end ifs
-  } // end while
-
-  const bool closedPath = (fabs(Vout[0] - theta) < 1.e-6);
-  if(!closedPath){
-    std::cout << "##> Theta diff: " << std::setprecision(6) << Vout[0] - theta << std::endl;
-  }
-
-  return closedPath;
-} //end KillingPath
-
-
-void PathRKQC(const double& ds,
-              double& h,
-              const double& hmax,
-              double& hdid,
-              MyVector<double>& Vin,
-              MyVector<double>& Vp,
-              void *params,
-              const DataMesh& Psi, //rotated Psi
-              const Tensor<DataMesh>& xi,
-              MyVector<double>& scale,
-              const double epsilon)
-{
-  //Runge-Kutta Quality Control
-  while(true){
-    MyVector<double> Vout(MV::Size(2));
-    MyVector<double> error(MV::Size(2));
-    hdid = h;
-
-    PathRKCK(h,Vin,Vout,Vp,params,Psi,xi,error);
-    double errmax = 0.0;
-
-    for(int i=0; i<error.Size(); ++i){
-      const double relerr = fabs(error[i]/scale[i]);
-      if(relerr > errmax) errmax = relerr;
-    }
-
-    errmax /= epsilon;
-
-    if(errmax > 1.0) { //failed step, reduce h
-      double hnext = 0.9*h*pow(errmax, -0.25); //decrease h
-      if(h/hnext > 10.0) hnext = 0.1*h; //by not by more than 0.1
-      const double xtest = ds + (0.1*hnext);
-      if(ds == xtest) { //can't step smaller so accept
-        for(int i=0; i<2; ++i) Vin[i] = Vout[i];
-        break;
-      } else { // accept new stepsize and try again
-        h = hnext;
-        continue;
-      }
-    } else {
-      double hnext = 5.0*h; //increase h, but not by more than 5
-      if(errmax > 1.89e-4) hnext = 0.9*h*pow(errmax, -0.2); //increase h
-      if(hnext > hmax) hnext = hmax; //and not more than hmax
-      //accept and move on
-      for(int i=0; i<Vin.Size(); ++i) Vin[i] = Vout[i];
-
-      h = hnext;
-      break;
-    } //end if
-  } //end while
-} //end PathRKQC
-
-//returns single position along path
-MyVector<double> PathDerivs(void *params,
-                const DataMesh& Psi, //rotated Psi
-                const MyVector<double>& Vin,
-                const Tensor<DataMesh>& xi) {
-
-  const StrahlkorperWithMesh& skwm = static_cast<struct rparams*>(params)->skwm;
-
-  const SurfaceBasis sb(skwm.Grid());
-  const DataMesh& rad = skwm.Radius();
-
-  double psiAtPoint = sb.Evaluate(Psi, Vin[0], Vin[1]);
-  double radAtPoint = sb.Evaluate(rad, Vin[0], Vin[1]);
-
-  //MyVector<double> result(MV::Size(2),0.0);
-  //result = sb.EvaluateVector(xi, Vin[0], Vin[1]);
-  MyVector<double> result = sb.EvaluateVector(xi, Vin[0], Vin[1]);
-
-  const double norm = 1.0 / (psiAtPoint*psiAtPoint*psiAtPoint*psiAtPoint
-                             *radAtPoint*radAtPoint);
-  result[0] = result[0]*norm;
-  result[1] = result[1]*norm/sin(Vin[0]);
-
-  return result;
-} //end PathDerivs
-
-
-//changes error, Vout
-void PathRKCK(const double& h,
-              const MyVector<double>& Vin,
-              MyVector<double>& Vout,
-              const MyVector<double>& Vp,
-              void *params,
-              const DataMesh& Psi, //rotated Psi
-              const Tensor<DataMesh>& xi,
-              MyVector<double>& error)
-{
-  //This uses the Cash-Karp version of the Runge-Kutta method
-  //for solving ordinary differential equations
-
-  //first step
-  MyVector<double> t(MV::Size(2));
-  for(int j=0; j<t.Size(); ++j) t[j] = Vin[j] + 0.2*Vp[j];
-
-  //second step
-  MyVector<double> k2 = PathDerivs(params, Psi, t, xi);
-  for(int j=0; j<k2.Size(); j++){
-    t[j] = Vin[j] + 0.075*h*(  Vp[j]
-                             + 3.0*k2[j]);
-  }
-
-  //third step
-  MyVector<double> k3 = PathDerivs(params, Psi, t, xi);
-  for(int j=0; j<k2.Size(); j++){
-    t[j] = Vin[j] + 0.3*h*(  Vp[j]
-                           - 3.0*k2[j]
-                           + 4.0*k3[j]);
-  }
-
-  //fourth step
-  MyVector<double> k4 = PathDerivs(params, Psi, t, xi);
-  for(int j=0; j<k2.Size(); j++){
-    t[j] = Vin[j] + h*( -11.0*Vp[j]
-                       + 135.0*k2[j]
-                       - 140.0*k3[j]
-                       + 70.0*k4[j]) / 54.0;
-  }
-
-  //fifth step
-  MyVector<double> k5 = PathDerivs(params, Psi, t, xi);
-  for(int j=0; j<k2.Size(); j++){
-    t[j] = Vin[j] + h*(  3262.0*Vp[j]
-                       + 37800.0*k2[j]
-                       + 4600.0*k3[j]
-                       + 44275.0*k4[j]
-                       + 6831.0*k5[j]) / 110592.0;
-  }
-
-  //sixth step
-  MyVector<double> k6 = PathDerivs(params, Psi, t, xi);
-  for(int j=0; j<k2.Size(); j++){
-    Vout[j] = Vin[j] + h*(  (37.0/378.0)*Vp[j]
-                          + (250.0/621.0)*k3[j]
-                          + (125.0/594.0)*k4[j]
-                          + (512.0/1771.0)*k6[j] );
-  }
-
-  //error estimate
-  for(int j=0; j<error.Size(); j++){
-    error[j] = h*( -(277.0/64512.0)*Vp[j]
-                  + (6925.0/370944.0)*k3[j]
-                  - (6925.0/202752.0)*k4[j]
-                  - (277.0/14336.0)*k5[j]
-                  + (277.0/7084.0)*k6[j] );
-  }
-
-}
-
-void KillingDiagnostics(const StrahlkorperWithMesh& skwm,
+void KillingDiagnostics(const SurfaceBasis& sb,
                         const DataMesh& L,
-                        const DataMesh& Psi, //original
+                        const DataMesh& Psi,
                         const Tensor<DataMesh>& xi,
-                        const MyVector<bool>& printDiagnostic){
-
-  const SurfaceBasis sb(skwm.Grid());
-  const DataMesh& rad = skwm.Radius();
+                        const double& rad,
+                        const MyVector<bool>& printDiagnostic)
+{
   const DataMesh& p2r2 = rad*rad*Psi*Psi;
-
-//for testing only below here------------------------------
-    //const int mNth = skwm.Grid().SurfaceCoords()(0).Extents()[0];
-    //const int mNph = skwm.Grid().SurfaceCoords()(0).Extents()[1];
-//for testing only above here-----------------------------------------------
 
   DataMesh div = sb.Divergence(xi) / p2r2;
 
@@ -696,7 +425,6 @@ void KillingDiagnostics(const StrahlkorperWithMesh& skwm,
     std::cout << "L2 Norm of Divergence = "
               << std::setprecision(12) << sqrt(sqrt(2.)*div2norm[0]/4.) << std::endl;
   }
-
 
   if(printDiagnostic[1] || printDiagnostic[2]){
     DataMesh vort = sb.Vorticity(xi) / p2r2 - 2.0*Psi*Psi*L;

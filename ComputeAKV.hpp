@@ -36,16 +36,18 @@ namespace ComputeItems {
         "  StrahlkorperWithMesh = name of surface in DataBox    \n"
         "  ConformalFactor = conformal factor in DataBox        \n"
         "  AKVGuess = initial guess for AKV                     \n"
+        "  Radius = the radius of the surface                   \n"
         "  Solver = which multidimensional root-finding solver  \n"
         "           from the GSL library will be used.          \n"
         "           Options: Hybrids, Hybrid, Newton, Broyden.  \n"
-        "           Default Broyden.                            \n"
+        "           Default Newton.                             \n"
         "  Verbose = Prints THETA, thetap and phip solutions.   \n"
         "            Default false.                             \n"
         "  PrintResiduals = Prints the ic10, ic1p, ic1m         \n"
         "            residuals at each iteration of the solver. \n"
-        "            Default to Verbose value.                  \n"
-        "  Output = name of solution in DataBox                 \n"
+        "            Default to false.                          \n"
+        "  Output = name of approximate Killing vector solution \n"
+        "           in DataBox.                                 \n"
         "  DivNorm = print the L2 norm of the divergence of the \n"
         "            approximate Killing vector.  Default false.\n"
         "  VortNorm = print the L2 norm of the vorticity of the \n"
@@ -75,14 +77,12 @@ namespace ComputeItems {
 
     private:
       void print_state (size_t iter, gsl_multiroot_fsolver * s) const;
-      std::string mSkwm;
-      std::string mConformalFactor;
-      std::string mSolver;
+      std::string mSkwm, mConformalFactor, mSolver;
       MyVector<double> mAKVGuess;
+      double mRad;
       std::string mDivNorm, mVortNorm, mSS, mfLNorm, mfLambdaNorm, mXiDivLNorm;
       MyVector<bool> printDiagnostic;
       bool mVerbose, mPrintResiduals;
-      bool mCheat;
       std::string mOutput;
       mutable result_type* mResult;
 

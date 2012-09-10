@@ -8,11 +8,6 @@
 #include "Utils/DataBox/DataBox.hpp"
 #include <iomanip>
 
-//TO EDIT
-/*
-
-*/
-
 namespace ComputeItems {
 
   ComputeAKV::ComputeAKV(const std::string& opts)
@@ -40,30 +35,31 @@ namespace ComputeItems {
       }
     }
 
+    mRad        = p.Get<double>("Radius");
     mSolver     = p.Get<std::string>("Solver","Newton");
     mVerbose    = p.Get<bool>("Verbose",false);
-    mPrintResiduals = p.Get<bool>("PrintResiduals",mVerbose);
+    mPrintResiduals = p.Get<bool>("PrintResiduals",false);
     mOutput     = p.Get<std::string>("Output");
 
     printDiagnostic = MyVector<bool>(MV::Size(6), true);
     if(p.OptionIsDefined("DivNorm")) printDiagnostic[0]=p.Get<bool>("DivNorm");
-    if(p.OptionIsDefined("VortNorm")) printDiagnostic[0]=p.Get<bool>("VortNorm");
-    if(p.OptionIsDefined("SS")) printDiagnostic[0]=p.Get<bool>("SS");
-    if(p.OptionIsDefined("fLNorm")) printDiagnostic[0]=p.Get<bool>("fLNorm");
-    if(p.OptionIsDefined("fLambdaNorm")) printDiagnostic[0]=p.Get<bool>("fLambdaNorm");
-    if(p.OptionIsDefined("XiDivLNorm")) printDiagnostic[0]=p.Get<bool>("XiDivLNorm");
+    if(p.OptionIsDefined("VortNorm")) printDiagnostic[1]=p.Get<bool>("VortNorm");
+    if(p.OptionIsDefined("SS")) printDiagnostic[2]=p.Get<bool>("SS");
+    if(p.OptionIsDefined("fLNorm")) printDiagnostic[3]=p.Get<bool>("fLNorm");
+    if(p.OptionIsDefined("fLambdaNorm")) printDiagnostic[4]=p.Get<bool>("fLambdaNorm");
+    if(p.OptionIsDefined("XiDivLNorm")) printDiagnostic[5]=p.Get<bool>("XiDivLNorm");
   }
 
 
   void ComputeAKV::print_state (size_t iter, gsl_multiroot_fsolver * s) const
   {
     std::cout << "iter = " << iter
-              << " x = " << std::setprecision(12) << std::setw(14) << gsl_vector_get(s->x,0)
-              << " " << std::setprecision(12) << std::setw(14) << gsl_vector_get(s->x,1)
-              << " " << std::setprecision(12) << std::setw(14) << gsl_vector_get(s->x,2)
-              << " f(x) = " << std::setprecision(12) << std::setw(14) << gsl_vector_get(s->f,0)
-              << " " << std::setprecision(12) << std::setw(14) << gsl_vector_get(s->f,1)
-              << " " << std::setprecision(12) << std::setw(14) << gsl_vector_get(s->f,2)
+              << " x = " << std::setprecision(8) << std::setw(10) << gsl_vector_get(s->x,0)
+              << " " << std::setprecision(8) << std::setw(10) << gsl_vector_get(s->x,1)
+              << " " << std::setprecision(8) << std::setw(10) << gsl_vector_get(s->x,2)
+              << " f(x) = " << std::setprecision(8) << std::setw(10) << gsl_vector_get(s->f,0)
+              << " " << std::setprecision(8) << std::setw(10) << gsl_vector_get(s->f,1)
+              << " " << std::setprecision(8) << std::setw(10) << gsl_vector_get(s->f,2)
               << std::endl << std::flush;
   }
 
@@ -104,23 +100,20 @@ namespace ComputeItems {
     DataMesh L(DataMesh::Empty);
     DataMesh v(DataMesh::Empty);
 
-    //struct rparams p = {skwm,
-    rparams p = {skwm,
-                 //theta,
-                 //phi,
-                 //rad,
-                 //sb,
+    rparams p = {theta,
+                 phi,
+                 mRad,
+                 sb,
                  Psi,
                  L,
                  v,
                  1.e-12,
                  1.e-12,
-                 mPrintResiduals };
+                 mPrintResiduals};
 
     gsl_multiroot_function f = {&AKVsolver, n, &p}; //initializes the function
 
     gsl_vector *x = gsl_vector_alloc(n); //creates initial guess vector
-
     gsl_vector_set (x, 0, mAKVGuess[0]);
     gsl_vector_set (x, 1, mAKVGuess[1]);
     gsl_vector_set (x, 2, mAKVGuess[2]);
@@ -132,11 +125,9 @@ namespace ComputeItems {
     else if(mSolver=="Broyden") T = gsl_multiroot_fsolver_broyden;
     else std::cout << "Solver option '" << mSolver << "' not valid." << std::endl;
 
-    s = gsl_multiroot_fsolver_alloc(T, n); //original
+    s = gsl_multiroot_fsolver_alloc(T, n);
     gsl_multiroot_fsolver_set(s, &f, x);
-      print_state(iter, s);
-
-    status = gsl_multiroot_fsolver_iterate(s); //iterates one time, sets status variable
+    if(mVerbose) print_state(iter, s);
 
     do {
       iter++;
@@ -164,10 +155,10 @@ namespace ComputeItems {
     double thetap = gsl_vector_get(s->x,1);
     double phip   = gsl_vector_get(s->x,2);
 
-    gsl_vector_free(x);
+    gsl_vector_free(x); //frees all memory associated with vector x
     gsl_multiroot_fsolver_free(s); //frees all memory associated with solver
 
-    //get thetap, phip within normal bounds
+    //get thetap, phip within standard bounds
     if(thetap < 0.0){
       thetap = -thetap;
       phip -= M_PI;
@@ -185,8 +176,6 @@ namespace ComputeItems {
       phip -= 2.0*m*M_PI;
     }
 
-    //gsl_vector_free(x);
-
     if(mVerbose){
       std::cout << "Solution found with : Theta  = " << THETA << "\n"
 	      << "                      thetap = " << (180.0/M_PI)*thetap << "\n"
@@ -195,11 +184,8 @@ namespace ComputeItems {
     }
 
     //compute L, v from minimized thetap, phip
-    DataMesh rad   = box.Get<StrahlkorperWithMesh>(mSkwm).Radius();
-
     //determine scale factor
-    double scale = normalizeKillingVector(&p, thetap, phip);
-    //double scale = normalizeKillingVector(skwm, Psi, v, thetap, phip);
+    double scale = normalizeKillingVector(sb, Psi, v, mRad);
     if(mVerbose){
       std::cout << "scale factor = " << scale << std::endl;
     }
@@ -211,15 +197,14 @@ namespace ComputeItems {
     //create xi (1-form)
     const SurfaceBasis sbe(box.Get<StrahlkorperWithMesh>(mSkwm).Grid());
     Tensor<DataMesh> tmp_xi = sbe.Gradient(v);
-    Tensor<DataMesh> xi = tmp_xi;
-       //initializes with the right structure, but also copies data.
+    Tensor<DataMesh> xi(2,"1",DataMesh::Empty);
     xi(0) = tmp_xi(1);
     xi(1) = -tmp_xi(0);
 
-    KillingDiagnostics(skwm, L, Psi, xi, printDiagnostic); //original
+    KillingDiagnostics(sb, L, Psi, xi, mRad, printDiagnostic);
 
     //approximate Killing vector
-    const DataMesh norm = 1.0 / (Psi*Psi*Psi*Psi*rad);
+    const DataMesh norm = 1.0 / (Psi*Psi*Psi*Psi*mRad);
     Tensor<DataMesh> xi_vec(3,"1",theta);
     xi_vec(0) =  norm * ( cos(theta)*cos(phi)*xi(0) - sin(phi)*xi(1) );
     xi_vec(1) =  norm * ( cos(theta)*sin(phi)*xi(0) + cos(phi)*xi(1) );

@@ -13,17 +13,11 @@ int AKVsolver(const gsl_vector * x,
                 void *params,
                 gsl_vector * f);
 
-
-double normalizeKillingVector(void *params,
-                              const double thetap,
-                              const double phip);
-/*
-double normalizeKillingVector(const StrahlkorperWithMesh& skwm,
+double normalizeKillingVector(const SurfaceBasis& sb,
                               const DataMesh& Psi,
                               DataMesh& v,
-                              const double thetap,
-                              const double phip);
-*/
+                              const double& rad);
+
 DataMesh RotateOnSphere
          (const DataMesh& collocationvalues,
           const DataMesh& thetaGrid,
@@ -32,73 +26,43 @@ DataMesh RotateOnSphere
           const double Theta,
           const double Phi);
 
-bool KillingPathNew(const StrahlkorperWithMesh& skwm,
+bool KillingPath(const SurfaceBasis& sb,
                     const DataMesh& Psi_r,
                     const Tensor<DataMesh>& xi,
+                    const double& rad,
                     double& t,
                     const double theta);
 
-int PathDerivNew(double t, 
+int PathDerivs(double t, 
          const double y[],
          double f[],
          void *params);
 
-bool KillingPath(void *params,
-                 const DataMesh& Psi, //rotated Psi
-                 double& t,
-                 double theta,
-                 const Tensor<DataMesh>& xi);
-
-MyVector<double> PathDerivs(void *params,
-                const DataMesh& Psi, //rotated Psi
-                const MyVector<double>& Vin,
-                const Tensor<DataMesh>& xi);
-
-void PathRKQC(const double& ds,
-              double& h,
-              const double& hmax,
-              double& hdid,
-              MyVector<double>& Vin,
-              MyVector<double>& Vp,
-              void *params,
-              const DataMesh& Psi, //rotated Psi
-              const Tensor<DataMesh>& xi,
-              MyVector<double>& scale,
-              const double epsilon);
-
-void PathRKCK(const double& h,
-              const MyVector<double>& Vin,
-              MyVector<double>& Vout,
-              const MyVector<double>& Vp,
-              void *params,
-              const DataMesh& Psi, //rotated Psi
-              const Tensor<DataMesh>& xi,
-              MyVector<double>& error);
-
-void KillingDiagnostics(const StrahlkorperWithMesh& skwm,
+void KillingDiagnostics(const SurfaceBasis& sb,
                         const DataMesh& L,
                         const DataMesh& Psi,
                         const Tensor<DataMesh>& xi,
+                        const double& rad,
                         const MyVector<bool>& printDiagnostic);
 
 struct rparams{
-  const StrahlkorperWithMesh& skwm;
-  //const DataMesh& theta;
-  //const DataMesh& phi;
-  //const double& rad;
-  //const SurfaceBasis& sb;
+  const DataMesh& theta;
+  const DataMesh& phi;
+  const double& rad;
+  const SurfaceBasis& sb;
   const DataMesh& Psi;
   DataMesh& L;
   DataMesh& v;
   const double & L_resid_tol;
   const double & v_resid_tol;
-  const bool PrintResiduals;
+  const bool printResiduals;
 };
 
 struct ODEparams{
-  const StrahlkorperWithMesh& skwm;
-  const DataMesh& Psi_r;
-  const Tensor<DataMesh>& xi;
+  const SurfaceBasis& sb;
+  const DataMesh& Psi_ha;
+  const Tensor<DataMesh>& xi_ha;
+  const double& rad;
 };
 
 #endif
