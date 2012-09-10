@@ -319,10 +319,9 @@ bool KillingPath(const SurfaceBasis& sb,
   bool printSteps = false;
   //perform harmonic analysis on Psi, xi to save from repetitive computation
   //to save from repetitive computation in PathDerivs
-  const DataMesh Psi_ha = sb.Evaluate(Psi);
-  //const Tensor<DataMesh> xi_ha = sb.EvaluateVector(xi);
-  //struct ODEparams params = {sb, Psi_ha, xi_ha, rad};
-  struct ODEparams params = {sb, Psi_ha, xi, rad};
+  const DataMesh Psi_ha = sb.ComputeCoefficients(Psi);
+  const Tensor<DataMesh> xi_ha = sb.ComputeVectorCoefficients(xi);
+  struct ODEparams params = {sb, Psi_ha, xi_ha, rad};
 
   const gsl_odeiv2_step_type *const T = gsl_odeiv2_step_rkck;
   gsl_odeiv2_step *const s = gsl_odeiv2_step_alloc (T, 2);
@@ -393,13 +392,10 @@ int PathDerivs(double t, const double y[], double f[], void *params)
   const DataMesh& Psi_ha = static_cast<struct ODEparams*>(params)->Psi_ha;
   const Tensor<DataMesh>& xi_ha = static_cast<struct ODEparams*>(params)->xi_ha;
   const double& rad = static_cast<struct ODEparams*>(params)->rad;
-//std::cout << POSITION << std::endl;
+
   double psiAtPoint = sb.EvaluateFromCoefficients(Psi_ha, y[0], y[1]);
-  //double psiAtPoint = sb.Evaluate(Psi_ha, y[0], y[1]);
-std::cout << psiAtPoint << " " << POSITION << std::endl;
-  //MyVector<double> result = sb.EvaluateVectorFromCoefficients(xi_ha, y[0], y[1]);
-  MyVector<double> result = sb.EvaluateVector(xi_ha, y[0], y[1]);
-std::cout << result << " " << POSITION << std::endl;
+  MyVector<double> result = sb.EvaluateVectorFromCoefficients(xi_ha, y[0], y[1]);
+
   const double norm = 1.0 / (psiAtPoint*psiAtPoint*psiAtPoint*psiAtPoint
                              *rad*rad);
   f[0] = result[0]*norm;

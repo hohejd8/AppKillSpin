@@ -61,7 +61,9 @@ struct rparams{
 struct ODEparams{
   const SurfaceBasis& sb;
   const DataMesh& Psi_ha;
+  //const DataMesh& Psi;
   const Tensor<DataMesh>& xi_ha;
+  //const Tensor<DataMesh>& xi;
   const double& rad;
 };
 
