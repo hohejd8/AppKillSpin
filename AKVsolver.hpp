@@ -7,11 +7,15 @@
 #include "Utils/DataBox/DataBoxAccess.hpp"
 #include "gsl/gsl_vector.h"
 
+double AKVsolver1D(double THETA, void *params);
 
 //function header for use with gsl root finder
 int AKVsolver(const gsl_vector * x,
                 void *params,
                 gsl_vector * f);
+
+gsl_vector* Minimize_THETA(struct rparams * p_compare,
+                           double& THETA_root);
 
 double normalizeKillingVector(const SurfaceBasis& sb,
                               const DataMesh& Psi,

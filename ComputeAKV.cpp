@@ -141,7 +141,7 @@ namespace ComputeItems {
         break;
       }
 
-      status = gsl_multiroot_test_residual(s->f, 1e-11);
+      status = gsl_multiroot_test_residual(s->f, 1e-12);
 
     } while(status == GSL_CONTINUE && iter<1000);
 
@@ -154,8 +154,21 @@ namespace ComputeItems {
     double THETA  = gsl_vector_get(s->x,0);
     double thetap = gsl_vector_get(s->x,1);
     double phip   = gsl_vector_get(s->x,2);
-
     gsl_vector_free(x); //frees all memory associated with vector x
+
+    //do a 1D root finder on THETA at thetap=0
+    const DataMesh v_save = v;
+    const DataMesh L_save = L;
+    double THETA_root = 0.0;
+    gsl_vector * residual_1D = Minimize_THETA(&p,THETA_root);
+/*
+    if(   fabs(gsl_vector_get(residual_1D,1))<1.e-11 
+       && fabs(gsl_vector_get(residual_1D,2))<1.e-11
+       && ){
+    
+
+    }
+*/
     gsl_multiroot_fsolver_free(s); //frees all memory associated with solver
 
     //get thetap, phip within standard bounds

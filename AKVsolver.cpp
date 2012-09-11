@@ -4,7 +4,9 @@
 #include "Spectral/BasisFunctions/SpherePackIterator.hpp"
 #include "gsl/gsl_odeiv2.h"
 #include <iomanip>
-
+#include <gsl/gsl_errno.h>
+     #include <gsl/gsl_math.h>
+     #include <gsl/gsl_roots.h>
 /*
 HELPFUL DIAGNOSTIC TOOLS WHEN COMPARING TO AppKillSpin:
 
@@ -26,15 +28,32 @@ put in 1D root finding, try testing (1,0),
 */
 //-----------------------------------------
 
+double AKVsolver1D(double THETA, void *params){
+  std::cout << POSITION << std::endl;
+  gsl_vector * x = gsl_vector_alloc(3);
+  gsl_vector_set(x,0,THETA);// = THETA;
+  gsl_vector_set(x,1,0.0);// = 0.0;
+  gsl_vector_set(x,2,0.0);// = 0.0;
+  std::cout << POSITION << std::endl;
+  gsl_vector * f = gsl_vector_alloc(3);
+  gsl_vector_set(f,0,0.0);// = 0.0;
+  gsl_vector_set(f,1,0.0);// = 0.0;
+  gsl_vector_set(f,2,0.0);// = 0.0;
+  std::cout << POSITION << std::endl;
+  AKVsolver(x, params, f);
+  std::cout << POSITION << std::endl;
+  return gsl_vector_get(f,0);
+}
+
 //function header for use with gsl root finders
 int AKVsolver(const gsl_vector * x,
               void *params,
-              gsl_vector * f){
-
+              gsl_vector * f)
+{
   const double THETA = gsl_vector_get (x,0);
   const double thetap = gsl_vector_get (x,1);
   const double phip = gsl_vector_get (x,2);
-
+  std::cout << POSITION << std::endl;
   //for use with gsl root finder
   const DataMesh& theta = static_cast<struct rparams*>(params)->theta;
   const DataMesh& phi = static_cast<struct rparams*>(params)->phi;
@@ -46,7 +65,7 @@ int AKVsolver(const gsl_vector * x,
   const double L_resid_tol = static_cast<struct rparams*>(params)->L_resid_tol;
   const double v_resid_tol = static_cast<struct rparams*>(params)->v_resid_tol;
   const bool printResiduals = static_cast<struct rparams*>(params)->printResiduals;
-
+  std::cout << POSITION << std::endl;
   SpherePackIterator sit(theta.Extents()[0],theta.Extents()[1]);
 
   //eq. 78, 93
@@ -199,6 +218,66 @@ int AKVsolver(const gsl_vector * x,
   return GSL_SUCCESS;
 } //end AKVsolver
 
+//this function attempts to minimize THETA at a higher resolution than
+//the multidimensional (THETA,thetap,phip) root finder is set to do
+gsl_vector* Minimize_THETA(struct rparams * p,
+                    double& THETA_root)
+{
+  std::cout << POSITION << std::endl;
+  int status;
+  int iter = 0, max_iter = 100;
+  const gsl_root_fsolver_type *T;
+  gsl_root_fsolver *s;
+  double THETA_lo = -1.0, THETA_hi = 1.0;
+  gsl_function F;
+       std::cout << POSITION << std::endl;
+  F.function = &AKVsolver1D;
+  F.params = p;
+
+  T = gsl_root_fsolver_brent; //bisection, falsepos; should probably just keep brent
+  s = gsl_root_fsolver_alloc (T);
+  gsl_root_fsolver_set (s, &F, THETA_lo, THETA_hi);
+  std::cout << POSITION << std::endl;
+  do{
+    iter++;
+    status = gsl_root_fsolver_iterate (s);
+    THETA_root = gsl_root_fsolver_root (s);
+    THETA_lo = gsl_root_fsolver_x_lower (s);
+    THETA_hi = gsl_root_fsolver_x_upper (s);
+    status = gsl_root_test_interval (THETA_lo, THETA_hi, 0.0, 0.001);
+     
+    if (status == GSL_SUCCESS)
+      std::cout << "Converged" << std::endl;
+
+  } while (status == GSL_CONTINUE && iter < max_iter);
+     
+  gsl_root_fsolver_free (s);
+  std::cout << POSITION << std::endl;
+
+  //compare the residual from multidimensional root finder to 1D root finder
+  //run AKVsolver one more time to get residual (f) output
+  gsl_vector * x = gsl_vector_alloc(3);
+  gsl_vector_set(x,0,THETA_root);// = THETA_root;
+  gsl_vector_set(x,1,0.0);// = 0.0;
+  gsl_vector_set(x,2,0.0);// = 0.0;*/
+  gsl_vector * f = gsl_vector_alloc(3);
+  gsl_vector_set(f,0,0.0);// = 0.0;
+  gsl_vector_set(f,1,0.0);// = 0.0;
+  gsl_vector_set(f,2,0.0);// = 0.0;
+
+  AKVsolver(x, p, f);
+  double f0 = gsl_vector_get(f,0);
+  double fp = gsl_vector_get(f,1);
+  double fm = gsl_vector_get(f,2);
+/*
+  if( fabs(gsl_vector_get(f,1)>1.e-11) || fabs(gsl_vector_get(f,2)>1.e-11) )
+    return false;
+  if(f0+sqrt(fp*fp+fm*fm) > 
+*/
+  std::cout << f0 << " " << fp << " " << fm << std::endl;
+  //return f;
+  //return status;
+}
 
 //takes a DataMesh on the sphere and rotates it by some amount Theta, Phi
 DataMesh RotateOnSphere
