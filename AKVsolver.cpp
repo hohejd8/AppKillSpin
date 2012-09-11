@@ -22,7 +22,6 @@ HELPFUL DIAGNOSTIC TOOLS WHEN COMPARING TO AppKillSpin:
 
 /*
 TO DO:
-eliminate small MyVectors
 put in 1D root finding, try testing (1,0), 
 */
 //-----------------------------------------
