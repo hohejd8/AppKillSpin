@@ -17,7 +17,7 @@ namespace ComputeItems {
     mSkwm       = p.Get<std::string>("StrahlkorperWithMesh");
     mConformalFactor = p.Get<std::string>("ConformalFactor","ConformalFactor");
     mAKVGuess   = p.Get<MyVector<double> >("AKVGuess");//must be three-dimensional
-    {
+/*    {
       bool thetap_moved = false;
       REQUIRE(mAKVGuess.Size()==3,"AKVGuess has Size " << mAKVGuess.Size() 
                                   << ", should be 3.");
@@ -34,7 +34,7 @@ namespace ComputeItems {
                      "moved off-axis by an amount 1.e-5." << std::endl;
       }
     }
-
+*/
     mRad        = p.Get<double>("Radius");
     mSolver     = p.Get<std::string>("Solver","Newton");
     mVerbose    = p.Get<bool>("Verbose",false);
@@ -50,7 +50,7 @@ namespace ComputeItems {
     if(p.OptionIsDefined("XiDivLNorm")) printDiagnostic[5]=p.Get<bool>("XiDivLNorm");
   }
 
-
+/*
   void ComputeAKV::print_state (size_t iter, gsl_multiroot_fsolver * s) const
   {
     std::cout << "iter = " << iter
@@ -62,21 +62,18 @@ namespace ComputeItems {
               << " " << std::setprecision(8) << std::setw(10) << gsl_vector_get(s->f,2)
               << std::endl << std::flush;
   }
-
+*/
   //==========================================================================
   
   void ComputeAKV::RecomputeData(const DataBoxAccess& box) const {
     delete mResult;
 
-    const gsl_multiroot_fsolver_type *T; //solver type
-    gsl_multiroot_fsolver *s; //the actual solver itself
-    int status;
-    size_t iter=0;
-
-    const size_t n = 3; //number of dimensions
-
     const StrahlkorperWithMesh& skwm = box.Get<StrahlkorperWithMesh>(mSkwm);
     const SurfaceBasis sb(skwm.Grid());
+    DataMesh theta = box.Get<StrahlkorperWithMesh>(mSkwm).Grid().SurfaceCoords()(0);
+    DataMesh phi = box.Get<StrahlkorperWithMesh>(mSkwm).Grid().SurfaceCoords()(1);
+    DataMesh L(DataMesh::Empty);
+    DataMesh v(DataMesh::Empty);
 
     //Psi needs to be interpolated onto the surface
     const Domain& D=box.Get<Domain>("Domain");
@@ -94,12 +91,6 @@ namespace ComputeItems {
     DataBoxAccess lba(localBox, "AKV Recompute");
     const DataMesh& Psi(lba.Get<Tensor<DataMesh> >(mConformalFactor)());
 
-    //initialize L, v
-    DataMesh theta = box.Get<StrahlkorperWithMesh>(mSkwm).Grid().SurfaceCoords()(0);
-    DataMesh phi = box.Get<StrahlkorperWithMesh>(mSkwm).Grid().SurfaceCoords()(1);
-    DataMesh L(DataMesh::Empty);
-    DataMesh v(DataMesh::Empty);
-
     rparams p = {theta,
                  phi,
                  mRad,
@@ -111,8 +102,41 @@ namespace ComputeItems {
                  1.e-12,
                  mPrintResiduals};
 
-    gsl_multiroot_function f = {&AKVsolver, n, &p}; //initializes the function
+    //if the initial guess for thetap is close to zero or pi,
+    //try solving at thetap = zero or pi
+    bool solutionFound = false;
+    double THETA = mAKVGuess[0];
+    double thetap = mAKVGuess[1];
+    double phip = mAKVGuess[2];
+    if( fabs(mAKVGuess[1]) < 1.e-5 || fabs(mAKVGuess[1]-M_PI) < 1.e-5 ){
+      solutionFound = findTHETA_root(&p,THETA,mVerbose);
+      if(solutionFound){
+        thetap = 0.0;
+        phip = 0.0;
+      }
+    }
 
+    
+
+    //if theta=0 was not a good solution, try the multidimensional root finder
+    if(!solutionFound){
+      findTtp(&p, THETA, thetap, phip, mSolver, mVerbose);
+      std::cout << "THETA = " << THETA
+                << " thetap = " << thetap
+                << " phip = " << phip << std::endl;
+    }
+
+
+
+/*
+    //if(!solutionFound){
+    //setup the gsl_multiroot finder
+    const gsl_multiroot_fsolver_type *T; //solver type
+    gsl_multiroot_fsolver *s; //the actual solver itself
+    int status;
+    size_t iter=0;
+    const size_t n = 3; //number of dimensions
+    gsl_multiroot_function f = {&AKVsolver, n, &p}; //initializes the function
     gsl_vector *x = gsl_vector_alloc(n); //creates initial guess vector
     gsl_vector_set (x, 0, mAKVGuess[0]);
     gsl_vector_set (x, 1, mAKVGuess[1]);
@@ -127,14 +151,14 @@ namespace ComputeItems {
 
     s = gsl_multiroot_fsolver_alloc(T, n);
     gsl_multiroot_fsolver_set(s, &f, x);
-    if(mVerbose) print_state(iter, s);
+    //if(mVerbose) print_state(iter, s);
 
     do {
       iter++;
 
       status = gsl_multiroot_fsolver_iterate(s);
 
-      if(mVerbose) print_state(iter, s);
+      //if(mVerbose) print_state(iter, s);
 
       if(status){ //if solver is stuck
         std::cout << "GSL multiroot solver is stuck at iter = " << iter << std::endl;
@@ -155,21 +179,15 @@ namespace ComputeItems {
     double thetap = gsl_vector_get(s->x,1);
     double phip   = gsl_vector_get(s->x,2);
     gsl_vector_free(x); //frees all memory associated with vector x
-
-    //do a 1D root finder on THETA at thetap=0
+    gsl_multiroot_fsolver_free(s); //frees all memory associated with solver
+*/
+    //do a 1D root finder on THETA at thetap=0 if thetap \approx 0
     const DataMesh v_save = v;
     const DataMesh L_save = L;
-    double THETA_root = 0.0;
-    gsl_vector * residual_1D = Minimize_THETA(&p,THETA_root);
-/*
-    if(   fabs(gsl_vector_get(residual_1D,1))<1.e-11 
-       && fabs(gsl_vector_get(residual_1D,2))<1.e-11
-       && ){
-    
-
+    if( (fabs(thetap) < 1.e-5 || fabs(thetap) < 1.e-5) && !solutionFound ){
+      solutionFound = findTHETA_root(&p,THETA,mVerbose);
     }
-*/
-    gsl_multiroot_fsolver_free(s); //frees all memory associated with solver
+
 
     //get thetap, phip within standard bounds
     if(thetap < 0.0){
@@ -179,7 +197,7 @@ namespace ComputeItems {
     if(thetap > M_PI){
       const int m = (thetap/M_PI);
       thetap -= m*M_PI;
-      if(n%2) phip -= M_PI;
+      if(m%2) phip -= M_PI;
     }
     if(phip <= -M_PI){
       const int m = (M_PI - phip)/(2.0*M_PI);
