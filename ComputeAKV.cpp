@@ -29,9 +29,9 @@ namespace ComputeItems {
     if(p.OptionIsDefined("DivNorm")) printDiagnostic[0]=p.Get<bool>("DivNorm");
     if(p.OptionIsDefined("VortNorm")) printDiagnostic[1]=p.Get<bool>("VortNorm");
     if(p.OptionIsDefined("SS")) printDiagnostic[2]=p.Get<bool>("SS");
-    if(p.OptionIsDefined("fLNorm")) printDiagnostic[3]=p.Get<bool>("fLNorm");
-    if(p.OptionIsDefined("fLambdaNorm")) printDiagnostic[4]=p.Get<bool>("fLambdaNorm");
-    if(p.OptionIsDefined("XiDivLNorm")) printDiagnostic[5]=p.Get<bool>("XiDivLNorm");
+    if(p.OptionIsDefined("XiDivLNorm")) printDiagnostic[3]=p.Get<bool>("XiDivLNorm");
+    if(p.OptionIsDefined("fLNorm")) printDiagnostic[4]=p.Get<bool>("fLNorm");
+    if(p.OptionIsDefined("fLambdaNorm")) printDiagnostic[5]=p.Get<bool>("fLambdaNorm");
   }
 
   //==========================================================================

@@ -564,25 +564,30 @@ void KillingDiagnostics(const SurfaceBasis& sb,
                         const double& rad,
                         const MyVector<bool>& printDiagnostic)
 {
-  const DataMesh& p2r2 = rad*rad*Psi*Psi;
+  const DataMesh& rp2 = rad*Psi*Psi;
+  const double rp22_00 = sb.ComputeCoefficients(rp2*rp2)[0];//(0,0) component of coefficients
 
-  DataMesh div = sb.Divergence(xi) / p2r2;
+  DataMesh div = sb.Divergence(xi)/rp2;
 
   //-----Divergence-------
   if(printDiagnostic[0]){
-    const DataMesh& div2norm = sb.ComputeCoefficients(div*div);
+    //const DataMesh& div2norm = sb.ComputeCoefficients(div*div);
     std::cout << "L2 Norm of Divergence = "
-              << std::setprecision(12) << sqrt(sqrt(2.)*div2norm[0]/4.) << std::endl;
+              << std::setprecision(12)
+              //<< sqrt(sqrt(2.)*div2norm[0]/4.) << std::endl;
+              << sb.ComputeCoefficients(div*div)[0]/rp22_00 << std::endl;
   }
 
   if(printDiagnostic[1] || printDiagnostic[2]){
-    DataMesh vort = sb.Vorticity(xi) / p2r2 - 2.0*Psi*Psi*L;
+    DataMesh vort = sb.Vorticity(xi)/rp2 - 2.0*rp2*L;
 
     //-----Vorticity-------
     if(printDiagnostic[1]){
-      const DataMesh vort2norm = sb.ComputeCoefficients(vort*vort);
+      //const DataMesh vort2norm = sb.ComputeCoefficients(vort*vort);
       std::cout << "L2 Norm of Vorticity = "
-                << std::setprecision(12) << sqrt(sqrt(2.)*vort2norm[0]/4.) << std::endl;
+                << std::setprecision(12)
+                //<< sqrt(sqrt(2.)*vort2norm[0]/4.) << std::endl;
+                << sb.ComputeCoefficients(vort*vort)[0]/rp22_00 << std::endl;
     }
 
     //-----SS-------
@@ -620,44 +625,47 @@ void KillingDiagnostics(const SurfaceBasis& sb,
     Tensor<DataMesh> GradL = sb.Gradient(L);
     DataMesh xiGradL = xi(0)*GradL(0) + xi(1)*GradL(1);
     const DataMesh& llncf = sb.ScalarLaplacian(log(Psi));
-    const DataMesh Rm1 = Psi*Psi*Psi*Psi / (1.-2.*llncf);
-    GradL(0) *= Rm1;
-    GradL(1) *= Rm1;
-
-    //-----Norm of f_L-------
-    if(printDiagnostic[3]){
-      DataMesh f_L = sb.Divergence(GradL);
-      f_L *= 0.5/(Psi*Psi);
-      f_L += Psi*Psi*L;
-
-      const DataMesh fL_ha = sb.ComputeCoefficients(f_L*f_L);
-
-      std::cout << "L2 Norm of f_L= "
-                << std::setprecision(12) << sqrt(sqrt(2.)*fL_ha[0]/4.) << std::endl;
-    } //end f_L
-
-    //-----Norm of f_Lambda-------
-    if(printDiagnostic[4]){
-      const Tensor<DataMesh> GradRm1 = sb.Gradient(Rm1);
-      DataMesh f_lam = GradRm1(0)*GradL(1) - GradRm1(1)*GradL(0);
-      f_lam *= 0.5/(Psi*Psi);
-
-      const DataMesh flam_ha = sb.ComputeCoefficients(f_lam*f_lam);
-
-      std::cout << "L2 Norm of f_lam= "
-                << std::setprecision(12) << sqrt(sqrt(2.)*flam_ha[0]/4.) << std::endl;
-    } // end f_Lambda
+    //const DataMesh Rm1 = Psi*Psi*Psi*Psi / (1.-2.*llncf);
+    const DataMesh Rm1 = (rp2*rp2/2.0)/(1.-2.*llncf);
 
     //-----Norm of xi*DivL-------
-    if(printDiagnostic[5]){
+    if(printDiagnostic[3]){
       xiGradL = xi(0)*GradL(0) + xi(1)*GradL(1);
       xiGradL /= (rad*rad*Psi*Psi);
 
       const DataMesh xiGradL_ha = sb.ComputeCoefficients(xiGradL*xiGradL);
 
       std::cout << "L2 Norm of xi*Div(L) = "
-                << std::setprecision(12) << sqrt(sqrt(2.)*xiGradL_ha[0]/4.) << std::endl;
+                << std::setprecision(12)
+                << sqrt(sqrt(2.)*xiGradL_ha[0]/4.) << std::endl;
     } //end xi*DivL
+
+    GradL(0) *= Rm1;
+    GradL(1) *= Rm1;
+
+    //-----Norm of f_L-------
+    if(printDiagnostic[4]){
+      DataMesh f_L = sb.Divergence(GradL);
+      f_L /= rp2;
+      f_L += rp2*L;
+
+      std::cout << "L2 Norm of f_L= "
+                << std::setprecision(12)
+                //<< sqrt(sqrt(2.)*fL_ha[0]/4.) << std::endl;
+                << sb.ComputeCoefficients(f_L*f_L)[0]/rp22_00 << std::endl;
+    } //end f_L
+
+    //-----Norm of f_Lambda-------
+    if(printDiagnostic[5]){
+      const Tensor<DataMesh> GradRm1 = sb.Gradient(Rm1);
+      DataMesh f_lam = GradRm1(0)*GradL(1) - GradRm1(1)*GradL(0);
+      f_lam *= 1./rp2;
+
+      std::cout << "L2 Norm of f_lam= "
+                << std::setprecision(12)
+                //<< sqrt(sqrt(2.)*flam_ha[0]/4.) << std::endl;
+                << sb.ComputeCoefficients(f_lam*f_lam)[0]/rp22_00 << std::endl;
+    } // end f_Lambda
 
   } //end print conditionals
 }//end KillingDiagnostics
