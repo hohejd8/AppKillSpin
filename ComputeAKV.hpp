@@ -1,5 +1,5 @@
 //=======================================
-// $Id: ComputeSKWM.hpp 2011-10-23 hohejd8 $
+// $Id: ComputeAKV.hpp
 //=======================================
 
 ///
@@ -10,10 +10,8 @@
 #define INCLUDED_ComputeAKV_hpp
 
 #include "Utils/DataBox/ComputeItem.hpp"
-//#include "hohejd8/SurfaceBasisExt.hpp"
 #include "SurfaceFinder/Strahlkorper/SurfaceBasis.hpp"
 #include "Utils/DataMesh/DataMesh.hpp"
-//#include "gsl/gsl_multiroots.h"
 
 namespace ComputeItems {
   /// Computes the approximate Killing vector when given
@@ -76,7 +74,6 @@ namespace ComputeItems {
       void RecomputeData(const DataBoxAccess& box) const;
 
     private:
-      //void print_state (size_t iter, gsl_multiroot_fsolver * s) const;
       std::string mSkwm, mConformalFactor, mSolver;
       MyVector<double> mAKVGuess;
       double mRad;

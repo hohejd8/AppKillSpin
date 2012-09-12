@@ -5,7 +5,25 @@
 #include "SurfaceFinder/Strahlkorper/StrahlkorperWithMesh.hpp"
 #include "Utils/DataMesh/DataMesh.hpp"
 #include "Utils/DataBox/DataBoxAccess.hpp"
-#include "gsl/gsl_vector.h"
+//#include "gsl/gsl_vector.h"
+#include "gsl/gsl_multiroots.h"
+
+//performs a 1D root finder for THETA at thetap=0 (phip=0)
+//returns true if THETA root is found such that
+//(l,m)=(1,m) residuals are < 1.e-12
+bool findTHETA(struct rparams * p_compare,
+               double& THETA_root,
+               const bool verbose);
+
+//uses the gsl multidimensional root finder to find
+//values for THETA, thetap, phip such that
+//(l,m)=(1,m) residuals are < 1.e-12
+void findTtp(struct rparams * p,
+             double& THETA,
+             double& thetap,
+             double& phip,
+             const std::string solver,
+             const bool verbose);
 
 //function header for use with gsl 1D root finder
 double AKVsolver1D(double THETA, void *params);
@@ -15,17 +33,8 @@ int AKVsolver(const gsl_vector * x,
                 void *params,
                 gsl_vector * f);
 
-//performs a 1D root finder for THETA at thetap=0
-bool findTHETA_root(struct rparams * p_compare,
-                           double& THETA_root,
-                           const bool verbose);
 
-void findTtp(struct rparams * p,
-             double& THETA,
-             double& thetap,
-             double& phip,
-             const std::string solver,
-             const bool verbose);
+void print_state (size_t iter, gsl_multiroot_fsolver * s);
 
 //determines normalization factor for approximate Killing vector
 double normalizeKillingVector(const SurfaceBasis& sb,
@@ -49,10 +58,10 @@ bool KillingPath(const SurfaceBasis& sb,
                     double& t,
                     const double theta);
 
-int PathDerivs(double t, 
-         const double y[],
-         double f[],
-         void *params);
+int PathDerivs(double t_required_by_solver, 
+               const double y[],
+               double f[],
+               void *params);
 
 //performs diagnostics on the approximate Killing vector solution
 void KillingDiagnostics(const SurfaceBasis& sb,

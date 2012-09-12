@@ -17,24 +17,8 @@ namespace ComputeItems {
     mSkwm       = p.Get<std::string>("StrahlkorperWithMesh");
     mConformalFactor = p.Get<std::string>("ConformalFactor","ConformalFactor");
     mAKVGuess   = p.Get<MyVector<double> >("AKVGuess");//must be three-dimensional
-/*    {
-      bool thetap_moved = false;
       REQUIRE(mAKVGuess.Size()==3,"AKVGuess has Size " << mAKVGuess.Size() 
                                   << ", should be 3.");
-      if(mAKVGuess[1]<1.e-5){
-        mAKVGuess[1] = 1.e-5;
-        thetap_moved = true;
-      }
-      if(mAKVGuess[1]>(M_PI-1.e-5)){
-        mAKVGuess[1] = M_PI - 1.e-5;
-        thetap_moved = true;
-      }
-      if(thetap_moved){
-        std::cout << "thetap is too close to a pole; the initial guess has been \n"
-                     "moved off-axis by an amount 1.e-5." << std::endl;
-      }
-    }
-*/
     mRad        = p.Get<double>("Radius");
     mSolver     = p.Get<std::string>("Solver","Newton");
     mVerbose    = p.Get<bool>("Verbose",false);
@@ -50,19 +34,6 @@ namespace ComputeItems {
     if(p.OptionIsDefined("XiDivLNorm")) printDiagnostic[5]=p.Get<bool>("XiDivLNorm");
   }
 
-/*
-  void ComputeAKV::print_state (size_t iter, gsl_multiroot_fsolver * s) const
-  {
-    std::cout << "iter = " << iter
-              << " x = " << std::setprecision(8) << std::setw(10) << gsl_vector_get(s->x,0)
-              << " " << std::setprecision(8) << std::setw(10) << gsl_vector_get(s->x,1)
-              << " " << std::setprecision(8) << std::setw(10) << gsl_vector_get(s->x,2)
-              << " f(x) = " << std::setprecision(8) << std::setw(10) << gsl_vector_get(s->f,0)
-              << " " << std::setprecision(8) << std::setw(10) << gsl_vector_get(s->f,1)
-              << " " << std::setprecision(8) << std::setw(10) << gsl_vector_get(s->f,2)
-              << std::endl << std::flush;
-  }
-*/
   //==========================================================================
   
   void ComputeAKV::RecomputeData(const DataBoxAccess& box) const {
@@ -91,6 +62,9 @@ namespace ComputeItems {
     DataBoxAccess lba(localBox, "AKV Recompute");
     const DataMesh& Psi(lba.Get<Tensor<DataMesh> >(mConformalFactor)());
 
+    //creating rparams p is not necessary here, but it does save
+    //findTHETA and findTtp from having long argument lists and
+    //creating the same struct anyway
     rparams p = {theta,
                  phi,
                  mRad,
@@ -104,90 +78,46 @@ namespace ComputeItems {
 
     //if the initial guess for thetap is close to zero or pi,
     //try solving at thetap = zero or pi
-    bool solutionFound = false;
+    bool oneDSolutionFound = false;
+    bool thetapGuessIsZero = mAKVGuess[1] < 1.e-5 || M_PI-mAKVGuess[1] < 1.e-5;
     double THETA = mAKVGuess[0];
     double thetap = mAKVGuess[1];
     double phip = mAKVGuess[2];
-    if( fabs(mAKVGuess[1]) < 1.e-5 || fabs(mAKVGuess[1]-M_PI) < 1.e-5 ){
-      solutionFound = findTHETA_root(&p,THETA,mVerbose);
-      if(solutionFound){
+
+    //if( fabs(mAKVGuess[1]) < 1.e-5 || fabs(mAKVGuess[1]-M_PI) < 1.e-5 ){
+    if(thetapGuessIsZero){
+      oneDSolutionFound = findTHETA(&p,THETA,mVerbose);
+      if(oneDSolutionFound){
         thetap = 0.0;
         phip = 0.0;
       }
     }
 
-    
-
-    //if theta=0 was not a good solution, try the multidimensional root finder
-    if(!solutionFound){
+    //if theta=0 was not a good solution
+    //or initial guess was not close to zero
+    //try the multidimensional root finder
+    if(!oneDSolutionFound){
       findTtp(&p, THETA, thetap, phip, mSolver, mVerbose);
       std::cout << "THETA = " << THETA
                 << " thetap = " << thetap
                 << " phip = " << phip << std::endl;
-    }
-
-
-
-/*
-    //if(!solutionFound){
-    //setup the gsl_multiroot finder
-    const gsl_multiroot_fsolver_type *T; //solver type
-    gsl_multiroot_fsolver *s; //the actual solver itself
-    int status;
-    size_t iter=0;
-    const size_t n = 3; //number of dimensions
-    gsl_multiroot_function f = {&AKVsolver, n, &p}; //initializes the function
-    gsl_vector *x = gsl_vector_alloc(n); //creates initial guess vector
-    gsl_vector_set (x, 0, mAKVGuess[0]);
-    gsl_vector_set (x, 1, mAKVGuess[1]);
-    gsl_vector_set (x, 2, mAKVGuess[2]);
-
-    //Declare the appropriate non-derivative root finder
-    if(mSolver=="Hybrids") T = gsl_multiroot_fsolver_hybrids;
-    else if(mSolver=="Hybrid") T = gsl_multiroot_fsolver_hybrid;
-    else if(mSolver=="Newton") T = gsl_multiroot_fsolver_dnewton;
-    else if(mSolver=="Broyden") T = gsl_multiroot_fsolver_broyden;
-    else std::cout << "Solver option '" << mSolver << "' not valid." << std::endl;
-
-    s = gsl_multiroot_fsolver_alloc(T, n);
-    gsl_multiroot_fsolver_set(s, &f, x);
-    //if(mVerbose) print_state(iter, s);
-
-    do {
-      iter++;
-
-      status = gsl_multiroot_fsolver_iterate(s);
-
-      //if(mVerbose) print_state(iter, s);
-
-      if(status){ //if solver is stuck
-        std::cout << "GSL multiroot solver is stuck at iter = " << iter << std::endl;
-        break;
+      //if thetap solution is close to zero,
+      //and we didn't already try thetap=0,
+      //try thetap=0 now
+      if( (thetap < 1.e-5 || M_PI-thetap < 1.e-5) && !thetapGuessIsZero){
+        const double THETA_saved = THETA;
+        const DataMesh v_saved = v;
+        const DataMesh L_saved = L;
+        oneDSolutionFound = findTHETA(&p,THETA,mVerbose);
+        if(oneDSolutionFound){
+          thetap = 0.0;
+          phip = 0.0;
+        } else {
+          THETA = THETA_saved;
+          v = v_saved; L = L_saved;
+        }
       }
-
-      status = gsl_multiroot_test_residual(s->f, 1e-12);
-
-    } while(status == GSL_CONTINUE && iter<1000);
-
-    if(iter==1000){
-      std::cout << "Iteration was stopped at iter=1000. \n"
-                   "You may want to check the solution for validity."
-                << std::endl;
     }
-
-    double THETA  = gsl_vector_get(s->x,0);
-    double thetap = gsl_vector_get(s->x,1);
-    double phip   = gsl_vector_get(s->x,2);
-    gsl_vector_free(x); //frees all memory associated with vector x
-    gsl_multiroot_fsolver_free(s); //frees all memory associated with solver
-*/
-    //do a 1D root finder on THETA at thetap=0 if thetap \approx 0
-    const DataMesh v_save = v;
-    const DataMesh L_save = L;
-    if( (fabs(thetap) < 1.e-5 || fabs(thetap) < 1.e-5) && !solutionFound ){
-      solutionFound = findTHETA_root(&p,THETA,mVerbose);
-    }
-
 
     //get thetap, phip within standard bounds
     if(thetap < 0.0){

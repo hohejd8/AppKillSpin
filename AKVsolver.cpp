@@ -5,9 +5,9 @@
 #include "gsl/gsl_odeiv2.h"
 #include <iomanip>
 #include <gsl/gsl_errno.h>
-     #include <gsl/gsl_math.h>
-     #include <gsl/gsl_roots.h>
-#include "gsl/gsl_multiroots.h"
+#include <gsl/gsl_math.h>
+#include <gsl/gsl_roots.h>
+
 /*
 HELPFUL DIAGNOSTIC TOOLS WHEN COMPARING TO AppKillSpin:
 
@@ -29,6 +29,128 @@ put in 1D root finding, try testing (1,0),
 */
 //-----------------------------------------
 
+//this function attempts to find THETA assuming thetap=0
+bool findTHETA(struct rparams * p,
+               double& THETA_root,
+               const bool verbose)
+{
+  std::cout << "Staring the gsl 1D root finder at thetap = 0.0." << std::endl;
+  bool goodSolution = false;
+  int status;
+  int iter = 0, max_iter = 100;
+  const gsl_root_fsolver_type *T;
+  gsl_root_fsolver *s;
+  double THETA_lo = -1.0, THETA_hi = 1.0;
+  gsl_function F;
+
+  F.function = &AKVsolver1D;
+  F.params = p;
+
+  T = gsl_root_fsolver_brent; //bisection, falsepos; should probably just keep brent
+  s = gsl_root_fsolver_alloc (T);
+  gsl_root_fsolver_set (s, &F, THETA_lo, THETA_hi);
+
+  do{
+    iter++;
+    status = gsl_root_fsolver_iterate (s);
+    THETA_root = gsl_root_fsolver_root (s);
+    THETA_lo = gsl_root_fsolver_x_lower (s);
+    THETA_hi = gsl_root_fsolver_x_upper (s);
+    status = gsl_root_test_interval (THETA_lo, THETA_hi, 0.0, 0.001);
+
+    if (status == GSL_SUCCESS && verbose)
+      std::cout << "Converged" << std::endl;
+
+  } while (status == GSL_CONTINUE && iter < max_iter);
+     
+  gsl_root_fsolver_free (s);
+
+  //compare the residual from multidimensional root finder to 1D root finder
+  //run AKVsolver one more time to get residual (f) output
+  gsl_vector * x = gsl_vector_alloc(3);
+  gsl_vector_set(x,0,THETA_root);
+  gsl_vector_set(x,1,0.0);
+  gsl_vector_set(x,2,0.0);
+  gsl_vector * f = gsl_vector_alloc(3);
+  gsl_vector_set(f,0,0.0);
+  gsl_vector_set(f,1,0.0);
+  gsl_vector_set(f,2,0.0);
+
+  AKVsolver(x, p, f);
+
+  if(verbose)
+    std::cout <<  "f0 = " << gsl_vector_get(f,0) 
+              << " fp = " << gsl_vector_get(f,1) 
+              << " fm = " << gsl_vector_get(f,2) << std::endl;
+
+  //if residuals are small, this is a good solution
+  if(   fabs(gsl_vector_get(f,0)) < 1.e-12
+     && fabs(gsl_vector_get(f,1)) < 1.e-12
+     && fabs(gsl_vector_get(f,2)) < 1.e-12 ) goodSolution = true;
+
+  return goodSolution;
+}
+
+//this function attempts to find THETA, thetap and phip
+void findTtp(struct rparams * p,
+             double& THETA,
+             double& thetap,
+             double& phip,
+             const std::string solver,
+             const bool verbose)
+{
+  std::cout << "Starting the gsl multidimensional root finder." << std::endl;
+  //setup the gsl_multiroot finder
+  const gsl_multiroot_fsolver_type *T; //solver type
+  gsl_multiroot_fsolver *s; //the actual solver itself
+
+  int status;
+  size_t iter=0;
+  const size_t n = 3; //number of dimensions
+  gsl_multiroot_function f = {&AKVsolver, n, p}; //initializes the function
+  gsl_vector *x = gsl_vector_alloc(n); //creates initial guess vector
+  gsl_vector_set (x, 0, THETA);
+  gsl_vector_set (x, 1, thetap);
+  gsl_vector_set (x, 2, phip);
+
+  //Declare the appropriate non-derivative root finder
+  if(solver=="Hybrids") T = gsl_multiroot_fsolver_hybrids;
+  else if(solver=="Hybrid") T = gsl_multiroot_fsolver_hybrid;
+  else if(solver=="Newton") T = gsl_multiroot_fsolver_dnewton;
+  else if(solver=="Broyden") T = gsl_multiroot_fsolver_broyden;
+  else std::cout << "Solver option '" << solver << "' not valid." << std::endl;
+
+  s = gsl_multiroot_fsolver_alloc(T, n);
+
+  gsl_multiroot_fsolver_set(s, &f, x);
+  if(verbose) print_state(iter, s);
+
+  do {
+    iter++;
+    status = gsl_multiroot_fsolver_iterate(s);
+    if(verbose) print_state(iter, s);
+    if(status){ //if solver is stuck
+      std::cout << "GSL multiroot solver is stuck at iter = " << iter << std::endl;
+      break;
+    }
+    status = gsl_multiroot_test_residual(s->f, 1e-12);
+  } while(status == GSL_CONTINUE && iter<1000);
+
+  if(iter==1000){
+    std::cout << "Iteration was stopped at iter=1000. \n"
+                 "You may want to check the solution for validity."
+              << std::endl;
+  }
+
+  THETA  = gsl_vector_get(s->x,0);
+  thetap = gsl_vector_get(s->x,1);
+  phip   = gsl_vector_get(s->x,2);
+  gsl_vector_free(x); //frees all memory associated with vector x
+  gsl_multiroot_fsolver_free(s); //frees all memory associated with solver
+
+  return;
+}
+
 double AKVsolver1D(double THETA, void *params)
 {
   gsl_vector * x = gsl_vector_alloc(3);
@@ -42,8 +164,6 @@ double AKVsolver1D(double THETA, void *params)
   gsl_vector_set(f,2,0.0);
 
   AKVsolver(x, params, f);
-
-  std::cout << "THETA = " << THETA << " f0 = " << gsl_vector_get(f,0) << std::endl;
 
   return gsl_vector_get(f,0);
 }
@@ -221,129 +341,17 @@ int AKVsolver(const gsl_vector * x,
   return GSL_SUCCESS;
 } //end AKVsolver
 
-//this function attempts to find THETA assuming thetap=0
-bool findTHETA_root(struct rparams * p,
-                    double& THETA_root,
-                    const bool verbose)
+
+void print_state (size_t iter, gsl_multiroot_fsolver * s)
 {
-  std::cout << "Staring the gsl 1D root finder at thetap = 0.0." << std::endl;
-  bool goodSolution = false;
-  int status;
-  int iter = 0, max_iter = 100;
-  const gsl_root_fsolver_type *T;
-  gsl_root_fsolver *s;
-  double THETA_lo = -1.0, THETA_hi = 1.0;
-  gsl_function F;
-
-  F.function = &AKVsolver1D;
-  F.params = p;
-
-  T = gsl_root_fsolver_brent; //bisection, falsepos; should probably just keep brent
-  s = gsl_root_fsolver_alloc (T);
-  gsl_root_fsolver_set (s, &F, THETA_lo, THETA_hi);
-
-  do{
-    iter++;
-    status = gsl_root_fsolver_iterate (s);
-    THETA_root = gsl_root_fsolver_root (s);
-    THETA_lo = gsl_root_fsolver_x_lower (s);
-    THETA_hi = gsl_root_fsolver_x_upper (s);
-    status = gsl_root_test_interval (THETA_lo, THETA_hi, 0.0, 0.001);
-
-    if (status == GSL_SUCCESS && verbose)
-      std::cout << "Converged" << std::endl;
-
-  } while (status == GSL_CONTINUE && iter < max_iter);
-     
-  gsl_root_fsolver_free (s);
-
-  //compare the residual from multidimensional root finder to 1D root finder
-  //run AKVsolver one more time to get residual (f) output
-  gsl_vector * x = gsl_vector_alloc(3);
-  gsl_vector_set(x,0,THETA_root);
-  gsl_vector_set(x,1,0.0);
-  gsl_vector_set(x,2,0.0);
-  gsl_vector * f = gsl_vector_alloc(3);
-  gsl_vector_set(f,0,0.0);
-  gsl_vector_set(f,1,0.0);
-  gsl_vector_set(f,2,0.0);
-
-  AKVsolver(x, p, f);
-
-  if(verbose)
-    std::cout <<  "f0 = " << gsl_vector_get(f,0) 
-              << " fp = " << gsl_vector_get(f,1) 
-              << " fm = " << gsl_vector_get(f,2) << std::endl;
-
-  //if residuals are small, this is a good solution
-  if(   fabs(gsl_vector_get(f,0)) < 1.e-12
-     && fabs(gsl_vector_get(f,1)) < 1.e-12
-     && fabs(gsl_vector_get(f,2)) < 1.e-12 ) goodSolution = true;
-
-  return goodSolution;
-}
-
-//this function attempts to find THETA, thetap and phip
-void findTtp(struct rparams * p,
-             double& THETA,
-             double& thetap,
-             double& phip,
-             const std::string solver,
-             const bool verbose)
-{
-  std::cout << "Starting the gsl multidimensional root finder." << std::endl;
-  //setup the gsl_multiroot finder
-  const gsl_multiroot_fsolver_type *T; //solver type
-  gsl_multiroot_fsolver *s; //the actual solver itself
-  int status;
-  size_t iter=0;
-  const size_t n = 3; //number of dimensions
-  gsl_multiroot_function f = {&AKVsolver, n, &p}; //initializes the function
-  gsl_vector *x = gsl_vector_alloc(n); //creates initial guess vector
-  gsl_vector_set (x, 0, THETA);
-  gsl_vector_set (x, 1, thetap);
-  gsl_vector_set (x, 2, phip);
-
-  //Declare the appropriate non-derivative root finder
-  if(solver=="Hybrids") T = gsl_multiroot_fsolver_hybrids;
-  else if(solver=="Hybrid") T = gsl_multiroot_fsolver_hybrid;
-  else if(solver=="Newton") T = gsl_multiroot_fsolver_dnewton;
-  else if(solver=="Broyden") T = gsl_multiroot_fsolver_broyden;
-  else std::cout << "Solver option '" << solver << "' not valid." << std::endl;
-
-  s = gsl_multiroot_fsolver_alloc(T, n);
-  gsl_multiroot_fsolver_set(s, &f, x);
-  //if(verbose) print_state(iter, s);
-
-  do {
-    iter++;
-
-    status = gsl_multiroot_fsolver_iterate(s);
-
-    //if(verbose) print_state(iter, s);
-
-    if(status){ //if solver is stuck
-      std::cout << "GSL multiroot solver is stuck at iter = " << iter << std::endl;
-      break;
-    }
-
-    status = gsl_multiroot_test_residual(s->f, 1e-12);
-
-  } while(status == GSL_CONTINUE && iter<1000);
-
-  if(iter==1000){
-    std::cout << "Iteration was stopped at iter=1000. \n"
-                 "You may want to check the solution for validity."
-              << std::endl;
-  }
-
-  THETA  = gsl_vector_get(s->x,0);
-  thetap = gsl_vector_get(s->x,1);
-  phip   = gsl_vector_get(s->x,2);
-  gsl_vector_free(x); //frees all memory associated with vector x
-  gsl_multiroot_fsolver_free(s); //frees all memory associated with solver
-
-  return;
+  std::cout << "iter = " << iter
+            << " x = " << std::setprecision(8) << std::setw(10) << gsl_vector_get(s->x,0)
+            << " " << std::setprecision(8) << std::setw(10) << gsl_vector_get(s->x,1)
+            << " " << std::setprecision(8) << std::setw(10) << gsl_vector_get(s->x,2)
+            << " f(x) = " << std::setprecision(8) << std::setw(10) << gsl_vector_get(s->f,0)
+            << " " << std::setprecision(8) << std::setw(10) << gsl_vector_get(s->f,1)
+            << " " << std::setprecision(8) << std::setw(10) << gsl_vector_get(s->f,2)
+            << std::endl << std::flush;
 }
 
 //takes a DataMesh on the sphere and rotates it by some amount Theta, Phi
@@ -455,11 +463,11 @@ double normalizeKillingVector(const SurfaceBasis& sb,
 } //end normalizeKillingVector
 
 bool KillingPath(const SurfaceBasis& sb,
-                    const DataMesh& Psi,
-                    const Tensor<DataMesh>& xi,
-                    const double& rad,
-                    double& t,
-                    const double theta)
+                 const DataMesh& Psi,
+                 const Tensor<DataMesh>& xi,
+                 const double& rad,
+                 double& t,
+                 const double theta)
 {
   bool printSteps = false;
   //perform harmonic analysis on Psi, xi to save from repetitive computation
@@ -531,7 +539,7 @@ bool KillingPath(const SurfaceBasis& sb,
   return closedPath;
 }
 
-int PathDerivs(double t, const double y[], double f[], void *params)
+int PathDerivs(double t_required_by_solver, const double y[], double f[], void *params)
 {
   const SurfaceBasis& sb = static_cast<struct ODEparams*>(params)->sb;
   const DataMesh& Psi_ha = static_cast<struct ODEparams*>(params)->Psi_ha;
