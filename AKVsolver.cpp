@@ -628,24 +628,12 @@ void KillingDiagnostics(const SurfaceBasis& sb,
     //const DataMesh Rm1 = Psi*Psi*Psi*Psi / (1.-2.*llncf);
     const DataMesh Rm1 = (rp2*rp2/2.0)/(1.-2.*llncf);
 
-    //-----Norm of xi*DivL-------
-    if(printDiagnostic[3]){
-      xiGradL = xi(0)*GradL(0) + xi(1)*GradL(1);
-      xiGradL /= (rad*rad*Psi*Psi);
-
-      const DataMesh xiGradL_ha = sb.ComputeCoefficients(xiGradL*xiGradL);
-
-      std::cout << "L2 Norm of xi*Div(L) = "
-                << std::setprecision(12)
-                << sqrt(sqrt(2.)*xiGradL_ha[0]/4.) << std::endl;
-    } //end xi*DivL
-
-    GradL(0) *= Rm1;
-    GradL(1) *= Rm1;
-
     //-----Norm of f_L-------
     if(printDiagnostic[4]){
-      DataMesh f_L = sb.Divergence(GradL);
+      Tensor<DataMesh> RGradL(2,"1",DataMesh::Empty);
+      RGradL(0) = GradL(0)*Rm1;
+      RGradL(1) = GradL(1)*Rm1;
+      DataMesh f_L = sb.Divergence(RGradL);
       f_L /= rp2;
       f_L += rp2*L;
 
@@ -659,13 +647,30 @@ void KillingDiagnostics(const SurfaceBasis& sb,
     if(printDiagnostic[5]){
       const Tensor<DataMesh> GradRm1 = sb.Gradient(Rm1);
       DataMesh f_lam = GradRm1(0)*GradL(1) - GradRm1(1)*GradL(0);
-      f_lam *= 1./rp2;
+      f_lam /= rp2;
 
       std::cout << "L2 Norm of f_lam= "
                 << std::setprecision(12)
                 //<< sqrt(sqrt(2.)*flam_ha[0]/4.) << std::endl;
                 << sb.ComputeCoefficients(f_lam*f_lam)[0]/rp22_00 << std::endl;
     } // end f_Lambda
+
+    //-----Norm of xi*GradL-------
+    if(printDiagnostic[3]){
+      xiGradL = xi(0)*GradL(0) + xi(1)*GradL(1);
+      xiGradL /= rp2;
+
+      //const DataMesh xiGradL_ha = sb.ComputeCoefficients(xiGradL*xiGradL);
+
+      std::cout << "L2 Norm of xi*Grad(L) = "
+                << std::setprecision(12)
+                //<< sqrt(sqrt(2.)*xiGradL_ha[0]/4.) << std::endl;
+                << sb.ComputeCoefficients(xiGradL*xiGradL)[0]/rp22_00 << std::endl;
+    } //end xi*DivL
+
+
+
+
 
   } //end print conditionals
 }//end KillingDiagnostics

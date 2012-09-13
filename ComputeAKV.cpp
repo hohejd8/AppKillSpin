@@ -62,9 +62,9 @@ namespace ComputeItems {
     DataBoxAccess lba(localBox, "AKV Recompute");
     const DataMesh& Psi(lba.Get<Tensor<DataMesh> >(mConformalFactor)());
 
-    //creating rparams p is not necessary here, but it does save
+    //creating struct rparams p is not necessary here, but it does save
     //findTHETA and findTtp from having long argument lists and
-    //creating the same struct anyway
+    //creating the struct on their own
     rparams p = {theta,
                  phi,
                  mRad,
@@ -77,19 +77,20 @@ namespace ComputeItems {
                  mPrintResiduals};
 
     //if the initial guess for thetap is close to zero or pi,
-    //try solving at thetap = zero or pi
+    //try solving at thetap = zero
     bool oneDSolutionFound = false;
     bool thetapGuessIsZero = mAKVGuess[1] < 1.e-5 || M_PI-mAKVGuess[1] < 1.e-5;
     double THETA = mAKVGuess[0];
     double thetap = mAKVGuess[1];
     double phip = mAKVGuess[2];
 
-    //if( fabs(mAKVGuess[1]) < 1.e-5 || fabs(mAKVGuess[1]-M_PI) < 1.e-5 ){
     if(thetapGuessIsZero){
       oneDSolutionFound = findTHETA(&p,THETA,mVerbose);
       if(oneDSolutionFound){
         thetap = 0.0;
         phip = 0.0;
+      } else { //thetap initial guess is bad and too close to zero
+        thetap = 1.e-5;
       }
     }
 
@@ -98,9 +99,7 @@ namespace ComputeItems {
     //try the multidimensional root finder
     if(!oneDSolutionFound){
       findTtp(&p, THETA, thetap, phip, mSolver, mVerbose);
-      std::cout << "THETA = " << THETA
-                << " thetap = " << thetap
-                << " phip = " << phip << std::endl;
+
       //if thetap solution is close to zero,
       //and we didn't already try thetap=0,
       //try thetap=0 now
