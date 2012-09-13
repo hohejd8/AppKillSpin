@@ -87,9 +87,14 @@ namespace ComputeItems {
                  mv_resid_tol,
                  mPrintResiduals};
 
+    //if the initial guess for thetap is close to zero or pi,
+    //try solving at thetap = zero
+    bool oneDSolutionFound = false;
     double THETA = mAKVGuess[0];
     double thetap = mAKVGuess[1];
     double phip = mAKVGuess[2];
+    bool thetapGuessIsZero = thetap < 1.e-5 || M_PI-thetap < 1.e-5;
+
 
     //run the appropriate AKV solvers here
     RunAKVsolvers(THETA, thetap, phip, mMin_thetap,
