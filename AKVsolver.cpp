@@ -533,6 +533,21 @@ int PathDerivs(double t_required_by_solver, const double y[], double f[], void *
   return GSL_SUCCESS;
 }
 
+double AKVInnerProduct(const DataMesh& v1,
+                       const DataMesh& v2,
+                       const DataMesh& Ricci,
+                       const SurfaceBasis& sb)
+{
+  const Tensor<DataMesh> Gradv1 = sb.Gradient(v1);
+  const Tensor<DataMesh> Gradv2 = sb.Gradient(v2);
+
+  double result = sb.Integrate(Ricci*Gradv1(0)*Gradv2(0));
+  result += sb.Integrate(Ricci*Gradv1(1)*Gradv2(1));
+  result *= 1.5/(8.*M_PI);
+
+  return result;
+}
+
 void KillingDiagnostics(const SurfaceBasis& sb,
                         const DataMesh& L,
                         const DataMesh& Psi,

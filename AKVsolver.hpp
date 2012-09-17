@@ -36,12 +36,6 @@ int AKVsolver(const gsl_vector * x,
 
 void print_state (size_t iter, gsl_multiroot_fsolver * s);
 
-//determines normalization factor for approximate Killing vector
-double normalizeKillingVector(const SurfaceBasis& sb,
-                              const DataMesh& Psi,
-                              DataMesh& v,
-                              const double& rad);
-
 //rotates a DataMesh by an amount (Theta,Phi)
 DataMesh RotateOnSphere
          (const DataMesh& collocationvalues,
@@ -50,6 +44,14 @@ DataMesh RotateOnSphere
           const SurfaceBasis& sbe,
           const double Theta,
           const double Phi);
+
+//determines the path length of following the approximate
+//Killing vector around the equator of the sphere (theta=Pi)
+//and returns the ratio of that path to the circumference 2*Pi
+double normalizeKillingVector(const SurfaceBasis& sb,
+                              const DataMesh& Psi,
+                              DataMesh& v,
+                              const double& rad);
 
 bool KillingPath(const SurfaceBasis& sb,
                     const DataMesh& Psi_r,
@@ -62,6 +64,14 @@ int PathDerivs(double t_required_by_solver,
                const double y[],
                double f[],
                void *params);
+
+//determines value of the integral
+// \frac{1}{2} \oint ^2R((_s \vec \nabla v_1) \cdot (\vec \nabla v_2) d\Omega
+//and returns the ratio of this result to (8*\pi / 3)
+double AKVInnerProduct(const DataMesh& v1,
+                       const DataMesh& v2,
+                       const DataMesh& Ricci,
+                       const SurfaceBasis& sb);
 
 //performs diagnostics on the approximate Killing vector solution
 void KillingDiagnostics(const SurfaceBasis& sb,
