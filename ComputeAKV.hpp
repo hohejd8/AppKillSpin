@@ -76,7 +76,7 @@ namespace ComputeItems {
     private:
       std::string mSkwm, mConformalFactor, mSolver;
       MyVector<double> mAKVGuess;
-      double mRad;
+      double mRad, mL_resid_tol, mv_resid_tol, mMin_thetap;
       std::string mDivNorm, mVortNorm, mSS, mfLNorm, mfLambdaNorm, mXiDivLNorm;
       MyVector<bool> printDiagnostic;
       bool mVerbose, mPrintResiduals;

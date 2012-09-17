@@ -75,14 +75,15 @@ void KillingDiagnostics(const SurfaceBasis& sb,
 struct rparams{
   const DataMesh& theta;
   const DataMesh& phi;
-  const double& rad;
+  const DataMesh& rp2;
   const SurfaceBasis& sb;
-  const DataMesh& Psi;
+  const DataMesh& llncf;
+  const Tensor<DataMesh>& GradRicci;
   DataMesh& L;
   DataMesh& v;
   const double & L_resid_tol;
   const double & v_resid_tol;
-  const bool printResiduals;
+  const bool & printResiduals;
 };
 
 //a structure required to follow the Killing path around the surface

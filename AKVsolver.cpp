@@ -8,30 +8,10 @@
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_roots.h>
 
-/*
-HELPFUL DIAGNOSTIC TOOLS WHEN COMPARING TO AppKillSpin:
-
-  //print v (or other DataMesh)
-  std::cout << "v " << POSITION << std::endl;
-  for(int i=0; i<mNth; ++i){
-      for(int j=0; j<mNph; ++j) {
-            std::cout << std::setprecision(10) << v[i*mNph+j] << " " ;
-      }
-      std::cout << std::endl;
-  }
-  std::cout << "\n" << std::endl;
-
-*/
-
-/*
-TO DO:
-put in 1D root finding, try testing (1,0), 
-*/
-//-----------------------------------------
-
 //this function attempts to find THETA assuming thetap=0
 bool findTHETA(struct rparams * p,
                double& THETA_root,
+               const double& residual_size,
                const bool verbose)
 {
   std::cout << "Staring the gsl 1D root finder at thetap = 0.0." << std::endl;
@@ -84,9 +64,9 @@ bool findTHETA(struct rparams * p,
               << " fm = " << gsl_vector_get(f,2) << std::endl;
 
   //if residuals are small, this is a good solution
-  if(   fabs(gsl_vector_get(f,0)) < 1.e-12
-     && fabs(gsl_vector_get(f,1)) < 1.e-12
-     && fabs(gsl_vector_get(f,2)) < 1.e-12 ) goodSolution = true;
+  if(   fabs(gsl_vector_get(f,0)) < residual_size
+     && fabs(gsl_vector_get(f,1)) < residual_size
+     && fabs(gsl_vector_get(f,2)) < residual_size ) goodSolution = true;
 
   return goodSolution;
 }
@@ -97,6 +77,7 @@ void findTtp(struct rparams * p,
              double& thetap,
              double& phip,
              const std::string solver,
+             const double& residual_size,
              const bool verbose)
 {
   std::cout << "Starting the gsl multidimensional root finder." << std::endl;
@@ -133,7 +114,7 @@ void findTtp(struct rparams * p,
       std::cout << "GSL multiroot solver is stuck at iter = " << iter << std::endl;
       break;
     }
-    status = gsl_multiroot_test_residual(s->f, 1e-12);
+    status = gsl_multiroot_test_residual(s->f, residual_size);
   } while(status == GSL_CONTINUE && iter<1000);
 
   if(iter==1000){
@@ -180,23 +161,29 @@ int AKVsolver(const gsl_vector * x,
   //for use with gsl root finder
   const DataMesh& theta = static_cast<struct rparams*>(params)->theta;
   const DataMesh& phi = static_cast<struct rparams*>(params)->phi;
-  const double& rad = static_cast<struct rparams*>(params)->rad;
+  const DataMesh& rp2 = static_cast<struct rparams*>(params)->rp2;
   const SurfaceBasis& sb = static_cast<struct rparams*>(params)->sb;
-  const DataMesh& Psi = static_cast<struct rparams*>(params)->Psi;
+  const DataMesh& llncf = static_cast<struct rparams*>(params)->llncf;
+  const Tensor<DataMesh>& GradRicci = static_cast<struct rparams*>(params)->GradRicci;
   DataMesh& L = static_cast<struct rparams*>(params)->L;
   DataMesh& v = static_cast<struct rparams*>(params)->v;
-  const double L_resid_tol = static_cast<struct rparams*>(params)->L_resid_tol;
-  const double v_resid_tol = static_cast<struct rparams*>(params)->v_resid_tol;
-  const bool printResiduals = static_cast<struct rparams*>(params)->printResiduals;
+  const double& L_resid_tol = static_cast<struct rparams*>(params)->L_resid_tol;
+  const double& v_resid_tol = static_cast<struct rparams*>(params)->v_resid_tol;
+  const bool& printResiduals = static_cast<struct rparams*>(params)->printResiduals;
 
   SpherePackIterator sit(theta.Extents()[0],theta.Extents()[1]);
+  //fast iterator references
+  const int l00a = sit(0,0,SpherePackIterator::a);
+  const int l10a = sit(1,0,SpherePackIterator::a);
+  const int l11a = sit(1,1,SpherePackIterator::a);
+  const int l11b = sit(1,1,SpherePackIterator::b);
 
   //eq. 78, 93
   L = cos(thetap)*cos(theta)
         + sin(thetap)*sin(theta)*(cos(phip)*cos(phi) + sin(phip)*sin(phi) );
 
   //eq. 95
-  v = L*rad*rad;
+  v = L;//*rad*rad;
 
   //eq. 94, make sure only l=1 mode exists by setting all l!=1 modes to zero
   DataMesh L_ha = sb.ComputeCoefficients(L);
@@ -216,13 +203,6 @@ int AKVsolver(const gsl_vector * x,
   //this is necessary for the RHS (collocation points) in the while loop
   L = sb.Evaluate(L_ha);
 
-  //^2R, eq. 20
-  const DataMesh& llncf = sb.ScalarLaplacian(log(Psi)); //original
-
-  const DataMesh& hR = (1.0-2.0*llncf) / (Psi*Psi*Psi*Psi*rad*rad);
-
-  const Tensor<DataMesh>& hGradR = sb.Gradient(hR);
-
   //The main loop
   bool unsolved = true;
   bool refining = false;
@@ -240,15 +220,16 @@ int AKVsolver(const gsl_vector * x,
     Gradv = sb.Gradient(v_ha);
 
     //compute eq. 97
-    RHS = -RHS + (4.0*llncf*L + hGradR(0)*Gradv(0) + hGradR(1)*Gradv(1) -2.0*L)*(1.0-THETA);
+    RHS = -RHS 
+          + (4.0*llncf*L + GradRicci(0)*Gradv(0) + GradRicci(1)*Gradv(1) -2.0*L)*(1.0-THETA);
 
     //perform harmonic analysis on RHS
     RHS_ha = sb.ComputeCoefficients(RHS);
 
     //keep track of l=1 values
-    ic10 = RHS_ha[sit(1,0,SpherePackIterator::a)];
-    ic1p = RHS_ha[sit(1,1,SpherePackIterator::a)];
-    ic1m = RHS_ha[sit(1,1,SpherePackIterator::b)];
+    ic10 = RHS_ha[l10a];
+    ic1p = RHS_ha[l11a];
+    ic1m = RHS_ha[l11b];
 
     //print residuals
     if(printResiduals){
@@ -258,9 +239,9 @@ int AKVsolver(const gsl_vector * x,
     }
 
     //remove the l=1 modes
-    RHS_ha[sit(1,0,SpherePackIterator::a)] = 0.0;
-    RHS_ha[sit(1,1,SpherePackIterator::a)] = 0.0;
-    RHS_ha[sit(1,1,SpherePackIterator::b)] = 0.0;
+    RHS_ha[l10a] = 0.0;
+    RHS_ha[l11a] = 0.0;
+    RHS_ha[l11b] = 0.0;
 
     //recompute RHS from 'fixed' analysis
     RHS = sb.Evaluate(RHS_ha);
@@ -273,9 +254,7 @@ int AKVsolver(const gsl_vector * x,
 
     //invert (Laplacian + 2)
     for(sit.Reset(); sit; ++sit){
-      if(sit.l()==1){ //must zero out n=1 modes
-        RHS_ha[sit()] = 0.0;
-      } else {
+      if(sit.l()!=1){ //l=1 modes have already been set to 0
         RHS_ha[sit()] /= 2.0 - sit.l()*(sit.l()+1.0);
       }
     }
@@ -291,25 +270,22 @@ int AKVsolver(const gsl_vector * x,
     //compute laplacian of delta v
     //NOTE: RHS changes definitions here
     RHS = sb.ScalarLaplacian(v_ha);
-    const DataMesh twocf4r2 = 2.0*Psi*Psi*Psi*Psi*rad*rad;
-    RHS = -RHS - twocf4r2*L;
+    RHS = -RHS - 2.0*rp2*rp2*L;
 
     //remove the l=0 mode from RHS
     RHS_ha = sb.ComputeCoefficients(RHS);
-    RHS_ha[sit(0,0,SpherePackIterator::a)] = 0.0;
+    RHS_ha[l00a] = 0.0;
     RHS = sb.Evaluate(RHS_ha);
 
     //compute RHS^2
     RHS *= RHS;
 
     //compute norm
-    const double norm_RHS_v = sqrt(sqrt(2.0)*sb.ComputeCoefficients(RHS)[0]/4.0);
+    const double norm_RHS_v = sqrt(sqrt(2.0)*sb.ComputeCoefficients(RHS)[l00a]/4.0);
 
     //invert (Laplacian + 0)
     for(sit.Reset(); sit; ++sit){
-      if(sit.l()==0){
-        RHS_ha[sit()] = 0.0;
-      } else {
+      if(sit.l()!=0){ //l=0 mode has already been set to 0
         RHS_ha[sit()] /= -sit.l()*(sit.l()+1.0);
       }
     }
@@ -470,7 +446,7 @@ bool KillingPath(const SurfaceBasis& sb,
                  const double theta)
 {
   bool printSteps = false;
-  //perform harmonic analysis on Psi, xi to save from repetitive computation
+  //perform harmonic analysis on Psi, xi
   //to save from repetitive computation in PathDerivs
   const DataMesh Psi_ha = sb.ComputeCoefficients(Psi);
   const Tensor<DataMesh> xi_ha = sb.ComputeVectorCoefficients(xi);
@@ -667,10 +643,6 @@ void KillingDiagnostics(const SurfaceBasis& sb,
                 //<< sqrt(sqrt(2.)*xiGradL_ha[0]/4.) << std::endl;
                 << sb.ComputeCoefficients(xiGradL*xiGradL)[0]/rp22_00 << std::endl;
     } //end xi*DivL
-
-
-
-
 
   } //end print conditionals
 }//end KillingDiagnostics

@@ -23,6 +23,9 @@ namespace ComputeItems {
     mSolver     = p.Get<std::string>("Solver","Newton");
     mVerbose    = p.Get<bool>("Verbose",false);
     mPrintResiduals = p.Get<bool>("PrintResiduals",false);
+    mL_resid_tol = p.Get<double>("L_resid_tol",1.e-12);
+    mv_resid_tol = p.Get<double>("v_resid_tol",1.e-12);
+    mMin_thetap = p.Get<double>("Min_thetap",1.e-5);
     mOutput     = p.Get<std::string>("Output");
 
     printDiagnostic = MyVector<bool>(MV::Size(6), true);
@@ -62,24 +65,32 @@ namespace ComputeItems {
     DataBoxAccess lba(localBox, "AKV Recompute");
     const DataMesh& Psi(lba.Get<Tensor<DataMesh> >(mConformalFactor)());
 
+    //compute some useful quantities
+    const DataMesh rp2 = mRad * Psi * Psi;
+    const DataMesh llncf = sb.ScalarLaplacian(log(Psi));
+    const DataMesh Ricci = (1.0-2.0*llncf) / (rp2*rp2);
+    const Tensor<DataMesh> GradRicci = sb.Gradient(Ricci);
+
     //creating struct rparams p is not necessary here, but it does save
     //findTHETA and findTtp from having long argument lists and
     //creating the struct on their own
     rparams p = {theta,
                  phi,
-                 mRad,
+                 rp2,
                  sb,
-                 Psi,
+                 llncf,
+                 GradRicci,
                  L,
                  v,
-                 1.e-12,
-                 1.e-12,
+                 mL_resid_tol,
+                 mv_resid_tol,
                  mPrintResiduals};
 
     //if the initial guess for thetap is close to zero or pi,
     //try solving at thetap = zero
     bool oneDSolutionFound = false;
-    bool thetapGuessIsZero = mAKVGuess[1] < 1.e-5 || M_PI-mAKVGuess[1] < 1.e-5;
+    bool thetapGuessIsZero = mAKVGuess[1] < mMin_thetap;
+    bool thetapGuessIsPi = M_PI-mAKVGuess[1] < mMin_thetap;
     double THETA = mAKVGuess[0];
     double thetap = mAKVGuess[1];
     double phip = mAKVGuess[2];
@@ -90,7 +101,19 @@ namespace ComputeItems {
         thetap = 0.0;
         phip = 0.0;
       } else { //thetap initial guess is bad and too close to zero
-        thetap = 1.e-5;
+        thetap = mMin_thetap;
+      }
+    }
+    if(thetapGuessIsPi){
+      oneDSolutionFound = findTHETA(&p,THETA,mVerbose);
+      if(oneDSolutionFound){
+        thetap = M_PI;
+        phip = 0.0;
+        //findTHETA tests for thetap=0.  If thetap=Pi, v and L can be
+        //corrected by multiplying by -1
+        v *= -1.; L *= -1.;
+      } else { //thetap initial guess is bad and too close to Pi
+        thetap = M_PI - mMin_thetap;
       }
     }
 
@@ -103,7 +126,7 @@ namespace ComputeItems {
       //if thetap solution is close to zero,
       //and we didn't already try thetap=0,
       //try thetap=0 now
-      if( (thetap < 1.e-5 || M_PI-thetap < 1.e-5) && !thetapGuessIsZero){
+      if( thetap < mMin_thetap && !thetapGuessIsZero){
         const double THETA_saved = THETA;
         const DataMesh v_saved = v;
         const DataMesh L_saved = L;
@@ -114,9 +137,27 @@ namespace ComputeItems {
         } else {
           THETA = THETA_saved;
           v = v_saved; L = L_saved;
-        }
-      }
-    }
+        } //end if(oneDSolution)
+      } // end if(thetap < mMin_thetap)
+
+      //if thetap solution is close to Pi,
+      //and we didn't already try thetap=0,
+      //try thetap=0 now
+      if( M_PI - thetap < mMin_thetap && !thetapGuessIsPi){
+        const double THETA_saved = THETA;
+        const DataMesh v_saved = v;
+        const DataMesh L_saved = L;
+        oneDSolutionFound = findTHETA(&p,THETA,mVerbose);
+        if(oneDSolutionFound){
+          thetap = M_PI;
+          phip = 0.0;
+        } else {
+          THETA = THETA_saved;
+          v = v_saved; L = L_saved;
+        } //end if(oneDSolution)
+      } // end if(thetap < mMin_thetap)
+
+    } // end if(!oneDSolutionFound)
 
     //get thetap, phip within standard bounds
     if(thetap < 0.0){
