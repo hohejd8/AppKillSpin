@@ -6,7 +6,7 @@
 
 CODE_HOME = ..
 
-SUBDIRECTORIES = Executables 
+SUBDIRECTORIES = Executables Tests
 
 OBJECT_FILES_INTO_LIB    = \
              AdmIntegralS2.o \

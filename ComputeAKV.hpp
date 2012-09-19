@@ -44,6 +44,11 @@ namespace ComputeItems {
         "  PrintResiduals = Prints the ic10, ic1p, ic1m         \n"
         "            residuals at each iteration of the solver. \n"
         "            Default to false.                          \n"
+        "  ResidualSize = determines the tolerance for residuals\n"
+        "            from the multidimensional root finder.     \n"
+        "            Default to 1.e-11.                         \n"
+        "  min_thetap = for values less than this, thetap is    \n"
+        "               considered close to zero. Default 1.e-5 \n"
         "  Output = name of approximate Killing vector solution \n"
         "           in DataBox.                                 \n"
         "  DivNorm = print the L2 norm of the divergence of the \n"
@@ -76,7 +81,7 @@ namespace ComputeItems {
     private:
       std::string mSkwm, mConformalFactor, mSolver;
       MyVector<double> mAKVGuess;
-      double mRad, mL_resid_tol, mv_resid_tol, mMin_thetap;
+      double mRad, mL_resid_tol, mv_resid_tol, mMin_thetap, mResidualSize;
       std::string mDivNorm, mVortNorm, mSS, mfLNorm, mfLambdaNorm, mXiDivLNorm;
       MyVector<bool> printDiagnostic;
       bool mVerbose, mPrintResiduals;

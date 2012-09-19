@@ -8,11 +8,24 @@
 //#include "gsl/gsl_vector.h"
 #include "gsl/gsl_multiroots.h"
 
+
+//this function determines which AKVsolver to run based on initial guess
+void RunAKVsolvers(double& THETA,
+                   double& thetap,
+                   double& phip,
+                   const double& min_thetap,
+                   const double& residualSize,
+                   const bool& verbose,
+                   struct rparams * p,
+                   const std::string solver);
+
+
 //performs a 1D root finder for THETA at thetap=0 (phip=0)
 //returns true if THETA root is found such that
 //(l,m)=(1,m) residuals are < 1.e-12
-bool findTHETA(struct rparams * p_compare,
+bool findTHETA(struct rparams * p,
                double& THETA_root,
+               const double& residual_size,
                const bool verbose);
 
 //uses the gsl multidimensional root finder to find
@@ -23,6 +36,7 @@ void findTtp(struct rparams * p,
              double& thetap,
              double& phip,
              const std::string solver,
+             const double& residual_size,
              const bool verbose);
 
 //function header for use with gsl 1D root finder
@@ -64,7 +78,7 @@ int PathDerivs(double t_required_by_solver,
                const double y[],
                double f[],
                void *params);
-
+/*
 //determines value of the integral
 // \frac{1}{2} \oint ^2R((_s \vec \nabla v_1) \cdot (\vec \nabla v_2) d\Omega
 //and returns the ratio of this result to (8*\pi / 3)
@@ -72,7 +86,7 @@ double AKVInnerProduct(const DataMesh& v1,
                        const DataMesh& v2,
                        const DataMesh& Ricci,
                        const SurfaceBasis& sb);
-
+*/
 //performs diagnostics on the approximate Killing vector solution
 void KillingDiagnostics(const SurfaceBasis& sb,
                         const DataMesh& L,

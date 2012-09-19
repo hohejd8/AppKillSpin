@@ -8,6 +8,107 @@
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_roots.h>
 
+
+//this function determines which AKVsolver to run based on initial guess
+void RunAKVsolvers(double& THETA,
+                   double& thetap,
+                   double& phip,
+                   const double& min_thetap,
+                   const double& residualSize,
+                   const bool& verbose,
+                   struct rparams * p,
+                   const std::string solver)
+{
+  //if the initial guess for thetap is close to zero or pi,
+  //try solving at thetap = zero
+  bool oneDSolutionFound = false;
+  const bool thetapGuessIsZero = thetap < min_thetap;
+  const bool thetapGuessIsPi = M_PI-thetap < min_thetap;
+
+  if(thetapGuessIsZero){
+    oneDSolutionFound = findTHETA(p,THETA,residualSize,verbose);
+    if(oneDSolutionFound){
+      thetap = 0.0;
+      phip = 0.0;
+    } else { //thetap initial guess is bad and too close to zero
+      thetap = min_thetap;
+    }
+  }
+  if(thetapGuessIsPi){
+    oneDSolutionFound = findTHETA(p,THETA,residualSize,verbose);
+    if(oneDSolutionFound){
+      thetap = M_PI;
+      phip = 0.0;
+      //findTHETA tests for thetap=0.  If thetap=Pi, v and L can be
+      //corrected by multiplying by -1
+      p->v *= -1.; p->L *= -1.;
+    } else { //thetap initial guess is bad and too close to Pi
+      thetap = M_PI - min_thetap;
+    }
+  }
+
+  //if theta=0 was not a good solution
+  //or initial guess was not close to zero
+  //try the multidimensional root finder
+  if(!oneDSolutionFound){
+    findTtp(p, THETA, thetap, phip, solver,residualSize, verbose);
+
+    //if thetap solution is close to zero,
+    //and we didn't already try thetap=0,
+    //try thetap=0 now
+    if( thetap < min_thetap && !thetapGuessIsZero){
+      const double THETA_saved = THETA;
+      const DataMesh v_saved = p->v;
+      const DataMesh L_saved = p->L;
+      oneDSolutionFound = findTHETA(p,THETA,residualSize,verbose);
+      if(oneDSolutionFound){
+        thetap = 0.0;
+        phip = 0.0;
+      } else {
+        THETA = THETA_saved;
+        p->v = v_saved; p->L = L_saved;
+      } //end if(oneDSolution)
+    } // end if(thetap < min_thetap)
+
+    //if thetap solution is close to Pi,
+    //and we didn't already try thetap=0,
+    //try thetap=0 now
+    if( M_PI - thetap < min_thetap && !thetapGuessIsPi){
+      const double THETA_saved = THETA;
+      const DataMesh v_saved = p->v;
+      const DataMesh L_saved = p->L;
+      oneDSolutionFound = findTHETA(p,THETA,residualSize,verbose);
+      if(oneDSolutionFound){
+        thetap = M_PI;
+        phip = 0.0;
+      } else {
+        THETA = THETA_saved;
+        p->v = v_saved; p->L = L_saved;
+      } //end if(oneDSolution)
+    } // end if(thetap < min_thetap)
+  } // end if(!oneDSolutionFound)
+
+  //get thetap, phip within standard bounds
+  if(thetap < 0.0){
+    thetap = -thetap;
+    phip -= M_PI;
+  }
+  if(thetap > M_PI){
+    const int m = (thetap/M_PI);
+    thetap -= m*M_PI;
+    if(m%2) phip -= M_PI;
+  }
+  if(phip <= -M_PI){
+    const int m = (M_PI - phip)/(2.0*M_PI);
+    phip += 2.0*m*M_PI;
+  } else if(phip > M_PI) {
+    const int m = (phip + M_PI)/(2.0*M_PI);
+    phip -= 2.0*m*M_PI;
+  }
+
+}
+
+
 //this function attempts to find THETA assuming thetap=0
 bool findTHETA(struct rparams * p,
                double& THETA_root,
@@ -445,7 +546,7 @@ bool KillingPath(const SurfaceBasis& sb,
                  double& t,
                  const double theta)
 {
-  bool printSteps = false;
+  bool printSteps = true;
   //perform harmonic analysis on Psi, xi
   //to save from repetitive computation in PathDerivs
   const DataMesh Psi_ha = sb.ComputeCoefficients(Psi);
@@ -474,7 +575,9 @@ bool KillingPath(const SurfaceBasis& sb,
 	      << std::endl; 
   }
      
-  while (true) {
+  int iter = 0;
+  while (true && iter<1000) {
+    iter++;
     const double ysave[2] = {y[0],y[1]}; 
     const double tsave = t;
     const int status = gsl_odeiv2_evolve_apply (e, c, s,
@@ -532,7 +635,7 @@ int PathDerivs(double t_required_by_solver, const double y[], double f[], void *
 
   return GSL_SUCCESS;
 }
-
+/*
 double AKVInnerProduct(const DataMesh& v1,
                        const DataMesh& v2,
                        const DataMesh& Ricci,
@@ -547,7 +650,7 @@ double AKVInnerProduct(const DataMesh& v1,
 
   return result;
 }
-
+*/
 void KillingDiagnostics(const SurfaceBasis& sb,
                         const DataMesh& L,
                         const DataMesh& Psi,
@@ -661,10 +764,4 @@ void KillingDiagnostics(const SurfaceBasis& sb,
 
   } //end print conditionals
 }//end KillingDiagnostics
-
-
-
-
-
-
 

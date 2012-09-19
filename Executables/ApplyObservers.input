@@ -140,10 +140,9 @@ Observers=
                 AdmIntegralS2(
                    Metric=g;
                    InvMetric=Invg;
-                   #InvConformalMetric=InvCg;
                    ExtrinsicCurvature=K;
                    StrahlkorperWithMesh=hohejd8SkWM;
-                    L=__LA__;
+                   L=__LA__;
                    Center=__d__/2,0,0;
                    Radius=__R1__;
                    ConformalFactor=ConformalFactor;

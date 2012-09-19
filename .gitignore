@@ -1,4 +1,4 @@
-ompiled Object files
+# Compiled Object files
 *.slo
 *.lo
 *.o
@@ -11,3 +11,14 @@ ompiled Object files
 *.lai
 *.la
 *.a
+
+# specific files
+Executables/.~*
+Executables/8.5.2
+Executables/10.5.2
+Executables/12.5.2
+Executables/14.5.2
+Executables/20.0.2
+*.out
+Tests/TestComputeAKV
+**/Dependencies
