@@ -156,7 +156,7 @@ int main(){
     }
 
     //determine scale factor
-    const double scale = normalizeKillingVector(sb, Psi, v, rad);
+    const double scale = normalizeKVAtOnePoint(sb, Psi, v, rad, M_PI/2., 0.0);
     if(true) std::cout << "scale factor = " << scale << std::endl;
 
   }

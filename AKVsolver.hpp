@@ -59,20 +59,41 @@ DataMesh RotateOnSphere
           const double Theta,
           const double Phi);
 
-//determines the path length of following the approximate
-//Killing vector around the equator of the sphere (theta=Pi)
-//and returns the ratio of that path to the circumference 2*Pi
-double normalizeKillingVector(const SurfaceBasis& sb,
+//calls normalizeKVAtOnePoint for every point in the mesh,
+//then returns the average of all the scale factors
+double normalizeKVAtAllPoints(const SurfaceBasis& sb,
                               const DataMesh& Psi,
-                              DataMesh& v,
+                              const DataMesh& theta,
+                              const DataMesh& phi,
+                              const DataMesh& v,
                               const double& rad);
+
+//determines the path length of following the approximate
+//Killing vector around the sphere starting at (theta, phi)
+//and returns the ratio of that path to the expected
+//value of 2*Pi (the normalization scale factor)
+double normalizeKVAtOnePoint(const SurfaceBasis& sb,
+                              const DataMesh& Psi,
+                              const DataMesh& v,
+                              const double& rad,
+                              const double& theta=M_PI/2.,
+                              const double& phi=0.0);
+double normalizeKVAtOnePoint(const SurfaceBasis& sb,
+                              const DataMesh& Psi,
+                              const Tensor<DataMesh>& xi,
+                              const double& rad,
+                              const double& theta=M_PI/2.0,
+                              const double& phi=0.0);
+
 
 bool KillingPath(const SurfaceBasis& sb,
                     const DataMesh& Psi_r,
                     const Tensor<DataMesh>& xi,
                     const double& rad,
                     double& t,
-                    const double theta);
+                    const double& theta,
+                    const double& phi=0.0,
+                    const bool printSteps=false);
 
 int PathDerivs(double t_required_by_solver, 
                const double y[],

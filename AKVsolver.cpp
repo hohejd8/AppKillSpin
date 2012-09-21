@@ -477,10 +477,50 @@ DataMesh RotateOnSphere
   return result;
 }
 
-double normalizeKillingVector(const SurfaceBasis& sb,
+double normalizeKVAtAllPoints(const SurfaceBasis& sb,
                               const DataMesh& Psi,
-                              DataMesh& v,
+                              const DataMesh& theta,
+                              const DataMesh& phi,
+                              const DataMesh& v,
                               const double& rad)
+{
+  //create xi
+  Tensor<DataMesh> tmp_xi = sb.Gradient(v);
+  Tensor<DataMesh> xi(2,"1",DataMesh::Empty);
+  xi(0) = tmp_xi(1);
+  xi(1) = -tmp_xi(0);
+
+  //create storage
+  double avgScaleFactor = 0.0;
+
+  for(int i=0; i<theta.Size(); i++)
+      avgScaleFactor += normalizeKVAtOnePoint(sb,Psi,xi,rad,theta[i],phi[i]);
+
+  return avgScaleFactor/theta.Size();
+}
+
+double normalizeKVAtOnePoint(const SurfaceBasis& sb,
+                              const DataMesh& Psi,
+                              const DataMesh& v,
+                              const double& rad,
+                              const double& theta/*=M_PI/2.0*/,
+                              const double& phi /*=0.0*/)
+{
+  //create xi
+  Tensor<DataMesh> tmp_xi = sb.Gradient(v);
+  Tensor<DataMesh> xi(2,"1",DataMesh::Empty);
+  xi(0) = tmp_xi(1);
+  xi(1) = -tmp_xi(0);
+
+  return normalizeKVAtOnePoint(sb, Psi, xi, rad, theta, phi);
+}
+
+double normalizeKVAtOnePoint(const SurfaceBasis& sb,
+                              const DataMesh& Psi,
+                              const Tensor<DataMesh>& xi,
+                              const double& rad,
+                              const double& theta/*=M_PI/2.0*/,
+                              const double& phi /*=0.0*/)
 {
   //rotate v
 //-:  DataMesh rotated_v = RotateOnSphere(v,
@@ -489,7 +529,7 @@ double normalizeKillingVector(const SurfaceBasis& sb,
 //-:                       sb,
 //-:                       thetap,
 //-:                       phip);
-  DataMesh rotated_v = v;
+  //DataMesh rotated_v = v;
   //rotate Psi
 //-:  DataMesh rotated_Psi = RotateOnSphere(Psi,
 //-:                       skwm.Grid().SurfaceCoords()(0),
@@ -499,25 +539,20 @@ double normalizeKillingVector(const SurfaceBasis& sb,
 //-:                       phip);
   DataMesh rotated_Psi = Psi;
 
-  //create xi
-  Tensor<DataMesh> tmp_xi = sb.Gradient(rotated_v);//rotated v
-  Tensor<DataMesh> xi(2,"1",DataMesh::Empty);
-  xi(0) = tmp_xi(1);
-  xi(1) = -tmp_xi(0);
-
   //Rescale the Killing vector. For a rotational Killing vector,
   //the affine path length should be 2*Pi.  Also, test various
   //paths to ensure we have an actual Killing field
   double t; //affine path length
 
-  bool goodtheta = KillingPath(sb, rotated_Psi, xi, rad, t, M_PI/2.0);
+  //bool goodtheta = KillingPath(sb, rotated_Psi, xi, rad, t, M_PI/2.0);
+  bool goodtheta = KillingPath(sb, rotated_Psi, xi, rad, t, theta, phi);
   REQUIRE(goodtheta, "Killing trajectory did not close " << POSITION);
   const double scale = t/(2.0*M_PI);
   std::cout << "Theta = " << std::setprecision(8) << std::setw(10)
             << M_PI/2.0 << " : T = "
             << std::setprecision(10) << t
             << " (" << scale << ")" << std::endl;
-
+/*
   KillingPath(sb, rotated_Psi, xi, rad, t, 0.5*M_PI/2.0);
   std::cout << "Theta = " << std::setprecision(8) << std::setw(10)
             << 0.5*M_PI/2.0 << " : T = "
@@ -535,7 +570,7 @@ double normalizeKillingVector(const SurfaceBasis& sb,
             << 0.125*M_PI/2.0 << " : T = "
             << std::setprecision(10) << t
             << " (" << t/(2.0*M_PI*scale) << ")" << std::endl;
-
+*/
   return scale;
 } //end normalizeKillingVector
 
@@ -544,9 +579,11 @@ bool KillingPath(const SurfaceBasis& sb,
                  const Tensor<DataMesh>& xi,
                  const double& rad,
                  double& t,
-                 const double theta)
+                 const double& theta,
+                 const double& phi, /*=0.0*/
+                 const bool printSteps /*=false*/)
 {
-  bool printSteps = true;
+  //bool printSteps = false;
   //perform harmonic analysis on Psi, xi
   //to save from repetitive computation in PathDerivs
   const DataMesh Psi_ha = sb.ComputeCoefficients(Psi);
@@ -562,7 +599,7 @@ bool KillingPath(const SurfaceBasis& sb,
   t = 0.0;
   double t1 = 1.e10;
   double h = 1e-6;
-  double y[2] = { theta, 0.0 };
+  double y[2] = {theta, phi-2.*M_PI}; //this makes the stopping criteria easier
   bool limit_h = false;
   double hmax = h;
   const double hmax2 = 2.0*M_PI/100.0;
@@ -570,14 +607,14 @@ bool KillingPath(const SurfaceBasis& sb,
   if(printSteps){
     std::cout << "START: y = ( " 
 	      << std::setprecision(8) << std::setw(10) << y[0] << " , " 
-	      << std::setprecision(8) << std::setw(10) << y[1] << " ); h = " 
+	      << std::setprecision(8) << std::setw(10) << y[1]+2.*M_PI << " ); h = " 
 	      << std::setprecision(8) << std::setw(10) << h 
 	      << std::endl; 
   }
      
-  int iter = 0;
+  int iter = 0;//delete this logic later
   while (true && iter<1000) {
-    iter++;
+    iter++; //delete this logic later
     const double ysave[2] = {y[0],y[1]}; 
     const double tsave = t;
     const int status = gsl_odeiv2_evolve_apply (e, c, s,
@@ -589,15 +626,15 @@ bool KillingPath(const SurfaceBasis& sb,
     	        << std::setprecision(8) << std::setw(10) << t 
   	        << " : y = ( " 
   	        << std::setprecision(8) << std::setw(10) << y[0] << " , " 
-  	        << std::setprecision(8) << std::setw(10) << y[1] << " ); h = " 
+  	        << std::setprecision(8) << std::setw(10) << y[1]+2.*M_PI << " ); h = " 
   	        << std::setprecision(8) << std::setw(10) << h 
   	        << std::endl;
     }
 
     ASSERT(status==GSL_SUCCESS,"Path Integration failed");
     if(limit_h && h > hmax) h = hmax;
-    if(fabs(y[1] - 2.*M_PI) < 1.e-10) break;
-    else if(y[1] > 2.*M_PI) { //if solver went too far...
+    if(fabs(y[1] - phi) < 1.e-10) break;
+    else if(y[1] > phi) { //if solver went too far...
       if(!limit_h) hmax = h;
       limit_h = true;
       h = hmax *= 0.5; //...reset h, hmax

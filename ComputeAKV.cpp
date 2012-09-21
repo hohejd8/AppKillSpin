@@ -102,16 +102,17 @@ namespace ComputeItems {
 	      << std::endl;
     }
 
-    //determine scale factor
-    const double scale = normalizeKillingVector(sb, Psi, v, mRad);
+    //determine scale factor at the equator
+    const double scale = normalizeKVAtOnePoint(sb, Psi, v, mRad, M_PI/2., 0.0);
+    const double avgScale = normalizeKVAtAllPoints(sb, Psi, theta, phi, v, mRad);
     if(mVerbose) std::cout << "scale factor = " << scale << std::endl;
+    if(mVerbose) std::cout << "average scale factor = " << avgScale << std::endl;
 
     //scale L, v
     v *= scale;
     L *= scale;
 
     //create xi (1-form)
-    //const SurfaceBasis sb(box.Get<StrahlkorperWithMesh>(mSkwm).Grid());
     Tensor<DataMesh> tmp_xi = sb.Gradient(v);
     Tensor<DataMesh> xi(2,"1",DataMesh::Empty);
     xi(0) = tmp_xi(1);
