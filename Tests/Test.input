@@ -1,2 +1,3 @@
-Nth = 8;
-Nph = 16;
+Nth = 14;
+Nph = 28;
+AKVGuess = 0.0, 0.0, 0.0;

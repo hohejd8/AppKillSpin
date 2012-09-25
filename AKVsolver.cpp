@@ -250,7 +250,7 @@ double AKVsolver1D(double THETA, void *params)
   return gsl_vector_get(f,0);
 }
 
-//function header for use with gsl root finders
+//function header required for use with gsl multidimensional root finders
 int AKVsolver(const gsl_vector * x,
               void *params,
               gsl_vector * f)
@@ -544,7 +544,7 @@ double normalizeKVAtOnePoint(const SurfaceBasis& sb,
   //paths to ensure we have an actual Killing field
   double t; //affine path length
 
-  //bool goodtheta = KillingPath(sb, rotated_Psi, xi, rad, t, M_PI/2.0);
+
   bool goodtheta = KillingPath(sb, rotated_Psi, xi, rad, t, theta, phi);
   REQUIRE(goodtheta, "Killing trajectory did not close " << POSITION);
   const double scale = t/(2.0*M_PI);
@@ -672,10 +672,11 @@ int PathDerivs(double t_required_by_solver, const double y[], double f[], void *
 
   return GSL_SUCCESS;
 }
-/*
+
 double AKVInnerProduct(const DataMesh& v1,
                        const DataMesh& v2,
                        const DataMesh& Ricci,
+                       const DataMesh& rp2,
                        const SurfaceBasis& sb)
 {
   const Tensor<DataMesh> Gradv1 = sb.Gradient(v1);
@@ -683,11 +684,11 @@ double AKVInnerProduct(const DataMesh& v1,
 
   double result = sb.Integrate(Ricci*Gradv1(0)*Gradv2(0));
   result += sb.Integrate(Ricci*Gradv1(1)*Gradv2(1));
-  result *= 1.5/(8.*M_PI);
+  result *= 0.5;
 
-  return result;
+  return result - (8.*M_PI/3.);
 }
-*/
+
 void KillingDiagnostics(const SurfaceBasis& sb,
                         const DataMesh& L,
                         const DataMesh& Psi,

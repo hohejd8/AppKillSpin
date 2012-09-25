@@ -9,7 +9,7 @@
 //#include "Utils/LowLevelUtils/SimpleNorms.hpp"
 //#include "Utils/ErrorHandling/Assert.hpp"
 #include "AppKillSpin/AKVsolver.hpp"
-
+#include "Spectral/BasisFunctions/SpherePackIterator.hpp"
 
 //This test file essentially copies and replaces
 //pieces of the ComputeAKV ComputeItem. The test
@@ -34,25 +34,36 @@ DataMesh ConstructConformalFactor(const DataMesh& theta,
 
   DataMesh Psi(theta); //copy constructor to get the right size
 
-  Psi = 1.28 + 0.001*sin(theta)*sin(theta)*cos(2.0*phi)*cos(theta)
-       + B*(1.0-3.0*cos(theta)*cos(theta)+3.0*sin(theta)*sin(theta)*cos(2.0*phi))
-       + C*(1.0-3.0*cos(theta)*cos(theta)-3.0*sin(theta)*sin(theta)*cos(2.0*phi));
+  Psi = 1.28 ;
+       //+ 0.001*sin(theta)*sin(theta)*cos(2.0*phi)*cos(theta)
+       //+ B*(1.0-3.0*cos(theta)*cos(theta)+3.0*sin(theta)*sin(theta)*cos(2.0*phi))
+       //+ C*(1.0-3.0*cos(theta)*cos(theta)-3.0*sin(theta)*sin(theta)*cos(2.0*phi));
   switch(axisym){
-    case 1: //z axisymmetry
-      Psi += 0.001*cos(theta)*cos(theta);
+    case 0: //constant
+      //do nothing to Psi
+      //std::cout << Psi << std::endl;
+      break;
+    case 1: 
+      //Psi += 0.001*cos(theta)*cos(theta);//z axisymmetry
+      //Psi += 0.1*sin(theta)*sin(theta);//fake axisymmetry
+      break;
     case 2: //x axisymmetry
       Psi += 0.001*(1.0-3.0*cos(theta)*cos(theta)+3.0*sin(theta)*sin(theta)*cos(2.0*phi));
+      break;
     case 3: //y axisymmetry
       Psi += 0.001*(1.0-3.0*cos(theta)*cos(theta)-3.0*sin(theta)*sin(theta)*cos(2.0*phi));
+      break;
     case 4: //xz axisymmetry
       Psi +=  0.001*(-1.0+3.0*cos(theta)*cos(theta)+3.0*sin(theta)*sin(theta)*cos(2.0*phi)
            +6.0*sin(2.0*theta)*cos(phi));
+      break;
     case 5: //xyz axisymmetry
       Psi +=  0.001*(-1.0+3.0*cos(theta)*cos(theta)
            +3.0*sqrt(2.0)*sin(2.0*theta)*(cos(phi)+sin(phi))
            +3.0*sin(theta)*sin(theta)*sin(2.0*phi));
+      break;
   } //end switch
-
+  //std::cout << Psi << std::endl;
   return Psi;
 }
 
@@ -132,9 +143,23 @@ int main(){
   const DataMesh& Psi_xyz = ConstructConformalFactor(theta, phi, xyz);
 */
 
-  for(int i=1; i<6; i++){
+  for(int i=3; i<4; i++){
     std::cout << "iteration = " << i << std::endl;
+    DataMesh Psi_ha(sb.CoefficientMesh());
+    SpherePackIterator sit(theta.Extents()[0],theta.Extents()[1]);
+    Psi_ha[sit(0,0,SpherePackIterator::a)] = 1.;
+    Psi_ha[sit(1,1,SpherePackIterator::a)] = 1.;
+    //const DataMesh Psi = sb.Evaluate(Psi_ha);
     const DataMesh& Psi = ConstructConformalFactor(theta, phi, i);
+    std::cout << "Psi = " << std::endl;
+    //std::cout << Psi << std::endl;
+    for(int m=0; m<Nth; m++){
+      for(int n=0; n<Nph; n++){
+        std::cout << Psi[n*Nth+m] << " ";
+      }
+      std::cout << std::endl;
+    }
+    std::cout << "\n" << std::endl;
     //compute some useful quantities
     const DataMesh rp2 = rad * Psi * Psi;
     const DataMesh llncf = sb.ScalarLaplacian(log(Psi));

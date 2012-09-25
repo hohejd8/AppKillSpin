@@ -108,6 +108,14 @@ namespace ComputeItems {
     if(mVerbose) std::cout << "scale factor = " << scale << std::endl;
     if(mVerbose) std::cout << "average scale factor = " << avgScale << std::endl;
 
+    //compute the inner product
+    const double residual_ip_equator = AKVInnerProduct(v*scale, v*scale, Ricci, rp2, sb);
+    std::cout << "Residual from the inner product of v scaled by the equator = "
+              << residual_ip_equator << std::endl;
+    const double residual_ip_average = AKVInnerProduct(v*avgScale, v*avgScale, Ricci, rp2, sb);
+    std::cout << "Residual from the inner product of v scaled by average scale factor = "
+              << residual_ip_average << std::endl;
+
     //scale L, v
     v *= scale;
     L *= scale;
