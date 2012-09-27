@@ -102,17 +102,23 @@ namespace ComputeItems {
 	      << std::endl;
     }
 
+    //rotate v, Psi for analysis
+    DataMesh rotated_v = RotateOnSphere(v,theta,phi,
+                                          sb,thetap,phip);
+    DataMesh rotated_Psi = RotateOnSphere(Psi,theta,phi,
+                                          sb,thetap,phip);
+
     //determine scale factor at the equator
-    const double scale = normalizeKVAtOnePoint(sb, Psi, v, mRad, M_PI/2., 0.0);
-    const double avgScale = normalizeKVAtAllPoints(sb, Psi, theta, phi, v, mRad);
+    const double scale = normalizeKVAtOnePoint(sb, rotated_Psi, rotated_v, mRad, M_PI/2., 0.0);
+    const double avgScale = normalizeKVAtAllPoints(sb, rotated_Psi, theta, phi, rotated_v, mRad);
     if(mVerbose) std::cout << "scale factor = " << scale << std::endl;
     if(mVerbose) std::cout << "average scale factor = " << avgScale << std::endl;
 
     //compute the inner product
-    const double residual_ip_equator = AKVInnerProduct(v*scale, v*scale, Ricci, rp2, sb);
+    const double residual_ip_equator = AKVInnerProduct(v*scale, v*scale, Ricci, /*rp2,*/ sb);
     std::cout << "Residual from the inner product of v scaled by the equator = "
               << residual_ip_equator << std::endl;
-    const double residual_ip_average = AKVInnerProduct(v*avgScale, v*avgScale, Ricci, rp2, sb);
+    const double residual_ip_average = AKVInnerProduct(v*avgScale, v*avgScale, Ricci, /*rp2,*/ sb);
     std::cout << "Residual from the inner product of v scaled by average scale factor = "
               << residual_ip_average << std::endl;
 

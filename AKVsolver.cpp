@@ -440,7 +440,7 @@ DataMesh RotateOnSphere
           const double Theta,
           const double Phi) 
 {
-  DataMesh result(DataMesh::Empty);
+  DataMesh result(sb.CollocationMesh());
 
   const double Cb = cos(Theta);
   const double Sb = sin(Theta);
@@ -473,7 +473,6 @@ DataMesh RotateOnSphere
     }
     result[i] = sb.Evaluate(collocationvalues, newTheta, newPhi);
   }
-
   return result;
 }
 
@@ -501,10 +500,12 @@ double normalizeKVAtAllPoints(const SurfaceBasis& sb,
 
 double normalizeKVAtOnePoint(const SurfaceBasis& sb,
                               const DataMesh& Psi,
+                              //const DataMesh& theta,
+                              //const DataMesh& phi,
                               const DataMesh& v,
                               const double& rad,
-                              const double& theta/*=M_PI/2.0*/,
-                              const double& phi /*=0.0*/)
+                              const double& thetap, /*=M_PI/2.0*/
+                              const double& phip /*=0.0*/)
 {
   //create xi
   Tensor<DataMesh> tmp_xi = sb.Gradient(v);
@@ -512,31 +513,35 @@ double normalizeKVAtOnePoint(const SurfaceBasis& sb,
   xi(0) = tmp_xi(1);
   xi(1) = -tmp_xi(0);
 
-  return normalizeKVAtOnePoint(sb, Psi, xi, rad, theta, phi);
+  return normalizeKVAtOnePoint(sb, Psi, xi, rad, thetap, phip);
 }
 
 double normalizeKVAtOnePoint(const SurfaceBasis& sb,
                               const DataMesh& Psi,
+                              //const DataMesh& theta,
+                              //const DataMesh& phi,
                               const Tensor<DataMesh>& xi,
                               const double& rad,
-                              const double& theta/*=M_PI/2.0*/,
-                              const double& phi /*=0.0*/)
+                              const double& thetap, /*=M_PI/2.0*/
+                              const double& phip /*=0.0*/)
 {
   //rotate v
 //-:  DataMesh rotated_v = RotateOnSphere(v,
-//-:                       skwm.Grid().SurfaceCoords()(0),
-//-:                       skwm.Grid().SurfaceCoords()(1),
+//-:                       theta,
+//-:                       phi,
 //-:                       sb,
 //-:                       thetap,
 //-:                       phip);
   //DataMesh rotated_v = v;
   //rotate Psi
-//-:  DataMesh rotated_Psi = RotateOnSphere(Psi,
-//-:                       skwm.Grid().SurfaceCoords()(0),
-//-:                       skwm.Grid().SurfaceCoords()(1),
-//-:                       sb,
-//-:                       thetap,
-//-:                       phip);
+/*
+  DataMesh rotated_Psi = RotateOnSphere(Psi,
+                         theta,
+                         phi,
+                         sb,
+                         thetap,
+                         phip);
+*/
   DataMesh rotated_Psi = Psi;
 
   //Rescale the Killing vector. For a rotational Killing vector,
@@ -545,7 +550,7 @@ double normalizeKVAtOnePoint(const SurfaceBasis& sb,
   double t; //affine path length
 
 
-  bool goodtheta = KillingPath(sb, rotated_Psi, xi, rad, t, theta, phi);
+  bool goodtheta = KillingPath(sb, rotated_Psi, xi, rad, t, thetap, phip);
   REQUIRE(goodtheta, "Killing trajectory did not close " << POSITION);
   const double scale = t/(2.0*M_PI);
   std::cout << "Theta = " << std::setprecision(8) << std::setw(10)
@@ -676,7 +681,7 @@ int PathDerivs(double t_required_by_solver, const double y[], double f[], void *
 double AKVInnerProduct(const DataMesh& v1,
                        const DataMesh& v2,
                        const DataMesh& Ricci,
-                       const DataMesh& rp2,
+                       //const DataMesh& rp2,
                        const SurfaceBasis& sb)
 {
   const Tensor<DataMesh> Gradv1 = sb.Gradient(v1);
@@ -687,6 +692,21 @@ double AKVInnerProduct(const DataMesh& v1,
   result *= 0.5;
 
   return result - (8.*M_PI/3.);
+}
+
+double AKVInnerProduct(const Tensor<DataMesh>& xi1,
+                       const double THETA1,
+                       const Tensor<DataMesh>& xi2,
+                       const double THETA2,
+                       const DataMesh& Ricci,
+                       //const DataMesh& rp2,
+                       const SurfaceBasis& sb)
+{
+  double result = sb.Integrate(Ricci*xi1(0)*xi2(0));
+  result += sb.Integrate(Ricci*xi1(1)*xi2(1));
+  result *= (THETA1 - THETA2);
+
+  return result;
 }
 
 void KillingDiagnostics(const SurfaceBasis& sb,

@@ -55,7 +55,7 @@ DataMesh RotateOnSphere
          (const DataMesh& collocationvalues,
           const DataMesh& thetaGrid,
           const DataMesh& phiGrid,
-          const SurfaceBasis& sbe,
+          const SurfaceBasis& sb,
           const double Theta,
           const double Phi);
 
@@ -74,16 +74,20 @@ double normalizeKVAtAllPoints(const SurfaceBasis& sb,
 //value of 2*Pi (the normalization scale factor)
 double normalizeKVAtOnePoint(const SurfaceBasis& sb,
                               const DataMesh& Psi,
+                              //const DataMesh& theta,
+                              //const DataMesh& phi,
                               const DataMesh& v,
                               const double& rad,
-                              const double& theta=M_PI/2.,
-                              const double& phi=0.0);
+                              const double& thetap=M_PI/2.,
+                              const double& phip=0.0);
 double normalizeKVAtOnePoint(const SurfaceBasis& sb,
                               const DataMesh& Psi,
+                              //const DataMesh& theta,
+                              //const DataMesh& phi,
                               const Tensor<DataMesh>& xi,
                               const double& rad,
-                              const double& theta=M_PI/2.0,
-                              const double& phi=0.0);
+                              const double& thetap=M_PI/2.0,
+                              const double& phip=0.0);
 
 
 bool KillingPath(const SurfaceBasis& sb,
@@ -101,12 +105,22 @@ int PathDerivs(double t_required_by_solver,
                void *params);
 
 //determines value of the integral
-// \frac{1}{2} \oint ^2R((_s \vec \nabla v_1) \cdot (\vec \nabla v_2) d\Omega
+// \frac{1}{2} \oint ^2R((_s \vec \nabla v_1) \cdot (_s \vec \nabla v_2) d\Omega
 //and returns the ratio of this result to (8*\pi / 3)
 double AKVInnerProduct(const DataMesh& v1,
                        const DataMesh& v2,
                        const DataMesh& Ricci,
-                       const DataMesh& rp2,
+                       //const DataMesh& rp2,
+                       const SurfaceBasis& sb);
+
+//determines value of the integral
+//(\Theta_1 - \Theta_2) \oint ^2R((\vec \xi_1) \cdot (\vec \xi_2) d\Omega
+double AKVInnerProduct(const Tensor<DataMesh>& xi1,
+                       const double THETA1,
+                       const Tensor<DataMesh>& xi2,
+                       const double THETA2,
+                       const DataMesh& Ricci,
+                       //const DataMesh& rp2,
                        const SurfaceBasis& sb);
 
 //performs diagnostics on the approximate Killing vector solution

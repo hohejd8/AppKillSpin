@@ -10,7 +10,7 @@
 //#include "Utils/ErrorHandling/Assert.hpp"
 #include "AppKillSpin/AKVsolver.hpp"
 #include "Spectral/BasisFunctions/SpherePackIterator.hpp"
-
+#include "Utils/LowLevelUtils/Position.hpp"
 //This test file essentially copies and replaces
 //pieces of the ComputeAKV ComputeItem. The test
 //is actually for the AKVsolver functions, which
@@ -18,19 +18,16 @@
 
 int NumberOfTestsFailed = 0;
 
-//enum Axisymmetry {z, x, y, xz, xyz};
-
 DataMesh ConstructConformalFactor(const DataMesh& theta,
                                   const DataMesh& phi,
                                   const int& axisym)
 {
-  std::cout << "Inside ConstructConformalFactor; axisym = " << axisym << std::endl;
-  double D = 1.e-9;
-  const double tpd = 2.0+D;
-  const double tmd = 2.0-D;
+  //double D = 1.e-9;
+  //const double tpd = 2.0+D;
+  //const double tmd = 2.0-D;
 
-  double B = 0.001*(1.0/(tpd*tpd)-1.0/tpd + 0.25);
-  double C = 0.001*(1.0/(tmd*tmd)-1.0/tmd + 0.25);
+  //double B = 0.001*(1.0/(tpd*tpd)-1.0/tpd + 0.25);
+  //double C = 0.001*(1.0/(tmd*tmd)-1.0/tmd + 0.25);
 
   DataMesh Psi(theta); //copy constructor to get the right size
 
@@ -44,7 +41,7 @@ DataMesh ConstructConformalFactor(const DataMesh& theta,
       //std::cout << Psi << std::endl;
       break;
     case 1: 
-      //Psi += 0.001*cos(theta)*cos(theta);//z axisymmetry
+      Psi += 0.001*cos(theta)*cos(theta);//z axisymmetry
       //Psi += 0.1*sin(theta)*sin(theta);//fake axisymmetry
       break;
     case 2: //x axisymmetry
@@ -63,17 +60,9 @@ DataMesh ConstructConformalFactor(const DataMesh& theta,
            +3.0*sin(theta)*sin(theta)*sin(2.0*phi));
       break;
   } //end switch
-  //std::cout << Psi << std::endl;
+
   return Psi;
 }
-
-/*
-void ComputeAKV(rparams p, MyVector<double> AKVGuess, const double rad,
-                const double min_thetap, const bool verbose)
-{
-
-}
-*/
 
 int main(){
 
@@ -118,10 +107,6 @@ int main(){
   const std::string solver = op.Get<std::string>("Solver","Newton");
   const bool verbose = op.Get<bool>("Verbose", false);
 
-  double THETA = AKVGuess[0];
-  double thetap = AKVGuess[1];
-  double phip = AKVGuess[2];
-
   //create skm
   const StrahlkorperMesh skm(Nth, Nph);
   //create surface basis
@@ -129,63 +114,87 @@ int main(){
   //get theta, phi
   const DataMesh theta(skm.SurfaceCoords()(0));
   const DataMesh phi(skm.SurfaceCoords()(1));
-  //create L, v
-  DataMesh L(DataMesh::Empty);
-  DataMesh v(DataMesh::Empty);
 
-//put all of this in a for loop?
-/*
+  //set the initial guesses to be along particular axes
+  const int axes = 3; //the number of perpendicular axes
+
   //create conformal factors for every rotation
-  const DataMesh& Psi_z = ConstructConformalFactor(theta, phi, z);
-  const DataMesh& Psi_x = ConstructConformalFactor(theta, phi, x);
-  const DataMesh& Psi_y = ConstructConformalFactor(theta, phi, y);
-  const DataMesh& Psi_xz = ConstructConformalFactor(theta, phi, xz);
-  const DataMesh& Psi_xyz = ConstructConformalFactor(theta, phi, xyz);
-*/
+  const int syms = 4; //the number of axisymmetries we are testing
 
-  for(int i=3; i<4; i++){
-    std::cout << "iteration = " << i << std::endl;
-    DataMesh Psi_ha(sb.CoefficientMesh());
-    SpherePackIterator sit(theta.Extents()[0],theta.Extents()[1]);
-    Psi_ha[sit(0,0,SpherePackIterator::a)] = 1.;
-    Psi_ha[sit(1,1,SpherePackIterator::a)] = 1.;
-    //const DataMesh Psi = sb.Evaluate(Psi_ha);
-    const DataMesh& Psi = ConstructConformalFactor(theta, phi, i);
-    std::cout << "Psi = " << std::endl;
-    //std::cout << Psi << std::endl;
-    for(int m=0; m<Nth; m++){
-      for(int n=0; n<Nph; n++){
-        std::cout << Psi[n*Nth+m] << " ";
-      }
-      std::cout << std::endl;
-    }
-    std::cout << "\n" << std::endl;
+
+  for(int s=0; s<syms; s++){//index over conformal factor symmetries
+    //create conformal factor
+    const DataMesh Psi = ConstructConformalFactor(theta, phi, s);
+
+    //set the initial guesses to be along particular axes
+    double THETA[3] = {0.,0.,0.};
+    double thetap[3] = {0.,M_PI/2.,M_PI/2.};
+    double phip[3] = {0.,0.,M_PI/2.};
+
+    MyVector<Tensor<DataMesh> > xi(MV::Size(axes),Tensor<DataMesh>(2,"1",DataMesh::Empty));
+
     //compute some useful quantities
     const DataMesh rp2 = rad * Psi * Psi;
     const DataMesh llncf = sb.ScalarLaplacian(log(Psi));
     const DataMesh Ricci = (1.0-2.0*llncf) / (rp2*rp2);
     const Tensor<DataMesh> GradRicci = sb.Gradient(Ricci);
 
-    //setup struct with all necessary data
-    rparams p = {theta, phi, rp2, sb, llncf, GradRicci,
-                 L, v, L_resid_tol, v_resid_tol, verbose};
+    for(int a=0; a<axes; a++){//index over perpendicular AKV axes
+      //create L, v
+      DataMesh L(DataMesh::Empty);
+      DataMesh v(DataMesh::Empty);
 
-    RunAKVsolvers(THETA, thetap, phip, min_thetap,
-                  residualSize, verbose, &p, solver);
+      //setup struct with all necessary data
+      rparams p = {theta, phi, rp2, sb, llncf, GradRicci,
+                   L, v, L_resid_tol, v_resid_tol, verbose};
 
-    if(true){
-      std::cout << "Solution found with : THETA  = " << THETA << "\n"
-	      << "                      thetap = " << (180.0/M_PI)*thetap << "\n"
-	      << "                        phip = " << (180.0/M_PI)*phip 
-	      << std::endl;
-    }
+      RunAKVsolvers(THETA[a], thetap[a], phip[a], min_thetap,
+                    residualSize, verbose, &p, solver);
 
-    //determine scale factor
-    const double scale = normalizeKVAtOnePoint(sb, Psi, v, rad, M_PI/2., 0.0);
-    if(true) std::cout << "scale factor = " << scale << std::endl;
+      if(true){
+        std::cout << "Solution found with : THETA[" << a << "] = " << THETA[a] << "\n"
+  	          << "                     thetap[" << a << "] = " << (180.0/M_PI)*thetap[a] << "\n"
+	          << "                       phip[" << a << "] = " << (180.0/M_PI)*phip[a] 
+	          << std::endl;
+      }
 
+      //rotate v, Psi for analysis
+      DataMesh rotated_v = RotateOnSphere(v,theta,phi,
+                                          sb,thetap[a],phip[a]);
+
+      DataMesh rotated_Psi = RotateOnSphere(Psi,theta,phi,
+                                            sb,thetap[a],phip[a]);
+
+      //determine scale factor
+      const double scale = normalizeKVAtOnePoint(sb, rotated_Psi, rotated_v, rad, M_PI/2., 0.0);
+      //if(true) std::cout << "scale factor = " << scale << std::endl;
+
+      //const double residual_ip_equator = AKVInnerProduct(v*scale, v*scale, Ricci, /*rp2,*/ sb);
+      //std::cout << "Residual from the inner product of v scaled by the equator = "
+      //          << residual_ip_equator << std::endl;
+
+      //scale L, v
+      v *= scale;
+      L *= scale;
+
+      //create xi (1-form)
+      Tensor<DataMesh> tmp_xi = sb.Gradient(v);
+      xi[a](0) = tmp_xi(1);
+      xi[a](1) = -tmp_xi(0);
+
+      //KillingDiagnostics(sb, L, Psi[s], xi[a], rad, MyVector<bool>(MV::Size(6),true) );
+    }//end loop over perpendicular AKV axes
+
+    //compute inner products between AKV solutions
+    const double zx = AKVInnerProduct(xi[0], THETA[0], xi[1], THETA[1], Ricci, sb);
+    std::cout << "z-x inner product = " << zx << std::endl;
+    const double zy = AKVInnerProduct(xi[0], THETA[0], xi[2], THETA[2], Ricci, sb);
+    std::cout << "z-y inner product = " << zy << std::endl;
+    const double xy = AKVInnerProduct(xi[1], THETA[1], xi[2], THETA[2], Ricci, sb);
+    std::cout << "x-y inner product = " << xy << std::endl;
+
+    std::cout << "\n" << std::endl;
   }
-
 
 
   // Return 0 for success
