@@ -686,12 +686,22 @@ double AKVInnerProduct(const DataMesh& v1,
 {
   const Tensor<DataMesh> Gradv1 = sb.Gradient(v1);
   const Tensor<DataMesh> Gradv2 = sb.Gradient(v2);
+  DataMesh integrand = 0.5*Ricci*(Gradv1(0)*Gradv2(0)+Gradv1(1)*Gradv2(1));
 
+  //integrate using collocation values
+/*
   double result = sb.Integrate(Ricci*Gradv1(0)*Gradv2(0));
   result += sb.Integrate(Ricci*Gradv1(1)*Gradv2(1));
   result *= 0.5;
+*/
+  double result = sb.Integrate(integrand);
+  //std::cout << "result = " << result << std::endl;// - (8.*M_PI/3.);
 
-  return result - (8.*M_PI/3.);
+  //integrate using harmonic decomposition
+  //DataMesh integrand = 0.5*Ricci*(Gradv1(0)*Gradv2(0)+Gradv1(1)*Gradv2(1));
+  double integral = sb.ComputeCoefficients(integrand)[0];
+
+  return integral;
 }
 
 double AKVInnerProduct(const Tensor<DataMesh>& xi1,

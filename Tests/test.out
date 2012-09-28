@@ -1,0 +1,96 @@
+completely symmetric
+Staring the gsl 1D root finder at thetap = 0.0.
+Solution found with : THETA[0] = -3.32889e-16
+                     thetap[0] = 0
+                       phip[0] = 0
+Theta =  1.5707963 : T = 6.283185307 (1)
+Starting the gsl multidimensional root finder.
+Solution found with : THETA[1] = 2.417529063e-16
+                     thetap[1] = 89.99999338
+                       phip[1] = 3.227059452e-06
+Theta =  1.5707963 : T = 6.283185307 (1)
+Starting the gsl multidimensional root finder.
+Solution found with : THETA[2] = 7.604887841e-16
+                     thetap[2] = 89.99998514
+                       phip[2] = 90.00002046
+Theta =  1.5707963 : T = 6.283185307 (1)
+z-z inner product = 2.53083375
+x-x inner product = 2.53083375
+y-y inner product = 2.53083375
+z-x inner product = -1.493279536e-21
+z-y inner product = -6.376388903e-21
+x-y inner product = 3.78211203e-21
+
+
+z axisymmetry
+Staring the gsl 1D root finder at thetap = 0.0.
+Solution found with : THETA[0] = -7.768791697e-16
+                     thetap[0] = 0
+                       phip[0] = 0
+Theta =  1.5707963 : T = 6.275333954 (0.9987504183)
+Starting the gsl multidimensional root finder.
+Solution found with : THETA[1] = -1.300129938e-06
+                     thetap[1] = 89.99999982
+                       phip[1] = -2.735026317e-09
+Theta =  1.5707963 : T = 6.287109687 (1.000624584)
+Starting the gsl multidimensional root finder.
+Solution found with : THETA[2] = -1.300129949e-06
+                     thetap[2] = 89.9999569
+                       phip[2] = 90.00000004
+Theta =  1.5707963 : T = 6.287109687 (1.000624584)
+z-z inner product = 2.529255247
+x-x inner product = 2.535580813
+y-y inner product = 2.535580813
+z-x inner product = 9.210917343e-14
+z-y inner product = 2.202379476e-11
+x-y inner product = -5.848152171e-21
+
+
+x axisymmetry
+Staring the gsl 1D root finder at thetap = 0.0.
+Solution found with : THETA[0] = -4.660178449e-05
+                     thetap[0] = 0
+                       phip[0] = 0
+Theta =  1.5707963 : T = 6.306689697 (1.00374084)
+Starting the gsl multidimensional root finder.
+Solution found with : THETA[1] = 4.263709317e-16
+                     thetap[1] = 90
+                       phip[1] = 1.421993869e-10
+Theta =  1.5707963 : T = 6.236082389 (0.9925033378)
+Starting the gsl multidimensional root finder.
+Solution found with : THETA[2] = -4.660178444e-05
+                     thetap[2] = 90.00036881
+                       phip[2] = 89.99999997
+Theta =  1.5707963 : T = 6.306689697 (1.00374084)
+z-z inner product = 2.54345413
+x-x inner product = 2.505724458
+y-y inner product = 2.54345413
+z-x inner product = -3.500992297e-17
+z-y inner product = 7.773906713e-18
+x-y inner product = -2.400578547e-11
+
+
+y axisymmetry
+Staring the gsl 1D root finder at thetap = 0.0.
+Solution found with : THETA[0] = -4.660178449e-05
+                     thetap[0] = 0
+                       phip[0] = 0
+Theta =  1.5707963 : T = 6.306689696 (1.00374084)
+Starting the gsl multidimensional root finder.
+Solution found with : THETA[1] = -4.660178243e-05
+                     thetap[1] = 0.5043477019
+                       phip[1] = 0.0001689807077
+Theta =  1.5707963 : T = 6.306689697 (1.00374084)
+Starting the gsl multidimensional root finder.
+Solution found with : THETA[2] = 1.667070773e-17
+                     thetap[2] = 90
+                       phip[2] = 90
+Theta =  1.5707963 : T = 6.236082389 (0.9925033378)
+z-z inner product = 2.54345413
+x-x inner product = 2.54345413
+y-y inner product = 2.505724458
+z-x inner product = -4.649273403e-11
+z-y inner product = -2.017125775e-16
+x-y inner product = -2.702751048e-11
+
+

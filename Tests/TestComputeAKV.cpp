@@ -38,26 +38,30 @@ DataMesh ConstructConformalFactor(const DataMesh& theta,
   switch(axisym){
     case 0: //constant
       //do nothing to Psi
-      //std::cout << Psi << std::endl;
+      std::cout << "completely symmetric" << std::endl;
       break;
     case 1: 
       Psi += 0.001*cos(theta)*cos(theta);//z axisymmetry
-      //Psi += 0.1*sin(theta)*sin(theta);//fake axisymmetry
+      std::cout << "z axisymmetry" << std::endl;
       break;
     case 2: //x axisymmetry
       Psi += 0.001*(1.0-3.0*cos(theta)*cos(theta)+3.0*sin(theta)*sin(theta)*cos(2.0*phi));
+      std::cout << "x axisymmetry" << std::endl;
       break;
     case 3: //y axisymmetry
       Psi += 0.001*(1.0-3.0*cos(theta)*cos(theta)-3.0*sin(theta)*sin(theta)*cos(2.0*phi));
+      std::cout << "y axisymmetry" << std::endl;
       break;
     case 4: //xz axisymmetry
       Psi +=  0.001*(-1.0+3.0*cos(theta)*cos(theta)+3.0*sin(theta)*sin(theta)*cos(2.0*phi)
            +6.0*sin(2.0*theta)*cos(phi));
+      std::cout << "xz axisymmetry" << std::endl;
       break;
     case 5: //xyz axisymmetry
       Psi +=  0.001*(-1.0+3.0*cos(theta)*cos(theta)
            +3.0*sqrt(2.0)*sin(2.0*theta)*(cos(phi)+sin(phi))
            +3.0*sin(theta)*sin(theta)*sin(2.0*phi));
+      std::cout << "xyz axisymmetry" << std::endl;
       break;
   } //end switch
 
@@ -94,7 +98,7 @@ int main(){
   OptionParser op(Options,Help);
   const int Nth = op.Get<int>("Nth", 3);
   const int Nph = op.Get<int>("Nph", 4);
-  const double rad = op.Get<int>("Radius",1.0);
+  const double rad = 1.0;//op.Get<int>("Radius",1.0);
   MyVector<double> AKVGuess =
                 op.Get<MyVector<double> >("AKVGuess",MyVector<double>(MV::Size(3),0.0));
       //must be three-dimensional
@@ -131,6 +135,10 @@ int main(){
     double thetap[3] = {0.,M_PI/2.,M_PI/2.};
     double phip[3] = {0.,0.,M_PI/2.};
 
+    //save the v solutions along particular axes
+    MyVector<DataMesh> v(MV::Size(3),DataMesh::Empty);
+    MyVector<DataMesh> rotated_v(MV::Size(3),DataMesh::Empty);
+
     MyVector<Tensor<DataMesh> > xi(MV::Size(axes),Tensor<DataMesh>(2,"1",DataMesh::Empty));
 
     //compute some useful quantities
@@ -142,11 +150,11 @@ int main(){
     for(int a=0; a<axes; a++){//index over perpendicular AKV axes
       //create L, v
       DataMesh L(DataMesh::Empty);
-      DataMesh v(DataMesh::Empty);
+      //DataMesh v(DataMesh::Empty);
 
       //setup struct with all necessary data
       rparams p = {theta, phi, rp2, sb, llncf, GradRicci,
-                   L, v, L_resid_tol, v_resid_tol, verbose};
+                   L, v[a], L_resid_tol, v_resid_tol, verbose};
 
       RunAKVsolvers(THETA[a], thetap[a], phip[a], min_thetap,
                     residualSize, verbose, &p, solver);
@@ -159,14 +167,15 @@ int main(){
       }
 
       //rotate v, Psi for analysis
-      DataMesh rotated_v = RotateOnSphere(v,theta,phi,
+      //DataMesh rotated_v = RotateOnSphere(v[a],theta,phi,
+      rotated_v[a] = RotateOnSphere(v[a],theta,phi,
                                           sb,thetap[a],phip[a]);
 
       DataMesh rotated_Psi = RotateOnSphere(Psi,theta,phi,
                                             sb,thetap[a],phip[a]);
 
       //determine scale factor
-      const double scale = normalizeKVAtOnePoint(sb, rotated_Psi, rotated_v, rad, M_PI/2., 0.0);
+      const double scale = normalizeKVAtOnePoint(sb, rotated_Psi, rotated_v[a], rad, M_PI/2., 0.0);
       //if(true) std::cout << "scale factor = " << scale << std::endl;
 
       //const double residual_ip_equator = AKVInnerProduct(v*scale, v*scale, Ricci, /*rp2,*/ sb);
@@ -174,16 +183,28 @@ int main(){
       //          << residual_ip_equator << std::endl;
 
       //scale L, v
-      v *= scale;
+      v[a] *= scale;
       L *= scale;
 
       //create xi (1-form)
-      Tensor<DataMesh> tmp_xi = sb.Gradient(v);
+      Tensor<DataMesh> tmp_xi = sb.Gradient(v[a]);
       xi[a](0) = tmp_xi(1);
       xi[a](1) = -tmp_xi(0);
 
       //KillingDiagnostics(sb, L, Psi[s], xi[a], rad, MyVector<bool>(MV::Size(6),true) );
+
+      //const double vv = AKVInnerProduct(rotated_v[a], rotated_v[a], Ricci, sb);
+      //std::cout << "v-v inner product = " << vv << std::endl;
     }//end loop over perpendicular AKV axes
+
+    //compute inner product for each individual AKV solution
+    const double zz = AKVInnerProduct(v[0], v[0], Ricci, sb);
+    std::cout << "z-z inner product = " << zz << std::endl;
+    const double xx = AKVInnerProduct(v[1], v[1], Ricci, sb);
+    std::cout << "x-x inner product = " << xx << std::endl;
+    const double yy = AKVInnerProduct(v[2], v[2], Ricci, sb);
+    std::cout << "y-y inner product = " << yy << std::endl;
+
 
     //compute inner products between AKV solutions
     const double zx = AKVInnerProduct(xi[0], THETA[0], xi[1], THETA[1], Ricci, sb);
