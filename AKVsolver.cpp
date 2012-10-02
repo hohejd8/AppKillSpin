@@ -695,11 +695,11 @@ double AKVInnerProduct(const DataMesh& v1,
   result *= 0.5;
 */
   double result = sb.Integrate(integrand);
-  //std::cout << "result = " << result << std::endl;// - (8.*M_PI/3.);
+  std::cout << "result = " << result << std::endl;// - (8.*M_PI/3.);
 
   //integrate using harmonic decomposition
   //DataMesh integrand = 0.5*Ricci*(Gradv1(0)*Gradv2(0)+Gradv1(1)*Gradv2(1));
-  double integral = sb.ComputeCoefficients(integrand)[0];
+  double integral = sqrt(2.)*M_PI*sb.ComputeCoefficients(integrand)[0];
 
   return integral;
 }
