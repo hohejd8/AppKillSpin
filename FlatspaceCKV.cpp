@@ -63,7 +63,7 @@ namespace ComputeItems {
       //inertialXC(i) = swm.GlobalCoords()[i] - swm.Center();
     }
 
-    //Xi (translational Killing vectors) and XiRot (rotational Killing vectors)
+    //Xi (translational Killing vectors) and RotXi (rotational Killing vectors)
     //The ith 1-form is \partial_j x^i
     MyVector<TDm> inertialXi(MV::fill,zero,zero,zero);
     MyVector<TDm> inertialRotXi(MV::fill,zero,zero,zero);

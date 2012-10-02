@@ -14,15 +14,14 @@ Solution found with : THETA[2] = 7.604887841e-16
                      thetap[2] = 89.99998514
                        phip[2] = 90.00002046
 Theta =  1.5707963 : T = 6.283185307 (1)
-result = 30.18341441
-z-z inner product = 30.18341441
-result = 30.18341441
-x-x inner product = 30.18341441
-result = 30.18341441
-y-y inner product = 30.18341441
+z-z inner product = 1
+x-x inner product = 1
+y-y inner product = 1
+passed TestComputeAKV.cpp (line 220; main)
 z-x inner product = -1.493279536e-21
 z-y inner product = -6.376388903e-21
 x-y inner product = 3.78211203e-21
+passed TestComputeAKV.cpp (line 229; main)
 
 
 z axisymmetry
@@ -41,15 +40,14 @@ Solution found with : THETA[2] = -1.300129949e-06
                      thetap[2] = 89.9999569
                        phip[2] = 90.00000004
 Theta =  1.5707963 : T = 6.287109687 (1.000624584)
-result = 30.22118793
-z-z inner product = 30.22118793
-result = 30.25897355
-x-x inner product = 30.25897355
-result = 30.25897355
-y-y inner product = 30.25897355
+z-z inner product = 0.9987504183
+x-x inner product = 1.000622427
+y-y inner product = 1.000622427
+passed TestComputeAKV.cpp (line 220; main)
 z-x inner product = 9.210917343e-14
 z-y inner product = 2.202379476e-11
 x-y inner product = -5.848152171e-21
+passed TestComputeAKV.cpp (line 229; main)
 
 
 x axisymmetry
@@ -68,15 +66,14 @@ Solution found with : THETA[2] = -4.660178444e-05
                      thetap[2] = 90.00036881
                        phip[2] = 89.99999997
 Theta =  1.5707963 : T = 6.306689697 (1.00374084)
-result = 30.25960047
-z-z inner product = 30.25960047
-result = 30.03367491
-x-x inner product = 30.03367491
-result = 30.25960047
-y-y inner product = 30.25960047
+z-z inner product = 1.003663319
+x-x inner product = 0.9925033378
+y-y inner product = 1.003663319
+passed TestComputeAKV.cpp (line 220; main)
 z-x inner product = -3.500992297e-17
 z-y inner product = 7.773906713e-18
 x-y inner product = -2.400578547e-11
+passed TestComputeAKV.cpp (line 229; main)
 
 
 y axisymmetry
@@ -95,14 +92,13 @@ Solution found with : THETA[2] = 1.667070773e-17
                      thetap[2] = 90
                        phip[2] = 90
 Theta =  1.5707963 : T = 6.236082389 (0.9925033378)
-result = 30.25960046
-z-z inner product = 30.25960046
-result = 30.25960047
-x-x inner product = 30.25960047
-result = 30.03367491
-y-y inner product = 30.03367491
+z-z inner product = 1.003663319
+x-x inner product = 1.003663319
+y-y inner product = 0.9925033378
+passed TestComputeAKV.cpp (line 220; main)
 z-x inner product = -4.649273403e-11
 z-y inner product = -2.017125775e-16
 x-y inner product = -2.702751048e-11
+passed TestComputeAKV.cpp (line 229; main)
 
 

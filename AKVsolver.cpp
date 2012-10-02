@@ -314,6 +314,7 @@ int AKVsolver(const gsl_vector * x,
   Tensor<DataMesh> Gradv(2,"1",DataMesh::Empty); //Gradient of v, eq. 97
 
   while(unsolved){
+
     //eq. 97, first term: compute Laplacian of L
     RHS = sb.ScalarLaplacian(L_ha);
 
@@ -371,6 +372,7 @@ int AKVsolver(const gsl_vector * x,
     //compute laplacian of delta v
     //NOTE: RHS changes definitions here
     RHS = sb.ScalarLaplacian(v_ha);
+
     RHS = -RHS - 2.0*rp2*rp2*L;
 
     //remove the l=0 mode from RHS
@@ -681,25 +683,16 @@ int PathDerivs(double t_required_by_solver, const double y[], double f[], void *
 double AKVInnerProduct(const DataMesh& v1,
                        const DataMesh& v2,
                        const DataMesh& Ricci,
-                       //const DataMesh& rp2,
+                       const DataMesh& rp2,
                        const SurfaceBasis& sb)
 {
   const Tensor<DataMesh> Gradv1 = sb.Gradient(v1);
   const Tensor<DataMesh> Gradv2 = sb.Gradient(v2);
-  DataMesh integrand = 0.5*Ricci*(Gradv1(0)*Gradv2(0)+Gradv1(1)*Gradv2(1));
+  //the factor of 1/2 in the integrand is cancelled by the
+  //missing factor of 2 in the Ricci scalar
+  DataMesh integrand = Ricci*(Gradv1(0)*Gradv2(0)+Gradv1(1)*Gradv2(1))/(rp2*rp2);
 
-  //integrate using collocation values
-/*
-  double result = sb.Integrate(Ricci*Gradv1(0)*Gradv2(0));
-  result += sb.Integrate(Ricci*Gradv1(1)*Gradv2(1));
-  result *= 0.5;
-*/
-  double result = sb.Integrate(integrand);
-  std::cout << "result = " << result << std::endl;// - (8.*M_PI/3.);
-
-  //integrate using harmonic decomposition
-  //DataMesh integrand = 0.5*Ricci*(Gradv1(0)*Gradv2(0)+Gradv1(1)*Gradv2(1));
-  double integral = sqrt(2.)*M_PI*sb.ComputeCoefficients(integrand)[0];
+  double integral = (3.*sqrt(2.)/8.0)*sb.ComputeCoefficients(integrand)[0];
 
   return integral;
 }

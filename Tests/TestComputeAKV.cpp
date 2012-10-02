@@ -98,7 +98,7 @@ int main(){
   OptionParser op(Options,Help);
   const int Nth = op.Get<int>("Nth", 3);
   const int Nph = op.Get<int>("Nph", 4);
-  const double rad = 1.0;//op.Get<int>("Radius",1.0);
+  const double rad = op.Get<int>("Radius",1.0);
   MyVector<double> AKVGuess =
                 op.Get<MyVector<double> >("AKVGuess",MyVector<double>(MV::Size(3),0.0));
       //must be three-dimensional
@@ -144,13 +144,12 @@ int main(){
     //compute some useful quantities
     const DataMesh rp2 = rad * Psi * Psi;
     const DataMesh llncf = sb.ScalarLaplacian(log(Psi));
-    const DataMesh Ricci = (1.0-2.0*llncf) / (rp2*rp2);
+    const DataMesh Ricci = (1.0-2.0*llncf) / (rp2*rp2);// * 2.0;
     const Tensor<DataMesh> GradRicci = sb.Gradient(Ricci);
 
     for(int a=0; a<axes; a++){//index over perpendicular AKV axes
       //create L, v
       DataMesh L(DataMesh::Empty);
-      //DataMesh v(DataMesh::Empty);
 
       //setup struct with all necessary data
       rparams p = {theta, phi, rp2, sb, llncf, GradRicci,
@@ -197,12 +196,26 @@ int main(){
       //std::cout << "v-v inner product = " << vv << std::endl;
     }//end loop over perpendicular AKV axes
 
+//std::cout << "Psi" << std::endl;
+//std::cout << Psi << std::endl;
+/*
+std::cout << "v[0]" << std::endl;
+std::cout << v[0] << std::endl;
+std::cout << "xi(0)" << std::endl;
+std::cout << xi[0](0) << std::endl;
+std::cout << "xi(1)" << std::endl;
+std::cout << xi[0](1) << std::endl;
+std::cout << "sin(phi)*sin(theta)" << std::endl;
+std::cout << sin(phi)*sin(theta) << std::endl;
+std::cout << "scaled sin(theta)" << std::endl;
+std::cout << 2.68435455975*sin(theta) << std::endl;
+*/
     //compute inner product for each individual AKV solution
-    const double zz = AKVInnerProduct(v[0], v[0], Ricci, sb);
+    const double zz = AKVInnerProduct(v[0], v[0], Ricci, rp2, sb);
     std::cout << "z-z inner product = " << zz << std::endl;
-    const double xx = AKVInnerProduct(v[1], v[1], Ricci, sb);
+    const double xx = AKVInnerProduct(v[1], v[1], Ricci, rp2, sb);
     std::cout << "x-x inner product = " << xx << std::endl;
-    const double yy = AKVInnerProduct(v[2], v[2], Ricci, sb);
+    const double yy = AKVInnerProduct(v[2], v[2], Ricci, rp2, sb);
     std::cout << "y-y inner product = " << yy << std::endl;
 
 
@@ -213,7 +226,6 @@ int main(){
     std::cout << "z-y inner product = " << zy << std::endl;
     const double xy = AKVInnerProduct(xi[1], THETA[1], xi[2], THETA[2], Ricci, sb);
     std::cout << "x-y inner product = " << xy << std::endl;
-
     std::cout << "\n" << std::endl;
   }
 

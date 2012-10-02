@@ -110,7 +110,7 @@ int PathDerivs(double t_required_by_solver,
 double AKVInnerProduct(const DataMesh& v1,
                        const DataMesh& v2,
                        const DataMesh& Ricci,
-                       //const DataMesh& rp2,
+                       const DataMesh& rp2,
                        const SurfaceBasis& sb);
 
 //determines value of the integral
