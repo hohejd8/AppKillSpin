@@ -14,14 +14,24 @@ Solution found with : THETA[2] = 7.604887841e-16
                      thetap[2] = 89.99998514
                        phip[2] = 90.00002046
 Theta =  1.5707963 : T = 6.283185307 (1)
-z-z inner product = 1
-x-x inner product = 1
-y-y inner product = 1
-passed TestComputeAKV.cpp (line 220; main)
-z-x inner product = -1.493279536e-21
-z-y inner product = -6.376388903e-21
-x-y inner product = 3.78211203e-21
-passed TestComputeAKV.cpp (line 229; main)
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3
+1
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA
+1
+z-z inner product = 2.68435456
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3
+1
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA
+1
+x-x inner product = 2.68435456
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3
+1
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA
+1
+y-y inner product = 2.68435456
+z-x inner product = -2.986559073e-21
+z-y inner product = -1.275277781e-20
+x-y inner product = 7.56422406e-21
 
 
 z axisymmetry
@@ -40,14 +50,24 @@ Solution found with : THETA[2] = -1.300129949e-06
                      thetap[2] = 89.9999569
                        phip[2] = 90.00000004
 Theta =  1.5707963 : T = 6.287109687 (1.000624584)
-z-z inner product = 0.9987504183
-x-x inner product = 1.000622427
-y-y inner product = 1.000622427
-passed TestComputeAKV.cpp (line 220; main)
-z-x inner product = 9.210917343e-14
-z-y inner product = 2.202379476e-11
-x-y inner product = -5.848152171e-21
-passed TestComputeAKV.cpp (line 229; main)
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3
+0.9987504183
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA
+0.9983356267
+z-z inner product = 2.682680304
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3
+1.000622427
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA
+1.000832424
+x-x inner product = 2.689389581
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3
+1.000622427
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA
+1.000832424
+y-y inner product = 2.689389581
+z-x inner product = 1.842183469e-13
+z-y inner product = 4.404758952e-11
+x-y inner product = -1.169630434e-20
 
 
 x axisymmetry
@@ -66,14 +86,24 @@ Solution found with : THETA[2] = -4.660178444e-05
                      thetap[2] = 90.00036881
                        phip[2] = 89.99999997
 Theta =  1.5707963 : T = 6.306689697 (1.00374084)
-z-z inner product = 1.003663319
-x-x inner product = 0.9925033378
-y-y inner product = 1.003663319
-passed TestComputeAKV.cpp (line 220; main)
-z-x inner product = -3.500992297e-17
-z-y inner product = 7.773906713e-18
-x-y inner product = -2.400578547e-11
-passed TestComputeAKV.cpp (line 229; main)
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3
+1.003663319
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA
+1.004974865
+z-z inner product = 2.697740494
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3
+0.9925033378
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA
+0.990067039
+x-x inner product = 2.657722134
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3
+1.003663319
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA
+1.004974865
+y-y inner product = 2.697740494
+z-x inner product = -7.001984593e-17
+z-y inner product = 1.554781343e-17
+x-y inner product = -4.801157093e-11
 
 
 y axisymmetry
@@ -92,13 +122,23 @@ Solution found with : THETA[2] = 1.667070773e-17
                      thetap[2] = 90
                        phip[2] = 90
 Theta =  1.5707963 : T = 6.236082389 (0.9925033378)
-z-z inner product = 1.003663319
-x-x inner product = 1.003663319
-y-y inner product = 0.9925033378
-passed TestComputeAKV.cpp (line 220; main)
-z-x inner product = -4.649273403e-11
-z-y inner product = -2.017125775e-16
-x-y inner product = -2.702751048e-11
-passed TestComputeAKV.cpp (line 229; main)
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3
+1.003663319
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA
+1.004974865
+z-z inner product = 2.697740494
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3
+1.003663319
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA
+1.004974865
+x-x inner product = 2.697740494
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3
+0.9925033378
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA
+0.990067039
+y-y inner product = 2.657722134
+z-x inner product = -9.298546805e-11
+z-y inner product = -4.03425155e-16
+x-y inner product = -5.405502096e-11
 
 

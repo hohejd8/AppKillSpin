@@ -323,7 +323,7 @@ int AKVsolver(const gsl_vector * x,
 
     //compute eq. 97
     RHS = -RHS 
-          + (4.0*llncf*L + GradRicci(0)*Gradv(0) + GradRicci(1)*Gradv(1) -2.0*L)*(1.0-THETA);
+          + (4.0*llncf*L + 0.5*GradRicci(0)*Gradv(0) + 0.5*GradRicci(1)*Gradv(1) -2.0*L)*(1.0-THETA);
 
     //perform harmonic analysis on RHS
     RHS_ha = sb.ComputeCoefficients(RHS);
@@ -688,11 +688,17 @@ double AKVInnerProduct(const DataMesh& v1,
 {
   const Tensor<DataMesh> Gradv1 = sb.Gradient(v1);
   const Tensor<DataMesh> Gradv2 = sb.Gradient(v2);
-  //the factor of 1/2 in the integrand is cancelled by the
-  //missing factor of 2 in the Ricci scalar
-  DataMesh integrand = Ricci*(Gradv1(0)*Gradv2(0)+Gradv1(1)*Gradv2(1))/(rp2*rp2);
 
-  double integral = (3.*sqrt(2.)/8.0)*sb.ComputeCoefficients(integrand)[0];
+  DataMesh integrand = 0.5*Ricci*(Gradv1(0)*Gradv2(0)+Gradv1(1)*Gradv2(1));//(rp2*rp2);
+
+  std::cout << "Integral of (integrand) / r^2 Psi^4 = 8*Pi/3" << std::endl;
+  std::cout << (3.*sqrt(2.)/8.0)*sb.ComputeCoefficients(integrand/(rp2*rp2))[0] << std::endl;
+
+  std::cout << "Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA" << std::endl;
+  double area = sb.ComputeCoefficients(rp2*rp2)[0];
+  std::cout << sb.ComputeCoefficients(integrand)[0] / (2./3. * area) << std::endl;
+
+  double integral = (3.*sqrt(2.)/8.0)*sb.ComputeCoefficients(integrand/(rp2*rp2))[0];
 
   return integral;
 }

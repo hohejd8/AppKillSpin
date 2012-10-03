@@ -144,7 +144,7 @@ int main(){
     //compute some useful quantities
     const DataMesh rp2 = rad * Psi * Psi;
     const DataMesh llncf = sb.ScalarLaplacian(log(Psi));
-    const DataMesh Ricci = (1.0-2.0*llncf) / (rp2*rp2);// * 2.0;
+    const DataMesh Ricci = 2.0 * (1.0-2.0*llncf) / (rp2*rp2);
     const Tensor<DataMesh> GradRicci = sb.Gradient(Ricci);
 
     for(int a=0; a<axes; a++){//index over perpendicular AKV axes
@@ -212,20 +212,20 @@ std::cout << 2.68435455975*sin(theta) << std::endl;
 */
     //compute inner product for each individual AKV solution
     const double zz = AKVInnerProduct(v[0], v[0], Ricci, rp2, sb);
-    std::cout << "z-z inner product = " << zz << std::endl;
+    //std::cout << "z-z inner product = " << zz << std::endl;
     const double xx = AKVInnerProduct(v[1], v[1], Ricci, rp2, sb);
-    std::cout << "x-x inner product = " << xx << std::endl;
+    //std::cout << "x-x inner product = " << xx << std::endl;
     const double yy = AKVInnerProduct(v[2], v[2], Ricci, rp2, sb);
-    std::cout << "y-y inner product = " << yy << std::endl;
+    //std::cout << "y-y inner product = " << yy << std::endl;
 
 
     //compute inner products between AKV solutions
     const double zx = AKVInnerProduct(xi[0], THETA[0], xi[1], THETA[1], Ricci, sb);
-    std::cout << "z-x inner product = " << zx << std::endl;
+    //std::cout << "z-x inner product = " << zx << std::endl;
     const double zy = AKVInnerProduct(xi[0], THETA[0], xi[2], THETA[2], Ricci, sb);
-    std::cout << "z-y inner product = " << zy << std::endl;
+    //std::cout << "z-y inner product = " << zy << std::endl;
     const double xy = AKVInnerProduct(xi[1], THETA[1], xi[2], THETA[2], Ricci, sb);
-    std::cout << "x-y inner product = " << xy << std::endl;
+    //std::cout << "x-y inner product = " << xy << std::endl;
     std::cout << "\n" << std::endl;
   }
 

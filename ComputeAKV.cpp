@@ -69,7 +69,7 @@ namespace ComputeItems {
     //compute some useful quantities
     const DataMesh rp2 = mRad * Psi * Psi;
     const DataMesh llncf = sb.ScalarLaplacian(log(Psi));
-    const DataMesh Ricci = (1.0-2.0*llncf) / (rp2*rp2);
+    const DataMesh Ricci = 2.0 * (1.0-2.0*llncf) / (rp2*rp2);
     const Tensor<DataMesh> GradRicci = sb.Gradient(Ricci);
 
     //creating struct rparams p is not necessary here, but it does save
