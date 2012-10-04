@@ -695,8 +695,8 @@ double AKVInnerProduct(const DataMesh& v1,
   std::cout << "Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             " 
             << (3.*sqrt(2.)/8.0)*sb.ComputeCoefficients(integrand/(rp2*rp2))[0] << std::endl;
 
-  double area = sb.ComputeCoefficients(rp2*rp2)[0];
-  std::cout << "Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : " 
+  double area = sb.ComputeCoefficients(Ricci*rp2*rp2)[0];
+  std::cout << "Integral of (integrand) = 2/3 Integral of (^2R r^2 Psi^4) dA : " 
             << sb.ComputeCoefficients(integrand)[0] / (2./3. * area) << std::endl;
 
   double integral = (3.*sqrt(2.)/8.0)*sb.ComputeCoefficients(integrand/(rp2*rp2))[0];

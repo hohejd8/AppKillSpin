@@ -187,6 +187,12 @@ int main(){
       const double scaleAtEquator =
                 normalizeKVAtOnePoint(sb, rotated_Psi, rotated_v[a], rad, M_PI/2., 0.0);
       std::cout << "scale factor at equator      : " << scaleAtEquator << std::endl;
+
+      //scale L, v
+      v[a] *= scaleAtEquator;
+      L *= scaleAtEquator;
+
+      //compare scale factors
       const double scaleAboveEquator =
                 normalizeKVAtOnePoint(sb, rotated_Psi, rotated_v[a], rad, M_PI/4., 0.0);
       std::cout << "scale factor at theta=Pi/4   : " << scaleAboveEquator << std::endl;
