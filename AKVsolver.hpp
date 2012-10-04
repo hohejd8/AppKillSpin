@@ -112,7 +112,7 @@ double AKVInnerProduct(const DataMesh& v1,
                        const DataMesh& Ricci,
                        const DataMesh& rp2,
                        const SurfaceBasis& sb);
-
+/*
 //determines value of the integral
 //(\Theta_1 - \Theta_2) \oint ^2R((\vec \xi_1) \cdot (\vec \xi_2) d\Omega
 double AKVInnerProduct(const Tensor<DataMesh>& xi1,
@@ -122,7 +122,7 @@ double AKVInnerProduct(const Tensor<DataMesh>& xi1,
                        const DataMesh& Ricci,
                        //const DataMesh& rp2,
                        const SurfaceBasis& sb);
-
+*/
 //performs diagnostics on the approximate Killing vector solution
 void KillingDiagnostics(const SurfaceBasis& sb,
                         const DataMesh& L,

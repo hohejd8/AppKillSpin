@@ -1,144 +1,192 @@
-completely symmetric
+COMPLETELY SYMMETRIC
+z-axis analysis
 Staring the gsl 1D root finder at thetap = 0.0.
 Solution found with : THETA[0] = -3.32889e-16
                      thetap[0] = 0
                        phip[0] = 0
-Theta =  1.5707963 : T = 6.283185307 (1)
-Starting the gsl multidimensional root finder.
-Solution found with : THETA[1] = 2.417529063e-16
-                     thetap[1] = 89.99999338
-                       phip[1] = 3.227059452e-06
-Theta =  1.5707963 : T = 6.283185307 (1)
-Starting the gsl multidimensional root finder.
-Solution found with : THETA[2] = 7.604887841e-16
-                     thetap[2] = 89.99998514
-                       phip[2] = 90.00002046
-Theta =  1.5707963 : T = 6.283185307 (1)
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3
-1
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA
-1
-z-z inner product = 2.68435456
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3
-1
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA
-1
-x-x inner product = 2.68435456
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3
-1
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA
-1
-y-y inner product = 2.68435456
-z-x inner product = -2.986559073e-21
-z-y inner product = -1.275277781e-20
-x-y inner product = 7.56422406e-21
+scale factor above equator = 1
+scale factor at equator    = 1
+scale factor below equator = 1
+scale factor over surface  = 1
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1
 
-
-z axisymmetry
-Staring the gsl 1D root finder at thetap = 0.0.
-Solution found with : THETA[0] = -7.768791697e-16
-                     thetap[0] = 0
-                       phip[0] = 0
-Theta =  1.5707963 : T = 6.275333954 (0.9987504183)
+x-axis analysis
 Starting the gsl multidimensional root finder.
-Solution found with : THETA[1] = -1.300129938e-06
-                     thetap[1] = 89.99999982
-                       phip[1] = -2.735026317e-09
-Theta =  1.5707963 : T = 6.287109687 (1.000624584)
-Starting the gsl multidimensional root finder.
-Solution found with : THETA[2] = -1.300129949e-06
-                     thetap[2] = 89.9999569
-                       phip[2] = 90.00000004
-Theta =  1.5707963 : T = 6.287109687 (1.000624584)
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3
-0.9987504183
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA
-0.9983356267
-z-z inner product = 2.682680304
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3
-1.000622427
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA
-1.000832424
-x-x inner product = 2.689389581
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3
-1.000622427
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA
-1.000832424
-y-y inner product = 2.689389581
-z-x inner product = 1.842183469e-13
-z-y inner product = 4.404758952e-11
-x-y inner product = -1.169630434e-20
-
-
-x axisymmetry
-Staring the gsl 1D root finder at thetap = 0.0.
-Solution found with : THETA[0] = -4.660178449e-05
-                     thetap[0] = 0
-                       phip[0] = 0
-Theta =  1.5707963 : T = 6.306689697 (1.00374084)
-Starting the gsl multidimensional root finder.
-Solution found with : THETA[1] = 4.263709317e-16
+Solution found with : THETA[1] = 2.41753e-16
                      thetap[1] = 90
-                       phip[1] = 1.421993869e-10
-Theta =  1.5707963 : T = 6.236082389 (0.9925033378)
-Starting the gsl multidimensional root finder.
-Solution found with : THETA[2] = -4.660178444e-05
-                     thetap[2] = 90.00036881
-                       phip[2] = 89.99999997
-Theta =  1.5707963 : T = 6.306689697 (1.00374084)
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3
-1.003663319
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA
-1.004974865
-z-z inner product = 2.697740494
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3
-0.9925033378
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA
-0.990067039
-x-x inner product = 2.657722134
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3
-1.003663319
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA
-1.004974865
-y-y inner product = 2.697740494
-z-x inner product = -7.001984593e-17
-z-y inner product = 1.554781343e-17
-x-y inner product = -4.801157093e-11
+                       phip[1] = 3.22706e-06
+scale factor above equator = 1
+scale factor at equator    = 1
+scale factor below equator = 1
+scale factor over surface  = 1
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1
 
-
-y axisymmetry
-Staring the gsl 1D root finder at thetap = 0.0.
-Solution found with : THETA[0] = -4.660178449e-05
-                     thetap[0] = 0
-                       phip[0] = 0
-Theta =  1.5707963 : T = 6.306689696 (1.00374084)
+y-axis analysis
 Starting the gsl multidimensional root finder.
-Solution found with : THETA[1] = -4.660178243e-05
-                     thetap[1] = 0.5043477019
-                       phip[1] = 0.0001689807077
-Theta =  1.5707963 : T = 6.306689697 (1.00374084)
-Starting the gsl multidimensional root finder.
-Solution found with : THETA[2] = 1.667070773e-17
+Solution found with : THETA[2] = 7.60489e-16
                      thetap[2] = 90
                        phip[2] = 90
-Theta =  1.5707963 : T = 6.236082389 (0.9925033378)
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3
-1.003663319
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA
-1.004974865
-z-z inner product = 2.697740494
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3
-1.003663319
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA
-1.004974865
-x-x inner product = 2.697740494
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3
-0.9925033378
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA
-0.990067039
-y-y inner product = 2.657722134
-z-x inner product = -9.298546805e-11
-z-y inner product = -4.03425155e-16
-x-y inner product = -5.405502096e-11
+scale factor above equator = 1
+scale factor at equator    = 1
+scale factor below equator = 1
+scale factor over surface  = 1
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1
+
+z-x inner product : 
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.15554e-07
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.15554e-07
+z-y inner product : 
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             2.59326e-07
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 2.59326e-07
+x-y inner product : 
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             -3.24212e-07
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : -3.24212e-07
+
+
+Z AXISYMMETRY
+z-axis analysis
+Staring the gsl 1D root finder at thetap = 0.0.
+Solution found with : THETA[0] = -7.76879e-16
+                     thetap[0] = 0
+                       phip[0] = 0
+scale factor above equator = 0.99875
+scale factor at equator    = 0.99875
+scale factor below equator = 0.99875
+scale factor over surface  = 0.99875
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00125
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00084
+
+x-axis analysis
+Starting the gsl multidimensional root finder.
+Solution found with : THETA[1] = -1.30013e-06
+                     thetap[1] = 90
+                       phip[1] = -2.73503e-09
+scale factor above equator = 1.00062
+scale factor at equator    = 1.00062
+scale factor below equator = 1.00062
+scale factor over surface  = 1.00062
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             0.999374
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.999583
+
+y-axis analysis
+Starting the gsl multidimensional root finder.
+Solution found with : THETA[2] = -1.30013e-06
+                     thetap[2] = 90
+                       phip[2] = 90
+scale factor above equator = 1.00062
+scale factor at equator    = 1.00062
+scale factor below equator = 1.00062
+scale factor over surface  = 1.00062
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             0.999374
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.999583
+
+z-x inner product : 
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             3.15034e-09
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 3.14903e-09
+z-y inner product : 
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             7.53263e-07
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 7.5295e-07
+x-y inner product : 
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             -2.4185e-08
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : -2.41901e-08
+
+
+X AXISYMMETRY
+z-axis analysis
+Staring the gsl 1D root finder at thetap = 0.0.
+Solution found with : THETA[0] = -4.66018e-05
+                     thetap[0] = 0
+                       phip[0] = 0
+scale factor above equator = 1.00374
+scale factor at equator    = 1.00374
+scale factor below equator = 1.00374
+scale factor over surface  = 1.00375
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             0.996196
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.997498
+
+x-axis analysis
+Starting the gsl multidimensional root finder.
+Solution found with : THETA[1] = 4.26371e-16
+                     thetap[1] = 90
+                       phip[1] = 1.42199e-10
+scale factor above equator = 0.992503
+scale factor at equator    = 0.992503
+scale factor below equator = 0.992503
+scale factor over surface  = 0.992503
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00755
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00508
+
+y-axis analysis
+Starting the gsl multidimensional root finder.
+Solution found with : THETA[2] = -4.66018e-05
+                     thetap[2] = 90.0004
+                       phip[2] = 90
+scale factor above equator = 1.00374
+scale factor at equator    = 1.00374
+scale factor below equator = 1.00374
+scale factor over surface  = 1.00375
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             0.996196
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.997498
+
+z-x inner product : 
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             3.34965e-14
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 3.35424e-14
+z-y inner product : 
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             -6.4125e-06
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : -6.42088e-06
+x-y inner product : 
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             -2.30496e-08
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : -2.2993e-08
+
+
+Y AXISYMMETRY
+z-axis analysis
+Staring the gsl 1D root finder at thetap = 0.0.
+Solution found with : THETA[0] = -4.66018e-05
+                     thetap[0] = 0
+                       phip[0] = 0
+scale factor above equator = 1.00374
+scale factor at equator    = 1.00374
+scale factor below equator = 1.00374
+scale factor over surface  = 1.00375
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             0.996196
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.997498
+
+x-axis analysis
+Starting the gsl multidimensional root finder.
+Solution found with : THETA[1] = -4.66018e-05
+                     thetap[1] = 0.504348
+                       phip[1] = 0.000168981
+scale factor above equator = 1.00374
+scale factor at equator    = 1.00374
+scale factor below equator = 1.00374
+scale factor over surface  = 1.00375
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             0.996196
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.997498
+
+y-axis analysis
+Starting the gsl multidimensional root finder.
+Solution found with : THETA[2] = 1.66707e-17
+                     thetap[2] = 90
+                       phip[2] = 90
+scale factor above equator = 0.992503
+scale factor at equator    = 0.992503
+scale factor below equator = 0.992503
+scale factor over surface  = 0.992503
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00755
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00508
+
+z-x inner product : 
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             0.996158
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.997459
+z-y inner product : 
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.92954e-13
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.93207e-13
+x-y inner product : 
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             2.59518e-08
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 2.58873e-08
 
 

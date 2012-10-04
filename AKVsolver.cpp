@@ -555,28 +555,29 @@ double normalizeKVAtOnePoint(const SurfaceBasis& sb,
   bool goodtheta = KillingPath(sb, rotated_Psi, xi, rad, t, thetap, phip);
   REQUIRE(goodtheta, "Killing trajectory did not close " << POSITION);
   const double scale = t/(2.0*M_PI);
-  std::cout << "Theta = " << std::setprecision(8) << std::setw(10)
-            << M_PI/2.0 << " : T = "
-            << std::setprecision(10) << t
-            << " (" << scale << ")" << std::endl;
 /*
+  std::cout << "theta = " << std::setprecision(8) << std::setw(10)
+            << 0.5*M_PI << " : affine path = "
+            << std::setprecision(10) << t //<< std::endl;
+            << " Scale factor = " << scale << std::endl;
+
   KillingPath(sb, rotated_Psi, xi, rad, t, 0.5*M_PI/2.0);
   std::cout << "Theta = " << std::setprecision(8) << std::setw(10)
-            << 0.5*M_PI/2.0 << " : T = "
-            << std::setprecision(10) << t
-            << " (" << t/(2.0*M_PI*scale) << ")" << std::endl;
+            << 0.5*M_PI/2.0 << " : affine path = "
+            << std::setprecision(10) << t //<< std::endl;
+            << "Scale factor = " << t/(2.0*M_PI*scale) << std::endl;
 
-  KillingPath(sb, rotated_Psi, xi, rad, t, 0.25*M_PI/2.0);
+  KillingPath(sb, rotated_Psi, xi, rad, t, 0.25*M_PI);
   std::cout << "Theta = " << std::setprecision(8) << std::setw(10)
-            << 0.25*M_PI/2.0 << " : T = "
-            << std::setprecision(10) << t
-            << " (" << t/(2.0*M_PI*scale) << ")" << std::endl;
+            << 0.25*M_PI << " : affine path = "
+            << std::setprecision(10) << t //<< std::endl;
+            << " Scale factor = " << t/(2.0*M_PI*scale) << std::endl;
 
-  KillingPath(sb, rotated_Psi, xi, rad, t, 0.125*M_PI/2.0);
+  KillingPath(sb, rotated_Psi, xi, rad, t, 0.75*M_PI);
   std::cout << "Theta = " << std::setprecision(8) << std::setw(10)
-            << 0.125*M_PI/2.0 << " : T = "
-            << std::setprecision(10) << t
-            << " (" << t/(2.0*M_PI*scale) << ")" << std::endl;
+            << 0.75*M_PI << " : affine path = "
+            << std::setprecision(10) << t //<< std::endl;
+            << " Scale factor = " << t/(2.0*M_PI*scale) << std::endl;
 */
   return scale;
 } //end normalizeKillingVector
@@ -691,18 +692,18 @@ double AKVInnerProduct(const DataMesh& v1,
 
   DataMesh integrand = 0.5*Ricci*(Gradv1(0)*Gradv2(0)+Gradv1(1)*Gradv2(1));//(rp2*rp2);
 
-  std::cout << "Integral of (integrand) / r^2 Psi^4 = 8*Pi/3" << std::endl;
-  std::cout << (3.*sqrt(2.)/8.0)*sb.ComputeCoefficients(integrand/(rp2*rp2))[0] << std::endl;
+  std::cout << "Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             " 
+            << (3.*sqrt(2.)/8.0)*sb.ComputeCoefficients(integrand/(rp2*rp2))[0] << std::endl;
 
-  std::cout << "Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA" << std::endl;
   double area = sb.ComputeCoefficients(rp2*rp2)[0];
-  std::cout << sb.ComputeCoefficients(integrand)[0] / (2./3. * area) << std::endl;
+  std::cout << "Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : " 
+            << sb.ComputeCoefficients(integrand)[0] / (2./3. * area) << std::endl;
 
   double integral = (3.*sqrt(2.)/8.0)*sb.ComputeCoefficients(integrand/(rp2*rp2))[0];
 
   return integral;
 }
-
+/*
 double AKVInnerProduct(const Tensor<DataMesh>& xi1,
                        const double THETA1,
                        const Tensor<DataMesh>& xi2,
@@ -717,7 +718,7 @@ double AKVInnerProduct(const Tensor<DataMesh>& xi1,
 
   return result;
 }
-
+*/
 void KillingDiagnostics(const SurfaceBasis& sb,
                         const DataMesh& L,
                         const DataMesh& Psi,
