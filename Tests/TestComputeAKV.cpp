@@ -1,5 +1,6 @@
 #include <cmath>
 #include <iostream>
+#include <iomanip>
 #include "Utils/StringParsing/ReadFileIntoString.hpp"
 #include "Utils/StringParsing/OptionParser.hpp"
 //#include "Utils/Tensor/Tensor.hpp"
@@ -186,24 +187,34 @@ int main(){
       //determine scale factor
       const double scaleAtEquator =
                 normalizeKVAtOnePoint(sb, rotated_Psi, rotated_v[a], rad, M_PI/2., 0.0);
-      std::cout << "scale factor at equator      : " << scaleAtEquator << std::endl;
+      std::cout << "scale factor at equator      : " 
+
+                << scaleAtEquator << std::endl;
 
       //scale L, v
       v[a] *= scaleAtEquator;
+      rotated_v[a] *= scaleAtEquator;
       L *= scaleAtEquator;
 
       //compare scale factors
       const double scaleAboveEquator =
                 normalizeKVAtOnePoint(sb, rotated_Psi, rotated_v[a], rad, M_PI/4., 0.0);
-      std::cout << "scale factor at theta=Pi/4   : " << scaleAboveEquator << std::endl;
+      std::cout << "scale factor at theta=Pi/4   : " 
+                << std::setprecision(12)
+                << scaleAboveEquator << std::endl;
       const double scaleBelowEquator =
                 normalizeKVAtOnePoint(sb, rotated_Psi, rotated_v[a], rad, 4.*M_PI/5., 0.0);
-      std::cout << "scale factor at theta=4*Pi/5 : " << scaleBelowEquator << std::endl;
+      std::cout << "scale factor at theta=4*Pi/5 : " 
+                << std::setprecision(12)
+                << scaleBelowEquator << std::endl;
       const double scaleOverSurface =
                 normalizeKVAtAllPoints(sb, rotated_Psi, theta, phi, rotated_v[a], rad);
-      std::cout << "scale factor over surface    : " << scaleOverSurface << std::endl;
+      std::cout << "scale factor over surface    : " 
+                << std::setprecision(12)
+                << scaleOverSurface << std::endl;
       //scale L, v
       //v[a] *= scale;
+      //rotated_v[a] *= scaleAtEquator;
       //L *= scale;
 
       //create xi (1-form)
