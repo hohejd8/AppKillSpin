@@ -493,11 +493,16 @@ double normalizeKVAtAllPoints(const SurfaceBasis& sb,
 
   //create storage
   double avgScaleFactor = 0.0;
+  DataMesh scaleFactor(Mesh(theta.Extents()));
 
-  for(int i=0; i<theta.Size(); i++)
-      avgScaleFactor += normalizeKVAtOnePoint(sb,Psi,xi,rad,theta[i],phi[i]);
+  //for(int i=0; i<theta.Size(); i++)
+  for(int i=0; i<scaleFactor.Size(); i++)
+      scaleFactor[i] = normalizeKVAtOnePoint(sb,Psi,xi,rad,theta[i],phi[i])-1.;
+      //avgScaleFactor += normalizeKVAtOnePoint(sb,Psi,xi,rad,theta[i],phi[i]);
 
-  return avgScaleFactor/theta.Size();
+  //return avgScaleFactor/theta.Size();
+  scaleFactor *= scaleFactor;
+  return sqrt(sb.ComputeCoefficients(scaleFactor)[0]/8.);
 }
 
 double normalizeKVAtOnePoint(const SurfaceBasis& sb,
@@ -692,33 +697,24 @@ double AKVInnerProduct(const DataMesh& v1,
 
   DataMesh integrand = 0.5*Ricci*(Gradv1(0)*Gradv2(0)+Gradv1(1)*Gradv2(1));//(rp2*rp2);
 
+  double integralrp2 = (3.*sqrt(2.)/8.0)*sb.ComputeCoefficients(integrand/(rp2*rp2))[0];
   std::cout << "Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             " 
-            << (3.*sqrt(2.)/8.0)*sb.ComputeCoefficients(integrand/(rp2*rp2))[0] << std::endl;
+            << integralrp2 << std::endl;
 
-  double area = sb.ComputeCoefficients(Ricci*rp2*rp2)[0];
-  std::cout << "Integral of (integrand) = 2/3 Integral of (^2R r^2 Psi^4) dA : " 
-            << sb.ComputeCoefficients(integrand)[0] / (2./3. * area) << std::endl;
+  double areaRicci = sb.ComputeCoefficients(0.5*Ricci*rp2*rp2)[0];
+  double integralRicci = sb.ComputeCoefficients(integrand)[0] / (2./3. * areaRicci);
+  std::cout << "Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : " 
+            << integralRicci << std::endl;
 
-  double integral = (3.*sqrt(2.)/8.0)*sb.ComputeCoefficients(integrand/(rp2*rp2))[0];
+  double area = sb.ComputeCoefficients(rp2*rp2)[0];
+  double integral = sb.ComputeCoefficients(integrand)[0] / (2./3. * area);
+  std::cout << "Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : " 
+            << integral << std::endl;
 
-  return integral;
+  return integralrp2;
 }
-/*
-double AKVInnerProduct(const Tensor<DataMesh>& xi1,
-                       const double THETA1,
-                       const Tensor<DataMesh>& xi2,
-                       const double THETA2,
-                       const DataMesh& Ricci,
-                       //const DataMesh& rp2,
-                       const SurfaceBasis& sb)
-{
-  double result = sb.Integrate(Ricci*xi1(0)*xi2(0));
-  result += sb.Integrate(Ricci*xi1(1)*xi2(1));
-  result *= (THETA1 - THETA2);
 
-  return result;
-}
-*/
+
 void KillingDiagnostics(const SurfaceBasis& sb,
                         const DataMesh& L,
                         const DataMesh& Psi,

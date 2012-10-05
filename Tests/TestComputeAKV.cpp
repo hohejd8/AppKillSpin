@@ -69,6 +69,41 @@ DataMesh ConstructConformalFactor(const DataMesh& theta,
   return Psi;
 }
 
+void TestScaleFactors(DataMesh v,
+                      DataMesh rotated_v,
+                      DataMesh rotated_Psi,
+                      const double& rad,
+                      const DataMesh& Ricci,
+                      const DataMesh& rp2,
+                      const SurfaceBasis& sb,
+                      const DataMesh& theta,
+                      const DataMesh& phi,
+                      const double& scaleFactor)
+{
+  std::cout << "\nScale factor is : " << scaleFactor << std::endl;
+
+  v *= scaleFactor;
+  rotated_v *= scaleFactor;
+
+      const double scaleAboveEquator =
+                normalizeKVAtOnePoint(sb, rotated_Psi, rotated_v, rad, M_PI/4., 0.0);
+      std::cout << "scale factor at theta=Pi/4   : " 
+                << std::setprecision(12)
+                << scaleAboveEquator << std::endl;
+      const double scaleBelowEquator =
+                normalizeKVAtOnePoint(sb, rotated_Psi, rotated_v, rad, 4.*M_PI/5., 0.0);
+      std::cout << "scale factor at theta=4*Pi/5 : " 
+                << std::setprecision(12)
+                << scaleBelowEquator << std::endl;
+      const double scaleOverSurface =
+                normalizeKVAtAllPoints(sb, rotated_Psi, theta, phi, rotated_v, rad);
+      std::cout << "scale factor over surface    : " 
+                << std::setprecision(12)
+                << scaleOverSurface << std::endl;
+      AKVInnerProduct(v, v, Ricci, rp2, sb);
+
+}
+
 int main(){
 
   const std::string Help =
@@ -126,8 +161,8 @@ int main(){
   //create conformal factors for every rotation
   const int syms = 4; //the number of axisymmetries we are testing
 
-
-  for(int s=0; s<syms; s++){//index over conformal factor symmetries
+  for(int s=1; s<2; s++){//index over conformal factor symmetries
+  //for(int s=0; s<syms; s++){//index over conformal factor symmetries
     //create conformal factor
     const DataMesh Psi = ConstructConformalFactor(theta, phi, s);
 
@@ -188,13 +223,13 @@ int main(){
       const double scaleAtEquator =
                 normalizeKVAtOnePoint(sb, rotated_Psi, rotated_v[a], rad, M_PI/2., 0.0);
       std::cout << "scale factor at equator      : " 
-
+                << std::setprecision(12)
                 << scaleAtEquator << std::endl;
 
       //scale L, v
-      v[a] *= scaleAtEquator;
-      rotated_v[a] *= scaleAtEquator;
-      L *= scaleAtEquator;
+      //v[a] *= scaleAtEquator;
+      //rotated_v[a] *= scaleAtEquator;
+      //L *= scaleAtEquator;
 
       //compare scale factors
       const double scaleAboveEquator =
@@ -212,22 +247,27 @@ int main(){
       std::cout << "scale factor over surface    : " 
                 << std::setprecision(12)
                 << scaleOverSurface << std::endl;
-      //scale L, v
-      //v[a] *= scale;
-      //rotated_v[a] *= scaleAtEquator;
-      //L *= scale;
+      double scaleInnerProduct = AKVInnerProduct(v[a], v[a], Ricci, rp2, sb);
+
+
+      TestScaleFactors(v[a], rotated_v[a], rotated_Psi,
+                       rad, Ricci, rp2, sb, theta, phi, scaleAtEquator);
+      TestScaleFactors(v[a], rotated_v[a], rotated_Psi,
+                       rad, Ricci, rp2, sb, theta, phi, 1./sqrt(scaleInnerProduct));
+      for(int i=0; i<=10; i++)
+        TestScaleFactors(v[a], rotated_v[a], rotated_Psi, 
+                         rad, Ricci, rp2, sb, theta, phi, 0.5+0.1*i);
 
       //create xi (1-form)
-      Tensor<DataMesh> tmp_xi = sb.Gradient(v[a]);
-      xi[a](0) = tmp_xi(1);
-      xi[a](1) = -tmp_xi(0);
+      //Tensor<DataMesh> tmp_xi = sb.Gradient(v[a]);
+      //xi[a](0) = tmp_xi(1);
+      //xi[a](1) = -tmp_xi(0);
 
       //KillingDiagnostics(sb, L, Psi[s], xi[a], rad, MyVector<bool>(MV::Size(6),true) );
 
-      //print out diagnostics
 
 
-      AKVInnerProduct(v[a], v[a], Ricci, rp2, sb);
+
       std::cout << std::endl;
     }//end loop over perpendicular AKV axes
 
