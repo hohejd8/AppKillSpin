@@ -20,13 +20,13 @@ Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             0.998750418335
 Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : 2.68268030432
 Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.998335626737
 
-Scale factor is : 0.999375013869
-scale factor at theta=Pi/4   : 0.999375013876
-scale factor at theta=4*Pi/5 : 0.999375013876
-scale factor over surface    : 0.000371618972676
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1
-Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : 2.68603672657
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.999584689437
+Scale factor is : 0.998750418345
+scale factor at theta=Pi/4   : 1.00000000001
+scale factor at theta=4*Pi/5 : 1.00000000001
+scale factor over surface    : 5.16073047754e-12
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             0.998750418345
+Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : 2.68268030435
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.998335626747
 
 Scale factor is : 0.5
 scale factor at theta=Pi/4   : 1.99750083667
@@ -137,13 +137,13 @@ Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00062242728
 Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : 2.68938958053
 Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00083242424
 
-Scale factor is : 1.00031332173
-scale factor at theta=Pi/4   : 1.00031141047
-scale factor at theta=4*Pi/5 : 1.00031148631
-scale factor over surface    : 0.000185117155976
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1
-Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : 2.68771667235
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00020986633
+Scale factor is : 1.00062674163
+scale factor at theta=Pi/4   : 0.999998089335
+scale factor at theta=4*Pi/5 : 0.999998165149
+scale factor over surface    : 1.18789269559e-06
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00062674163
+Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : 2.68940117626
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00083673948
 
 Scale factor is : 0.5
 scale factor at theta=Pi/4   : 2.00124965955
@@ -254,13 +254,13 @@ Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00062242728
 Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : 2.68938958053
 Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00083242424
 
-Scale factor is : 1.00031332173
-scale factor at theta=Pi/4   : 1.00031141047
-scale factor at theta=4*Pi/5 : 1.00031148631
-scale factor over surface    : 0.000185117156327
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1
-Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : 2.68771667235
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00020986633
+Scale factor is : 1.00062674163
+scale factor at theta=Pi/4   : 0.999998089328
+scale factor at theta=4*Pi/5 : 0.999998165148
+scale factor over surface    : 1.18789258212e-06
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00062674163
+Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : 2.68940117626
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00083673948
 
 Scale factor is : 0.5
 scale factor at theta=Pi/4   : 2.00124965954

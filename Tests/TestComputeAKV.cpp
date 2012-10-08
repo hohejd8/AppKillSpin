@@ -253,7 +253,7 @@ int main(){
       TestScaleFactors(v[a], rotated_v[a], rotated_Psi,
                        rad, Ricci, rp2, sb, theta, phi, scaleAtEquator);
       TestScaleFactors(v[a], rotated_v[a], rotated_Psi,
-                       rad, Ricci, rp2, sb, theta, phi, 1./sqrt(scaleInnerProduct));
+                       rad, Ricci, rp2, sb, theta, phi, 1./scaleInnerProduct);
       for(int i=0; i<=10; i++)
         TestScaleFactors(v[a], rotated_v[a], rotated_Psi, 
                          rad, Ricci, rp2, sb, theta, phi, 0.5+0.1*i);
