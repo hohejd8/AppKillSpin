@@ -504,11 +504,11 @@ double normalizeKVAtAllPoints(const SurfaceBasis& sb,
   //return avgScaleFactor/theta.Size();
   scaleFactor *= scaleFactor;
   const DataMesh r2p4 = rad*rad*Psi*Psi*Psi*Psi;
-  const double area = 2./3. * sb.ComputeCoefficients(r2p4)[0];
+  const double area = sb.ComputeCoefficients(r2p4)[0];
   //return sqrt(sb.ComputeCoefficients(scaleFactor)[0]/8.);
-std::cout << "\int d\Omega / 4*pi = " 
+std::cout << "Integral (T/(2*pi) - 1) dOmega / 4*pi                     = " 
           << sqrt(sb.ComputeCoefficients(scaleFactor)[0]/8.) << std::endl;
-std::cout << "\int dA / (2/3 A) = " 
+std::cout << "Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= " 
           << sqrt(sb.ComputeCoefficients(scaleFactor*r2p4)[0])/area << std::endl;
   return sqrt(sb.ComputeCoefficients(scaleFactor*r2p4)[0])/area;
 }
@@ -706,8 +706,8 @@ double AKVInnerProduct(const DataMesh& v1,
   DataMesh integrand = 0.5*Ricci*(Gradv1(0)*Gradv2(0)+Gradv1(1)*Gradv2(1));//(rp2*rp2);
 
   double integralrp2 = (3.*sqrt(2.)/8.0)*sb.ComputeCoefficients(integrand/(rp2*rp2))[0];
-  //std::cout << "Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             " 
-  //          << integralrp2 << std::endl;
+  std::cout << "Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             " 
+            << integralrp2 << std::endl;
 
   double areaRicci = sb.ComputeCoefficients(0.5*Ricci*rp2*rp2)[0];
   double integralRicci = sb.ComputeCoefficients(integrand)[0] / (2./3. * areaRicci);

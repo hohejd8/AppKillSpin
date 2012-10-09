@@ -4,128 +4,531 @@ Staring the gsl 1D root finder at thetap = 0.0.
 Solution found with : THETA[0] = -7.76879e-16
                      thetap[0] = 0
                        phip[0] = 0
+
+Unscaled results
 scale factor at equator      : 0.99875041834
 scale factor at theta=Pi/4   : 0.99875041834
 scale factor at theta=4*Pi/5 : 0.99875041834
-int dOmega / 4*pi = 0.000743005700333
-int dA / (2/3 A) = 0.000679887770226
-scale factor over surface    : 0.000679887770226
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 0.000743005700333
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 0.000453258513484
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00125114506
 Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00083531489
 
+Using the scale factor from the path length at the equator
 Scale factor is : 0.99875041834
-int dOmega / 4*pi = 5.16073047754e-12
-int dA / (2/3 A) = 4.7223292305e-12
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 5.16073047754e-12
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 3.148219487e-12
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             0.998750418335
 Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.998335626737
 
+Using the scale factor from the inner product
 Scale factor is : 0.998750418345
-int dOmega / 4*pi = 5.16073047754e-12
-int dA / (2/3 A) = 4.7223292305e-12
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 5.16073047754e-12
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 3.148219487e-12
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             0.998750418345
 Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.998335626747
 
-Scale factor is : 0.997751667927
-int dOmega / 4*pi = 0.000595198752757
-int dA / (2/3 A) = 0.000544636942451
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.996339953829
-
-Scale factor is : 0.997851542969
-int dOmega / 4*pi = 0.000535625266361
-int dA / (2/3 A) = 0.000490124191321
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.99653943127
-
-Scale factor is : 0.997951418011
-int dOmega / 4*pi = 0.000476063699814
-int dA / (2/3 A) = 0.000435622347455
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.996738928679
-
-Scale factor is : 0.998051293052
-int dOmega / 4*pi = 0.000416514053117
-int dA / (2/3 A) = 0.000381131410856
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.996938446054
-
-Scale factor is : 0.998151168094
-int dOmega / 4*pi = 0.000356976312427
-int dA / (2/3 A) = 0.000326651368853
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.997137983395
-
-Scale factor is : 0.998251043136
-int dOmega / 4*pi = 0.000297450505431
-int dA / (2/3 A) = 0.000272182246784
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.997337540704
-
-Scale factor is : 0.998350918178
-int dOmega / 4*pi = 0.00023793660444
-int dA / (2/3 A) = 0.000217724019312
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.997537117979
-
-Scale factor is : 0.99845079322
-int dOmega / 4*pi = 0.000178434595611
-int dA / (2/3 A) = 0.000163276673768
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.997736715221
-
-Scale factor is : 0.998550668262
-int dOmega / 4*pi = 0.000118944492789
-int dA / (2/3 A) = 0.000108840222823
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.997936332429
-
+Using inner product scale factor times 0.9999
 Scale factor is : 0.998650543303
-int dOmega / 4*pi = 5.94662959718e-05
-int dA / (2/3 A) = 5.44146664739e-05
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 5.94662959718e-05
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 3.62764443159e-05
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             0.998550678249
 Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.998135969605
 
+Using inner product scale factor times 0.99991
+Scale factor is : 0.998660530808
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 5.35191352738e-05
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 3.2648475895e-05
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             0.99857065136
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.99815593442
+
+Using inner product scale factor times 0.99992
+Scale factor is : 0.998670518312
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 4.75720853292e-05
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 2.90205750373e-05
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             0.99859062467
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.998175899436
+
+Using inner product scale factor times 0.99993
+Scale factor is : 0.998680505816
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 4.16251599823e-05
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 2.53927501884e-05
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             0.998610598181
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.998195864651
+
+Using inner product scale factor times 0.99994
+Scale factor is : 0.99869049332
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 3.5678345389e-05
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 2.17649929029e-05
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             0.998630571891
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.998215830066
+
+Using inner product scale factor times 0.99995
+Scale factor is : 0.998700480824
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 2.97316553934e-05
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 1.81373116263e-05
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             0.9986505458
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.99823579568
+
+Using inner product scale factor times 0.99996
+Scale factor is : 0.998710468328
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 2.37850899956e-05
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 1.45097063584e-05
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             0.99867051991
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.998255761494
+
+Using inner product scale factor times 0.99997
+Scale factor is : 0.998720455833
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 1.78386353513e-05
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 1.0882168654e-05
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             0.998690494219
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.998275727508
+
+Using inner product scale factor times 0.99998
+Scale factor is : 0.998730443337
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 1.18923053049e-05
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 7.25470695849e-06
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             0.998710468728
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.998295693721
+
+Using inner product scale factor times 0.99999
+Scale factor is : 0.998740430841
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 5.94608601179e-06
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 3.62731282619e-06
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             0.998730443437
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.998315660134
+
+Using inner product scale factor times 1
 Scale factor is : 0.998750418345
-int dOmega / 4*pi = 5.16073047754e-12
-int dA / (2/3 A) = 4.7223292305e-12
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 5.16073047754e-12
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 3.148219487e-12
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             0.998750418345
 Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.998335626747
 
+Using inner product scale factor times 1.00001
+Scale factor is : 0.998760405849
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 5.94597878094e-06
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 3.62724741176e-06
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             0.998770393453
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.998355593559
+
+Using inner product scale factor times 1.00002
+Scale factor is : 0.998770393354
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 1.18918242808e-05
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 7.25441351758e-06
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             0.998790368761
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.998375560571
+
+Using inner product scale factor times 1.00003
+Scale factor is : 0.998780380858
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 1.78375728711e-05
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 1.08815205053e-05
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             0.998810344269
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.998395527783
+
+Using inner product scale factor times 1.00004
+Scale factor is : 0.998790368362
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 2.37831830197e-05
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 1.45085430389e-05
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             0.998830319977
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.998415495194
+
+Using inner product scale factor times 1.00005
+Scale factor is : 0.998800355866
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 2.97286824146e-05
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 1.8135498009e-05
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             0.998850295884
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.998435462805
+
+Using inner product scale factor times 1.00006
+Scale factor is : 0.99881034337
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 3.5674071056e-05
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 2.17623854158e-05
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             0.998870271991
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.998455430616
+
+Using inner product scale factor times 1.00007
+Scale factor is : 0.998820330875
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 4.16193350997e-05
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 2.53891968137e-05
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             0.998890248298
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.998475398626
+
+Using inner product scale factor times 1.00008
+Scale factor is : 0.998830318379
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 4.75644883899e-05
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 2.90159406483e-05
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             0.998910224804
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.998495366836
+
+Using inner product scale factor times 1.00009
+Scale factor is : 0.998840305883
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 5.35095032381e-05
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 3.26426000286e-05
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             0.99893020151
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.998515335246
+
+Using inner product scale factor times 1.0001
 Scale factor is : 0.998850293387
-int dOmega / 4*pi = 5.94544073327e-05
-int dA / (2/3 A) = 5.44037877682e-05
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 5.94544073327e-05
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 3.62691918455e-05
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             0.998950178416
 Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.998535303855
 
-Scale factor is : 0.998950168429
-int dOmega / 4*pi = 0.000118896941509
-int dA / (2/3 A) = 0.000108796710998
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.998735000931
 
-Scale factor is : 0.999050043471
-int dOmega / 4*pi = 0.000178327569679
-int dA / (2/3 A) = 0.000163178739631
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.998934717973
+x-axis analysis
+Starting the gsl multidimensional root finder.
+Solution found with : THETA[1] = -1.30012993799e-06
+                     thetap[1] = 89.9999998197
+                       phip[1] = -2.73502631688e-09
 
-Scale factor is : 0.999149918513
-int dOmega / 4*pi = 0.000237746319531
-int dA / (2/3 A) = 0.000217549899002
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.999134454982
+Unscaled results
+scale factor at equator      : 1.00062458445
+scale factor at theta=Pi/4   : 1.00062482976
+scale factor at theta=4*Pi/5 : 1.00062490563
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 0.00037147736122
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 0.000226613682913
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             0.999373650934
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.999583385811
 
-Scale factor is : 0.999249793554
-int dOmega / 4*pi = 0.000297153204911
-int dA / (2/3 A) = 0.000271910201781
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.999334211957
+Using the scale factor from the path length at the equator
+Scale factor is : 1.00062458445
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 1.3037584941e-07
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 7.95099856306e-08
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00062242728
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00083242424
 
-Scale factor is : 0.999349668596
-int dOmega / 4*pi = 0.000356548211972
-int dA / (2/3 A) = 0.000326259635299
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.9995339889
+Using the scale factor from the inner product
+Scale factor is : 1.00062674163
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 1.18789269559e-06
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 7.24678622306e-07
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00062674163
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00083673948
 
-Scale factor is : 0.999449543638
-int dOmega / 4*pi = 0.000415931340717
-int dA / (2/3 A) = 0.000380598199556
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.999733785809
+Using inner product scale factor times 0.9999
+Scale factor is : 1.00052667895
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 5.82815423961e-05
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 3.55536800036e-05
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00042662628
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00063658214
 
-Scale factor is : 0.99954941868
-int dOmega / 4*pi = 0.000475302604988
-int dA / (2/3 A) = 0.000434925907221
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.999933602684
+Using inner product scale factor times 0.99991
+Scale factor is : 1.00053668522
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 5.23343956287e-05
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 3.19257200795e-05
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00044663692
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00065659698
 
-Scale factor is : 0.999649293722
-int dOmega / 4*pi = 0.000534662004785
-int dA / (2/3 A) = 0.000489242758292
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00013343953
+Using inner product scale factor times 0.99992
+Scale factor is : 1.00054669149
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 4.63873705085e-05
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 2.82978343641e-05
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00046664775
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00067661201
 
-Scale factor is : 0.999749168764
-int dOmega / 4*pi = 0.00059400954011
-int dA / (2/3 A) = 0.000543548752771
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00033329634
+Using inner product scale factor times 0.99993
+Scale factor is : 1.00055669775
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 4.04404663057e-05
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 2.46700224121e-05
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00048665878
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00069662724
+
+Using inner product scale factor times 0.99994
+Scale factor is : 1.00056670402
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 3.44936857565e-05
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 2.1042285892e-05
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00050667002
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00071664268
+
+Using inner product scale factor times 0.99995
+Scale factor is : 1.00057671029
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 2.85470305161e-05
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 1.74146258133e-05
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00052668145
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00073665831
+
+Using inner product scale factor times 0.99996
+Scale factor is : 1.00058671656
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 2.26005067165e-05
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 1.37870459156e-05
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00054669309
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00075667415
+
+Using inner product scale factor times 0.99997
+Scale factor is : 1.00059672282
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 1.66541267945e-05
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 1.0159553784e-05
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00056670492
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00077669018
+
+Using inner product scale factor times 0.99998
+Scale factor is : 1.00060672909
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 1.07079311314e-05
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 6.53217404449e-06
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00058671696
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00079670641
+
+Using inner product scale factor times 0.99999
+Scale factor is : 1.00061673536
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 4.76217011593e-06
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 2.90505940069e-06
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00060672919
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00081672285
+
+Using inner product scale factor times 1
+Scale factor is : 1.00062674163
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 1.18789269559e-06
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 7.24678622306e-07
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00062674163
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00083673948
+
+Using inner product scale factor times 1.00001
+Scale factor is : 1.00063674789
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 7.13120083693e-06
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 4.35029740013e-06
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00064675426
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00085675632
+
+Using inner product scale factor times 1.00002
+Scale factor is : 1.00064675416
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 1.30768054941e-05
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 7.97731662893e-06
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00066676709
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00087677335
+
+Using inner product scale factor times 1.00003
+Scale factor is : 1.00065676043
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 1.90224411524e-05
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 1.16043547407e-05
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00068678013
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00089679059
+
+Using inner product scale factor times 1.00004
+Scale factor is : 1.00066676669
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 2.49680013657e-05
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 1.52313468205e-05
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00070679337
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00091680802
+
+Using inner product scale factor times 1.00005
+Scale factor is : 1.00067677296
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 3.09134609652e-05
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 1.88582775191e-05
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.0007268068
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00093682566
+
+Using inner product scale factor times 1.00006
+Scale factor is : 1.00068677923
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 3.68588112807e-05
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 2.24851415492e-05
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00074682044
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.0009568435
+
+Using inner product scale factor times 1.00007
+Scale factor is : 1.0006967855
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 4.28040477087e-05
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 2.61119361028e-05
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00076683427
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00097686153
+
+Using inner product scale factor times 1.00008
+Scale factor is : 1.00070679176
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 4.87491688525e-05
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 2.97386603287e-05
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00078684831
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00099687977
+
+Using inner product scale factor times 1.00009
+Scale factor is : 1.00071679803
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 5.46941737158e-05
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 3.33653136196e-05
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00080686254
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.0010168982
+
+Using inner product scale factor times 1.0001
+Scale factor is : 1.0007268043
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 6.06390611802e-05
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 3.69918952925e-05
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00082687698
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00103691684
+
+
+y-axis analysis
+Starting the gsl multidimensional root finder.
+Solution found with : THETA[2] = -1.30012994871e-06
+                     thetap[2] = 89.9999568951
+                       phip[2] = 90.0000000427
+
+Unscaled results
+scale factor at equator      : 1.00062458445
+scale factor at theta=Pi/4   : 1.00062482976
+scale factor at theta=4*Pi/5 : 1.00062490562
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 0.000371477360971
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 0.000226613682761
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             0.999373650934
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.999583385811
+
+Using the scale factor from the path length at the equator
+Scale factor is : 1.00062458445
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 1.30375431921e-07
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 7.95097308822e-08
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00062242728
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00083242424
+
+Using the scale factor from the inner product
+Scale factor is : 1.00062674163
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 1.18789258212e-06
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 7.24678552615e-07
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00062674163
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00083673948
+
+Using inner product scale factor times 0.9999
+Scale factor is : 1.00052667895
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 5.82815417791e-05
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 3.55536796271e-05
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00042662628
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00063658214
+
+Using inner product scale factor times 0.99991
+Scale factor is : 1.00053668522
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 5.23343955261e-05
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 3.19257200172e-05
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00044663692
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00065659698
+
+Using inner product scale factor times 0.99992
+Scale factor is : 1.00054669149
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 4.63873702166e-05
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 2.82978341861e-05
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00046664775
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00067661201
+
+Using inner product scale factor times 0.99993
+Scale factor is : 1.00055669775
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 4.04404666717e-05
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 2.46700226354e-05
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00048665878
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00069662724
+
+Using inner product scale factor times 0.99994
+Scale factor is : 1.00056670402
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 3.44936858497e-05
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 2.10422859488e-05
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00050667002
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00071664268
+
+Using inner product scale factor times 0.99995
+Scale factor is : 1.00057671029
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 2.85470309348e-05
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 1.74146260686e-05
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00052668145
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00073665831
+
+Using inner product scale factor times 0.99996
+Scale factor is : 1.00058671656
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 2.26005062739e-05
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 1.37870456456e-05
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00054669309
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00075667415
+
+Using inner product scale factor times 0.99997
+Scale factor is : 1.00059672282
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 1.66541262503e-05
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 1.01595534521e-05
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00056670492
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00077669018
+
+Using inner product scale factor times 0.99998
+Scale factor is : 1.00060672909
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 1.07079311878e-05
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 6.53217407898e-06
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00058671696
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00079670641
+
+Using inner product scale factor times 0.99999
+Scale factor is : 1.00061673536
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 4.76217007691e-06
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 2.90505937658e-06
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00060672919
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00081672285
+
+Using inner product scale factor times 1
+Scale factor is : 1.00062674163
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 1.18789258212e-06
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 7.24678552615e-07
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00062674163
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00083673948
+
+Using inner product scale factor times 1.00001
+Scale factor is : 1.00063674789
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 7.13120130732e-06
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 4.35029768699e-06
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00064675426
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00085675632
+
+Using inner product scale factor times 1.00002
+Scale factor is : 1.00064675416
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 1.30768056221e-05
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 7.97731670689e-06
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00066676709
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00087677335
+
+Using inner product scale factor times 1.00003
+Scale factor is : 1.00065676043
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 1.90224414796e-05
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 1.16043549402e-05
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00068678013
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00089679059
+
+Using inner product scale factor times 1.00004
+Scale factor is : 1.00066676669
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 2.49680017128e-05
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 1.5231347032e-05
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00070679337
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00091680802
+
+Using inner product scale factor times 1.00005
+Scale factor is : 1.00067677296
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 3.09134612426e-05
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 1.88582776883e-05
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.0007268068
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00093682566
+
+Using inner product scale factor times 1.00006
+Scale factor is : 1.00068677923
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 3.68588109547e-05
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 2.24851413503e-05
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00074682044
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.0009568435
+
+Using inner product scale factor times 1.00007
+Scale factor is : 1.0006967855
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 4.28040473921e-05
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 2.61119359097e-05
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00076683427
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00097686153
+
+Using inner product scale factor times 1.00008
+Scale factor is : 1.00070679176
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 4.87491687494e-05
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 2.97386602661e-05
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00078684831
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00099687977
+
+Using inner product scale factor times 1.00009
+Scale factor is : 1.00071679803
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 5.46941736688e-05
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 3.33653135906e-05
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00080686254
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.0010168982
+
+Using inner product scale factor times 1.0001
+Scale factor is : 1.0007268043
+Integral (T/(2*pi) - 1) dOmega / 4*pi                     = 6.06390614176e-05
+Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= 3.69918954372e-05
+Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00082687698
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00103691684
+
 
 z-x inner product : 
 z-y inner product : 

@@ -80,7 +80,7 @@ void TestScaleFactors(DataMesh v,
                       const DataMesh& phi,
                       const double& scaleFactor)
 {
-  std::cout << "\nScale factor is : " << scaleFactor << std::endl;
+  std::cout << "Scale factor is : " << scaleFactor << std::endl;
 
   v *= scaleFactor;
   rotated_v *= scaleFactor;
@@ -101,7 +101,7 @@ void TestScaleFactors(DataMesh v,
       //          << std::setprecision(12)
       //          << scaleOverSurface << std::endl;
       AKVInnerProduct(v, v, Ricci, rp2, sb);
-
+  std::cout << std::endl;
 }
 
 int main(){
@@ -183,8 +183,8 @@ int main(){
     const DataMesh Ricci = 2.0 * (1.0-2.0*llncf) / (rp2*rp2);
     const Tensor<DataMesh> GradRicci = sb.Gradient(Ricci);
 
-    //for(int a=0; a<axes; a++){//index over perpendicular AKV axes
-    for(int a=0; a<1; a++){//index over perpendicular AKV axes
+    for(int a=0; a<axes; a++){//index over perpendicular AKV axes
+    //for(int a=0; a<1; a++){//index over perpendicular AKV axes
       //for printing
       switch(a){
         case 0:
@@ -221,6 +221,7 @@ int main(){
                                             sb,thetap[a],phip[a]);
 
       //determine scale factor
+      std::cout << "\nUnscaled results" << std::endl;
       const double scaleAtEquator =
                 normalizeKVAtOnePoint(sb, rotated_Psi, rotated_v[a], rad, M_PI/2., 0.0);
       std::cout << "scale factor at equator      : " 
@@ -245,20 +246,25 @@ int main(){
                 << scaleBelowEquator << std::endl;
       const double scaleOverSurface =
                 normalizeKVAtAllPoints(sb, rotated_Psi, theta, phi, rotated_v[a], rad);
-      std::cout << "scale factor over surface    : " 
-                << std::setprecision(12)
-                << scaleOverSurface << std::endl;
+      //std::cout << "scale factor over surface    : " 
+      //          << std::setprecision(12)
+      //          << scaleOverSurface << std::endl;
       double scaleInnerProduct = AKVInnerProduct(v[a], v[a], Ricci, rp2, sb);
 
 
+      std::cout << "\nUsing the scale factor from the path length at the equator" << std::endl;
       TestScaleFactors(v[a], rotated_v[a], rotated_Psi,
                        rad, Ricci, rp2, sb, theta, phi, scaleAtEquator);
+      std::cout << "Using the scale factor from the inner product / r2p4" << std::endl;
       TestScaleFactors(v[a], rotated_v[a], rotated_Psi,
                        rad, Ricci, rp2, sb, theta, phi, 1./scaleInnerProduct);
-      for(int i=0; i<=20; i++)
+      for(int i=0; i<=20; i++){
+        const double deviation = 0.99990+0.00001*i;
+        std::cout << "Using inner product scale factor times " << deviation << std::endl;
         TestScaleFactors(v[a], rotated_v[a], rotated_Psi, 
                          //rad, Ricci, rp2, sb, theta, phi, 0.5+0.1*i);
-                         rad, Ricci, rp2, sb, theta, phi, (1./scaleInnerProduct)*(0.9990+0.0001*i));
+                         rad, Ricci, rp2, sb, theta, phi, (1./scaleInnerProduct)*deviation);
+      }
 
       std::cout << std::endl;
     }//end loop over perpendicular AKV axes
@@ -275,11 +281,11 @@ int main(){
 
     //compute inner products between AKV solutions
     std::cout << "z-x inner product : " << std::endl;
-    //AKVInnerProduct(v[0], v[1], Ricci, rp2, sb);
+    AKVInnerProduct(v[0], v[1], Ricci, rp2, sb);
     std::cout << "z-y inner product : " << std::endl;
-    //AKVInnerProduct(v[0], v[2], Ricci, rp2, sb);
+    AKVInnerProduct(v[0], v[2], Ricci, rp2, sb);
     std::cout << "x-y inner product : " << std::endl;
-    //AKVInnerProduct(v[1], v[2], Ricci, rp2, sb);
+    AKVInnerProduct(v[1], v[2], Ricci, rp2, sb);
     std::cout << "\n" << std::endl;
   }
 
