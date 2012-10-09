@@ -7,360 +7,128 @@ Solution found with : THETA[0] = -7.76879e-16
 scale factor at equator      : 0.99875041834
 scale factor at theta=Pi/4   : 0.99875041834
 scale factor at theta=4*Pi/5 : 0.99875041834
-scale factor over surface    : 0.000743005700333
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00125114506
-Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : 2.68939734815
+int dOmega / 4*pi = 0.000743005700333
+int dA / (2/3 A) = 0.000679887770226
+scale factor over surface    : 0.000679887770226
 Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00083531489
 
 Scale factor is : 0.99875041834
-scale factor at theta=Pi/4   : 1.00000000001
-scale factor at theta=4*Pi/5 : 1.00000000001
-scale factor over surface    : 5.16073047754e-12
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             0.998750418335
-Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : 2.68268030432
+int dOmega / 4*pi = 5.16073047754e-12
+int dA / (2/3 A) = 4.7223292305e-12
 Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.998335626737
 
 Scale factor is : 0.998750418345
-scale factor at theta=Pi/4   : 1.00000000001
-scale factor at theta=4*Pi/5 : 1.00000000001
-scale factor over surface    : 5.16073047754e-12
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             0.998750418345
-Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : 2.68268030435
+int dOmega / 4*pi = 5.16073047754e-12
+int dA / (2/3 A) = 4.7223292305e-12
 Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.998335626747
 
-Scale factor is : 0.5
-scale factor at theta=Pi/4   : 1.99750083667
-scale factor at theta=4*Pi/5 : 1.99750083667
-scale factor over surface    : 0.593117546096
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             0.250312786266
-Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : 0.672349337038
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.250208828721
+Scale factor is : 0.997751667927
+int dOmega / 4*pi = 0.000595198752757
+int dA / (2/3 A) = 0.000544636942451
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.996339953829
 
-Scale factor is : 0.6
-scale factor at theta=Pi/4   : 1.66458403057
-scale factor at theta=4*Pi/5 : 1.66458403057
-scale factor over surface    : 0.395164028838
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             0.360450412223
-Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : 0.968183045335
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.360300713359
+Scale factor is : 0.997851542969
+int dOmega / 4*pi = 0.000535625266361
+int dA / (2/3 A) = 0.000490124191321
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.99653943127
 
-Scale factor is : 0.7
-scale factor at theta=Pi/4   : 1.42678631193
-scale factor at theta=4*Pi/5 : 1.42678631193
-scale factor over surface    : 0.253768659366
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             0.490613061081
-Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : 1.3178047006
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.490409304294
+Scale factor is : 0.997951418011
+int dOmega / 4*pi = 0.000476063699814
+int dA / (2/3 A) = 0.000435622347455
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.996738928679
 
-Scale factor is : 0.8
-scale factor at theta=Pi/4   : 1.24843802295
-scale factor at theta=4*Pi/5 : 1.24843802295
-scale factor over surface    : 0.147722132262
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             0.64080073284
-Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : 1.72121430282
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.640534601527
+Scale factor is : 0.998051293052
+int dOmega / 4*pi = 0.000416514053117
+int dA / (2/3 A) = 0.000381131410856
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.996938446054
 
-Scale factor is : 0.9
-scale factor at theta=Pi/4   : 1.10972268705
-scale factor at theta=4*Pi/5 : 1.10972268705
-scale factor over surface    : 0.0652415000569
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             0.811013427501
-Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : 2.178411852
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.810676605058
+Scale factor is : 0.998151168094
+int dOmega / 4*pi = 0.000356976312427
+int dA / (2/3 A) = 0.000326651368853
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.997137983395
 
-Scale factor is : 1
-scale factor at theta=Pi/4   : 0.99875041834
-scale factor at theta=4*Pi/5 : 0.99875041834
-scale factor over surface    : 0.000743005700333
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00125114506
-Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : 2.68939734815
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00083531489
+Scale factor is : 0.998251043136
+int dOmega / 4*pi = 0.000297450505431
+int dA / (2/3 A) = 0.000272182246784
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.997337540704
 
-Scale factor is : 1.1
-scale factor at theta=Pi/4   : 0.907954925764
-scale factor at theta=4*Pi/5 : 0.907954925764
-scale factor over surface    : 0.0547303285914
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.21151388553
-Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : 3.25417079127
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.21101073101
+Scale factor is : 0.998350918178
+int dOmega / 4*pi = 0.00023793660444
+int dA / (2/3 A) = 0.000217724019312
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.997537117979
 
-Scale factor is : 1.2
-scale factor at theta=Pi/4   : 0.832292015296
-scale factor at theta=4*Pi/5 : 0.832292015296
-scale factor over surface    : 0.0997197643265
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.44180164889
-Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : 3.87273218134
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.44120285344
+Scale factor is : 0.99845079322
+int dOmega / 4*pi = 0.000178434595611
+int dA / (2/3 A) = 0.000163276673768
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.997736715221
 
-Scale factor is : 1.3
-scale factor at theta=Pi/4   : 0.768269552583
-scale factor at theta=4*Pi/5 : 0.768269552583
-scale factor over surface    : 0.137787748415
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.69211443516
-Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : 4.54508151838
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.69141168216
+Scale factor is : 0.998550668262
+int dOmega / 4*pi = 0.000118944492789
+int dA / (2/3 A) = 0.000108840222823
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.997936332429
 
-Scale factor is : 1.4
-scale factor at theta=Pi/4   : 0.713393155964
-scale factor at theta=4*Pi/5 : 0.713393155964
-scale factor over surface    : 0.170417449068
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.96245224432
-Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : 5.27121880238
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.96163721718
+Scale factor is : 0.998650543303
+int dOmega / 4*pi = 5.94662959718e-05
+int dA / (2/3 A) = 5.44146664739e-05
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.998135969605
 
-Scale factor is : 1.5
-scale factor at theta=Pi/4   : 0.66583361223
-scale factor at theta=4*Pi/5 : 0.66583361223
-scale factor over surface    : 0.198696522965
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             2.25281507639
-Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : 6.05114403335
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 2.25187945849
+Scale factor is : 0.998750418345
+int dOmega / 4*pi = 5.16073047754e-12
+int dA / (2/3 A) = 4.7223292305e-12
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.998335626747
 
-x-axis analysis
-Starting the gsl multidimensional root finder.
-Solution found with : THETA[1] = -1.30012993799e-06
-                     thetap[1] = 89.9999998197
-                       phip[1] = -2.73502631688e-09
-scale factor at equator      : 1.00062458445
-scale factor at theta=Pi/4   : 1.00062482976
-scale factor at theta=4*Pi/5 : 1.00062490563
-scale factor over surface    : 0.00037147736122
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             0.999373650934
-Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : 2.68603322352
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.999583385811
+Scale factor is : 0.998850293387
+int dOmega / 4*pi = 5.94544073327e-05
+int dA / (2/3 A) = 5.44037877682e-05
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.998535303855
 
-Scale factor is : 1.00062458445
-scale factor at theta=Pi/4   : 1.00000024515
-scale factor at theta=4*Pi/5 : 1.00000032097
-scale factor over surface    : 1.3037584941e-07
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00062242728
-Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : 2.68938958053
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00083242424
+Scale factor is : 0.998950168429
+int dOmega / 4*pi = 0.000118896941509
+int dA / (2/3 A) = 0.000108796710998
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.998735000931
 
-Scale factor is : 1.00062674163
-scale factor at theta=Pi/4   : 0.999998089335
-scale factor at theta=4*Pi/5 : 0.999998165149
-scale factor over surface    : 1.18789269559e-06
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00062674163
-Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : 2.68940117626
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00083673948
+Scale factor is : 0.999050043471
+int dOmega / 4*pi = 0.000178327569679
+int dA / (2/3 A) = 0.000163178739631
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.998934717973
 
-Scale factor is : 0.5
-scale factor at theta=Pi/4   : 2.00124965955
-scale factor at theta=4*Pi/5 : 2.00124981125
-scale factor over surface    : 0.595346512202
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             0.249843412734
-Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : 0.671508305881
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.249895846453
+Scale factor is : 0.999149918513
+int dOmega / 4*pi = 0.000237746319531
+int dA / (2/3 A) = 0.000217549899002
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.999134454982
 
-Scale factor is : 0.6
-scale factor at theta=Pi/4   : 1.66770804959
-scale factor at theta=4*Pi/5 : 1.66770817607
-scale factor over surface    : 0.397021500586
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             0.359774514336
-Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : 0.966971960468
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.359850018892
+Scale factor is : 0.999249793554
+int dOmega / 4*pi = 0.000297153204911
+int dA / (2/3 A) = 0.000271910201781
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.999334211957
 
-Scale factor is : 0.7
-scale factor at theta=Pi/4   : 1.42946404251
-scale factor at theta=4*Pi/5 : 1.42946415091
-scale factor over surface    : 0.255360778001
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             0.489693088958
-Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : 1.31615627953
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.489795859047
+Scale factor is : 0.999349668596
+int dOmega / 4*pi = 0.000356548211972
+int dA / (2/3 A) = 0.000326259635299
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.9995339889
 
-Scale factor is : 0.8
-scale factor at theta=Pi/4   : 1.2507810372
-scale factor at theta=4*Pi/5 : 1.25078113203
-scale factor over surface    : 0.149115236064
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             0.639599136598
-Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : 1.71906126305
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.639733366919
+Scale factor is : 0.999449543638
+int dOmega / 4*pi = 0.000415931340717
+int dA / (2/3 A) = 0.000380598199556
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.999733785809
 
-Scale factor is : 0.9
-scale factor at theta=Pi/4   : 1.11180536641
-scale factor at theta=4*Pi/5 : 1.11180545069
-scale factor over surface    : 0.0664798145567
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             0.809492657257
-Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : 2.17568691105
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.809662542507
+Scale factor is : 0.99954941868
+int dOmega / 4*pi = 0.000475302604988
+int dA / (2/3 A) = 0.000434925907221
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.999933602684
 
-Scale factor is : 1
-scale factor at theta=Pi/4   : 1.00062482976
-scale factor at theta=4*Pi/5 : 1.00062490563
-scale factor over surface    : 0.00037147736122
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             0.999373650934
-Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : 2.68603322352
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.999583385811
+Scale factor is : 0.999649293722
+int dOmega / 4*pi = 0.000534662004785
+int dA / (2/3 A) = 0.000489242758292
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00013343953
 
-Scale factor is : 1.1
-scale factor at theta=Pi/4   : 0.90965893614
-scale factor at theta=4*Pi/5 : 0.909659005114
-scale factor over surface    : 0.0537171621815
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.20924211763
-Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : 3.25010020046
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.20949589683
-
-Scale factor is : 1.2
-scale factor at theta=Pi/4   : 0.833854024791
-scale factor at theta=4*Pi/5 : 0.833854088018
-scale factor over surface    : 0.0987910284578
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.43909805735
-Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : 3.86788784187
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.43940007557
-
-Scale factor is : 1.3
-scale factor at theta=Pi/4   : 0.769711407512
-scale factor at theta=4*Pi/5 : 0.76971146587
-scale factor over surface    : 0.136930453769
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.68894147008
-Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : 4.53939614775
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.68929592202
-
-Scale factor is : 1.4
-scale factor at theta=Pi/4   : 0.714732021252
-scale factor at theta=4*Pi/5 : 0.714732075452
-scale factor over surface    : 0.16962138975
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.95877235583
-Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : 5.2646251181
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.95918343619
-
-Scale factor is : 1.5
-scale factor at theta=Pi/4   : 0.667083219839
-scale factor at theta=4*Pi/5 : 0.667083270406
-scale factor over surface    : 0.197953534267
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             2.2485907146
-Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : 6.04357475293
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 2.24906261807
-
-y-axis analysis
-Starting the gsl multidimensional root finder.
-Solution found with : THETA[2] = -1.30012994871e-06
-                     thetap[2] = 89.9999568951
-                       phip[2] = 90.0000000427
-scale factor at equator      : 1.00062458445
-scale factor at theta=Pi/4   : 1.00062482976
-scale factor at theta=4*Pi/5 : 1.00062490562
-scale factor over surface    : 0.000371477360971
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             0.999373650934
-Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : 2.68603322352
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.999583385811
-
-Scale factor is : 1.00062458445
-scale factor at theta=Pi/4   : 1.00000024515
-scale factor at theta=4*Pi/5 : 1.00000032096
-scale factor over surface    : 1.30375431921e-07
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00062242728
-Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : 2.68938958053
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00083242424
-
-Scale factor is : 1.00062674163
-scale factor at theta=Pi/4   : 0.999998089328
-scale factor at theta=4*Pi/5 : 0.999998165148
-scale factor over surface    : 1.18789258212e-06
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.00062674163
-Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : 2.68940117626
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00083673948
-
-Scale factor is : 0.5
-scale factor at theta=Pi/4   : 2.00124965954
-scale factor at theta=4*Pi/5 : 2.00124981127
-scale factor over surface    : 0.595346512203
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             0.249843412734
-Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : 0.671508305881
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.249895846453
-
-Scale factor is : 0.6
-scale factor at theta=Pi/4   : 1.66770804961
-scale factor at theta=4*Pi/5 : 1.66770817604
-scale factor over surface    : 0.397021500585
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             0.359774514336
-Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : 0.966971960468
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.359850018892
-
-Scale factor is : 0.7
-scale factor at theta=Pi/4   : 1.42946404254
-scale factor at theta=4*Pi/5 : 1.42946415088
-scale factor over surface    : 0.255360778001
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             0.489693088958
-Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : 1.31615627953
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.489795859047
-
-Scale factor is : 0.8
-scale factor at theta=Pi/4   : 1.25078103719
-scale factor at theta=4*Pi/5 : 1.25078113203
-scale factor over surface    : 0.149115236063
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             0.639599136598
-Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : 1.71906126305
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.639733366919
-
-Scale factor is : 0.9
-scale factor at theta=Pi/4   : 1.11180536641
-scale factor at theta=4*Pi/5 : 1.11180545069
-scale factor over surface    : 0.0664798145563
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             0.809492657257
-Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : 2.17568691105
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.809662542507
-
-Scale factor is : 1
-scale factor at theta=Pi/4   : 1.00062482976
-scale factor at theta=4*Pi/5 : 1.00062490562
-scale factor over surface    : 0.000371477360971
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             0.999373650934
-Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : 2.68603322352
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 0.999583385811
-
-Scale factor is : 1.1
-scale factor at theta=Pi/4   : 0.90965893614
-scale factor at theta=4*Pi/5 : 0.909659005114
-scale factor over surface    : 0.0537171621819
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.20924211763
-Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : 3.25010020046
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.20949589683
-
-Scale factor is : 1.2
-scale factor at theta=Pi/4   : 0.833854024807
-scale factor at theta=4*Pi/5 : 0.83385408802
-scale factor over surface    : 0.0987910284581
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.43909805735
-Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : 3.86788784187
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.43940007557
-
-Scale factor is : 1.3
-scale factor at theta=Pi/4   : 0.769711407511
-scale factor at theta=4*Pi/5 : 0.769711465861
-scale factor over surface    : 0.136930453769
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.68894147008
-Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : 4.53939614775
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.68929592202
-
-Scale factor is : 1.4
-scale factor at theta=Pi/4   : 0.71473202127
-scale factor at theta=4*Pi/5 : 0.714732075445
-scale factor over surface    : 0.16962138975
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             1.95877235583
-Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : 5.2646251181
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.95918343619
-
-Scale factor is : 1.5
-scale factor at theta=Pi/4   : 0.667083219853
-scale factor at theta=4*Pi/5 : 0.667083270427
-scale factor over surface    : 0.197953534267
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             2.2485907146
-Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : 6.04357475293
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 2.24906261807
+Scale factor is : 0.999749168764
+int dOmega / 4*pi = 0.00059400954011
+int dA / (2/3 A) = 0.000543548752771
+Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 1.00033329634
 
 z-x inner product : 
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             3.15034003108e-09
-Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : 8.46192902932e-09
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 3.14903166333e-09
 z-y inner product : 
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             7.53263101982e-07
-Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : 2.02329235669e-06
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : 7.52950263859e-07
 x-y inner product : 
-Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             -2.41850093664e-08
-Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : -6.50024529105e-08
-Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : -2.41900849912e-08
 
 

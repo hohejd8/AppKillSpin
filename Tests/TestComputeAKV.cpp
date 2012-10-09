@@ -87,19 +87,19 @@ void TestScaleFactors(DataMesh v,
 
       const double scaleAboveEquator =
                 normalizeKVAtOnePoint(sb, rotated_Psi, rotated_v, rad, M_PI/4., 0.0);
-      std::cout << "scale factor at theta=Pi/4   : " 
-                << std::setprecision(12)
-                << scaleAboveEquator << std::endl;
+      //std::cout << "scale factor at theta=Pi/4   : " 
+      //          << std::setprecision(12)
+      //          << scaleAboveEquator << std::endl;
       const double scaleBelowEquator =
                 normalizeKVAtOnePoint(sb, rotated_Psi, rotated_v, rad, 4.*M_PI/5., 0.0);
-      std::cout << "scale factor at theta=4*Pi/5 : " 
-                << std::setprecision(12)
-                << scaleBelowEquator << std::endl;
+      //std::cout << "scale factor at theta=4*Pi/5 : " 
+      //          << std::setprecision(12)
+      //          << scaleBelowEquator << std::endl;
       const double scaleOverSurface =
                 normalizeKVAtAllPoints(sb, rotated_Psi, theta, phi, rotated_v, rad);
-      std::cout << "scale factor over surface    : " 
-                << std::setprecision(12)
-                << scaleOverSurface << std::endl;
+      //std::cout << "scale factor over surface    : " 
+      //          << std::setprecision(12)
+      //          << scaleOverSurface << std::endl;
       AKVInnerProduct(v, v, Ricci, rp2, sb);
 
 }
@@ -183,7 +183,8 @@ int main(){
     const DataMesh Ricci = 2.0 * (1.0-2.0*llncf) / (rp2*rp2);
     const Tensor<DataMesh> GradRicci = sb.Gradient(Ricci);
 
-    for(int a=0; a<axes; a++){//index over perpendicular AKV axes
+    //for(int a=0; a<axes; a++){//index over perpendicular AKV axes
+    for(int a=0; a<1; a++){//index over perpendicular AKV axes
       //for printing
       switch(a){
         case 0:
@@ -254,19 +255,10 @@ int main(){
                        rad, Ricci, rp2, sb, theta, phi, scaleAtEquator);
       TestScaleFactors(v[a], rotated_v[a], rotated_Psi,
                        rad, Ricci, rp2, sb, theta, phi, 1./scaleInnerProduct);
-      for(int i=0; i<=10; i++)
+      for(int i=0; i<=20; i++)
         TestScaleFactors(v[a], rotated_v[a], rotated_Psi, 
-                         rad, Ricci, rp2, sb, theta, phi, 0.5+0.1*i);
-
-      //create xi (1-form)
-      //Tensor<DataMesh> tmp_xi = sb.Gradient(v[a]);
-      //xi[a](0) = tmp_xi(1);
-      //xi[a](1) = -tmp_xi(0);
-
-      //KillingDiagnostics(sb, L, Psi[s], xi[a], rad, MyVector<bool>(MV::Size(6),true) );
-
-
-
+                         //rad, Ricci, rp2, sb, theta, phi, 0.5+0.1*i);
+                         rad, Ricci, rp2, sb, theta, phi, (1./scaleInnerProduct)*(0.9990+0.0001*i));
 
       std::cout << std::endl;
     }//end loop over perpendicular AKV axes
@@ -283,11 +275,11 @@ int main(){
 
     //compute inner products between AKV solutions
     std::cout << "z-x inner product : " << std::endl;
-    AKVInnerProduct(v[0], v[1], Ricci, rp2, sb);
+    //AKVInnerProduct(v[0], v[1], Ricci, rp2, sb);
     std::cout << "z-y inner product : " << std::endl;
-    AKVInnerProduct(v[0], v[2], Ricci, rp2, sb);
+    //AKVInnerProduct(v[0], v[2], Ricci, rp2, sb);
     std::cout << "x-y inner product : " << std::endl;
-    AKVInnerProduct(v[1], v[2], Ricci, rp2, sb);
+    //AKVInnerProduct(v[1], v[2], Ricci, rp2, sb);
     std::cout << "\n" << std::endl;
   }
 
