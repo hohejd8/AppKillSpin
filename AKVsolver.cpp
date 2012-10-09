@@ -284,7 +284,7 @@ int AKVsolver(const gsl_vector * x,
         + sin(thetap)*sin(theta)*(cos(phip)*cos(phi) + sin(phip)*sin(phi) );
 
   //eq. 95
-  v = L;//*rad*rad;
+  v = L;
 
   //eq. 94, make sure only l=1 mode exists by setting all l!=1 modes to zero
   DataMesh L_ha = sb.ComputeCoefficients(L);
@@ -312,6 +312,13 @@ int AKVsolver(const gsl_vector * x,
   DataMesh RHS(DataMesh::Empty);//RHS=right hand side of eq. 97
   DataMesh RHS_ha(sb.CoefficientMesh());
   Tensor<DataMesh> Gradv(2,"1",DataMesh::Empty); //Gradient of v, eq. 97
+
+  // index for l=0
+  const int l00a = sit(0,0,SpherePackIterator::a);
+  // indices for l=1
+  const int l10a = sit(1,0,SpherePackIterator::a);
+  const int l11a = sit(1,1,SpherePackIterator::a);
+  const int l11b = sit(1,1,SpherePackIterator::b);
 
   while(unsolved){
 
@@ -352,11 +359,11 @@ int AKVsolver(const gsl_vector * x,
     RHS *= RHS;
 
     //evaluate normalization factor
-    const double norm_RHS_L = sqrt(sqrt(2.0)*sb.ComputeCoefficients(RHS)[0]/4.0);
+    const double norm_RHS_L = sqrt(sqrt(2.0)*sb.ComputeCoefficients(RHS)[l00a]/4.0);
 
     //invert (Laplacian + 2)
     for(sit.Reset(); sit; ++sit){
-      if(sit.l()!=1){ //l=1 modes have already been set to 0
+      if(sit.l()!=1){ // l=1 modes are zero
         RHS_ha[sit()] /= 2.0 - sit.l()*(sit.l()+1.0);
       }
     }
@@ -388,7 +395,7 @@ int AKVsolver(const gsl_vector * x,
 
     //invert (Laplacian + 0)
     for(sit.Reset(); sit; ++sit){
-      if(sit.l()!=0){ //l=0 mode has already been set to 0
+      if(sit.l()!=0){ // l=0 mode is zero
         RHS_ha[sit()] /= -sit.l()*(sit.l()+1.0);
       }
     }
