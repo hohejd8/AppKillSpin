@@ -273,8 +273,9 @@ int AKVsolver(const gsl_vector * x,
   const bool& printResiduals = static_cast<struct rparams*>(params)->printResiduals;
 
   SpherePackIterator sit(theta.Extents()[0],theta.Extents()[1]);
-  //fast iterator references
+  // index for l=0
   const int l00a = sit(0,0,SpherePackIterator::a);
+  // indices for l=1
   const int l10a = sit(1,0,SpherePackIterator::a);
   const int l11a = sit(1,1,SpherePackIterator::a);
   const int l11b = sit(1,1,SpherePackIterator::b);
@@ -312,13 +313,6 @@ int AKVsolver(const gsl_vector * x,
   DataMesh RHS(DataMesh::Empty);//RHS=right hand side of eq. 97
   DataMesh RHS_ha(sb.CoefficientMesh());
   Tensor<DataMesh> Gradv(2,"1",DataMesh::Empty); //Gradient of v, eq. 97
-
-  // index for l=0
-  const int l00a = sit(0,0,SpherePackIterator::a);
-  // indices for l=1
-  const int l10a = sit(1,0,SpherePackIterator::a);
-  const int l11a = sit(1,1,SpherePackIterator::a);
-  const int l11b = sit(1,1,SpherePackIterator::b);
 
   while(unsolved){
 
