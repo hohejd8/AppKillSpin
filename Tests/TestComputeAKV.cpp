@@ -183,8 +183,8 @@ int main(){
     const DataMesh Ricci = 2.0 * (1.0-2.0*llncf) / (rp2*rp2);
     const Tensor<DataMesh> GradRicci = sb.Gradient(Ricci);
 
-    for(int a=0; a<axes; a++){//index over perpendicular AKV axes
-    //for(int a=0; a<1; a++){//index over perpendicular AKV axes
+    //for(int a=0; a<axes; a++){//index over perpendicular AKV axes
+    for(int a=1; a<2; a++){//index over perpendicular AKV axes
       //for printing
       switch(a){
         case 0:
@@ -259,7 +259,7 @@ int main(){
       TestScaleFactors(v[a], rotated_v[a], rotated_Psi,
                        rad, Ricci, rp2, sb, theta, phi, 1./scaleInnerProduct);
       for(int i=0; i<=20; i++){
-        const double deviation = 0.99990+0.00001*i;
+        const double deviation = 0.9999979+0.00000001*i;
         std::cout << "Using inner product scale factor times " << deviation << std::endl;
         TestScaleFactors(v[a], rotated_v[a], rotated_Psi, 
                          //rad, Ricci, rp2, sb, theta, phi, 0.5+0.1*i);
@@ -281,11 +281,11 @@ int main(){
 
     //compute inner products between AKV solutions
     std::cout << "z-x inner product : " << std::endl;
-    AKVInnerProduct(v[0], v[1], Ricci, rp2, sb);
+    //AKVInnerProduct(v[0], v[1], Ricci, rp2, sb);
     std::cout << "z-y inner product : " << std::endl;
-    AKVInnerProduct(v[0], v[2], Ricci, rp2, sb);
+    //AKVInnerProduct(v[0], v[2], Ricci, rp2, sb);
     std::cout << "x-y inner product : " << std::endl;
-    AKVInnerProduct(v[1], v[2], Ricci, rp2, sb);
+    //AKVInnerProduct(v[1], v[2], Ricci, rp2, sb);
     std::cout << "\n" << std::endl;
   }
 
