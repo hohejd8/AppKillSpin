@@ -183,8 +183,8 @@ int main(){
     const DataMesh Ricci = 2.0 * (1.0-2.0*llncf) / (rp2*rp2);
     const Tensor<DataMesh> GradRicci = sb.Gradient(Ricci);
 
-    //for(int a=0; a<axes; a++){//index over perpendicular AKV axes
-    for(int a=1; a<2; a++){//index over perpendicular AKV axes
+    for(int a=0; a<axes; a++){//index over perpendicular AKV axes
+    //for(int a=1; a<2; a++){//index over perpendicular AKV axes
       //for printing
       switch(a){
         case 0:
