@@ -80,18 +80,18 @@ void TestScaleFactors(DataMesh v,
                       const DataMesh& phi,
                       const double& scaleFactor)
 {
-  std::cout << "Scale factor is : " << scaleFactor << std::endl;
+  //std::cout << "Scale factor is : " << scaleFactor << std::endl;
 
   v *= scaleFactor;
   rotated_v *= scaleFactor;
 
-      const double scaleAboveEquator =
-                normalizeKVAtOnePoint(sb, rotated_Psi, rotated_v, rad, M_PI/4., 0.0);
+      //const double scaleAboveEquator =
+      //          normalizeKVAtOnePoint(sb, rotated_Psi, rotated_v, rad, M_PI/4., 0.0);
       //std::cout << "scale factor at theta=Pi/4   : " 
       //          << std::setprecision(12)
       //          << scaleAboveEquator << std::endl;
-      const double scaleBelowEquator =
-                normalizeKVAtOnePoint(sb, rotated_Psi, rotated_v, rad, 4.*M_PI/5., 0.0);
+      //const double scaleBelowEquator =
+      //          normalizeKVAtOnePoint(sb, rotated_Psi, rotated_v, rad, 4.*M_PI/5., 0.0);
       //std::cout << "scale factor at theta=4*Pi/5 : " 
       //          << std::setprecision(12)
       //          << scaleBelowEquator << std::endl;
@@ -100,8 +100,9 @@ void TestScaleFactors(DataMesh v,
       //std::cout << "scale factor over surface    : " 
       //          << std::setprecision(12)
       //          << scaleOverSurface << std::endl;
-      AKVInnerProduct(v, v, Ricci, rp2, sb);
-  std::cout << std::endl;
+      //const double scaleInnerProduct = AKVInnerProduct(v, v, Ricci, rp2, sb);
+      std::cout << std::setprecision(15) << scaleFactor << " " << scaleOverSurface << std::endl;
+  //std::cout << std::endl;
 }
 
 int main(){
@@ -161,7 +162,7 @@ int main(){
   //create conformal factors for every rotation
   const int syms = 4; //the number of axisymmetries we are testing
 
-  for(int s=1; s<2; s++){//index over conformal factor symmetries
+  for(int s=3; s<4; s++){//index over conformal factor symmetries
   //for(int s=0; s<syms; s++){//index over conformal factor symmetries
     //create conformal factor
     const DataMesh Psi = ConstructConformalFactor(theta, phi, s);
@@ -183,8 +184,8 @@ int main(){
     const DataMesh Ricci = 2.0 * (1.0-2.0*llncf) / (rp2*rp2);
     const Tensor<DataMesh> GradRicci = sb.Gradient(Ricci);
 
-    for(int a=0; a<axes; a++){//index over perpendicular AKV axes
-    //for(int a=1; a<2; a++){//index over perpendicular AKV axes
+    //for(int a=0; a<axes; a++){//index over perpendicular AKV axes
+    for(int a=0; a<1; a++){//index over perpendicular AKV axes
       //for printing
       switch(a){
         case 0:
@@ -221,12 +222,12 @@ int main(){
                                             sb,thetap[a],phip[a]);
 
       //determine scale factor
-      std::cout << "\nUnscaled results" << std::endl;
+      //std::cout << "\nUnscaled results" << std::endl;
       const double scaleAtEquator =
                 normalizeKVAtOnePoint(sb, rotated_Psi, rotated_v[a], rad, M_PI/2., 0.0);
-      std::cout << "scale factor at equator      : " 
-                << std::setprecision(12)
-                << scaleAtEquator << std::endl;
+      //std::cout << "scale factor at equator      : " 
+      //          << std::setprecision(12)
+      //          << scaleAtEquator << std::endl;
 
       //scale L, v
       //v[a] *= scaleAtEquator;
@@ -236,14 +237,14 @@ int main(){
       //compare scale factors
       const double scaleAboveEquator =
                 normalizeKVAtOnePoint(sb, rotated_Psi, rotated_v[a], rad, M_PI/4., 0.0);
-      std::cout << "scale factor at theta=Pi/4   : " 
-                << std::setprecision(12)
-                << scaleAboveEquator << std::endl;
+      //std::cout << "scale factor at theta=Pi/4   : " 
+      //          << std::setprecision(12)
+      //          << scaleAboveEquator << std::endl;
       const double scaleBelowEquator =
                 normalizeKVAtOnePoint(sb, rotated_Psi, rotated_v[a], rad, 4.*M_PI/5., 0.0);
-      std::cout << "scale factor at theta=4*Pi/5 : " 
-                << std::setprecision(12)
-                << scaleBelowEquator << std::endl;
+      //std::cout << "scale factor at theta=4*Pi/5 : " 
+      //          << std::setprecision(12)
+      //          << scaleBelowEquator << std::endl;
       const double scaleOverSurface =
                 normalizeKVAtAllPoints(sb, rotated_Psi, theta, phi, rotated_v[a], rad);
       //std::cout << "scale factor over surface    : " 
@@ -252,15 +253,16 @@ int main(){
       double scaleInnerProduct = AKVInnerProduct(v[a], v[a], Ricci, rp2, sb);
 
 
-      std::cout << "\nUsing the scale factor from the path length at the equator" << std::endl;
+      //std::cout << "\nUsing the scale factor from the path length at the equator" << std::endl;
       TestScaleFactors(v[a], rotated_v[a], rotated_Psi,
                        rad, Ricci, rp2, sb, theta, phi, scaleAtEquator);
-      std::cout << "Using the scale factor from the inner product / r2p4" << std::endl;
+      //std::cout << "Using the scale factor from the inner product / r2p4" << std::endl;
       TestScaleFactors(v[a], rotated_v[a], rotated_Psi,
                        rad, Ricci, rp2, sb, theta, phi, 1./scaleInnerProduct);
-      for(int i=0; i<=20; i++){
-        const double deviation = 0.9999979+0.00000001*i;
-        std::cout << "Using inner product scale factor times " << deviation << std::endl;
+      const double difference = fabs(scaleAtEquator-1./scaleInnerProduct);
+      for(int i=0; i<=80; i++){
+        const double deviation = (1.-2.*difference)+(difference/20.)*i;
+        //std::cout << "Using inner product scale factor times " << deviation << std::endl;
         TestScaleFactors(v[a], rotated_v[a], rotated_Psi, 
                          //rad, Ricci, rp2, sb, theta, phi, 0.5+0.1*i);
                          rad, Ricci, rp2, sb, theta, phi, (1./scaleInnerProduct)*deviation);

@@ -506,10 +506,10 @@ double normalizeKVAtAllPoints(const SurfaceBasis& sb,
   const DataMesh r2p4 = rad*rad*Psi*Psi*Psi*Psi;
   const double area = sb.ComputeCoefficients(r2p4)[0];
   //return sqrt(sb.ComputeCoefficients(scaleFactor)[0]/8.);
-std::cout << "Integral (T/(2*pi) - 1) dOmega / 4*pi                     = " 
-          << sqrt(sb.ComputeCoefficients(scaleFactor)[0]/8.) << std::endl;
-std::cout << "Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= " 
-          << sqrt(sb.ComputeCoefficients(scaleFactor*r2p4)[0])/area << std::endl;
+//std::cout << "Integral (T/(2*pi) - 1) dOmega / 4*pi                     = " 
+//          << sqrt(sb.ComputeCoefficients(scaleFactor)[0]/8.) << std::endl;
+//std::cout << "Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= " 
+//          << sqrt(sb.ComputeCoefficients(scaleFactor*r2p4)[0])/area << std::endl;
   return sqrt(sb.ComputeCoefficients(scaleFactor*r2p4)[0])/area;
 }
 
@@ -654,7 +654,7 @@ bool KillingPath(const SurfaceBasis& sb,
 
     ASSERT(status==GSL_SUCCESS,"Path Integration failed");
     if(limit_h && h > hmax) h = hmax;
-    if(fabs(y[1] - phi) < 1.e-10) break;
+    if(fabs(y[1] - phi) < 1.e-11) break;
     else if(y[1] > phi) { //if solver went too far...
       if(!limit_h) hmax = h;
       limit_h = true;
@@ -706,8 +706,8 @@ double AKVInnerProduct(const DataMesh& v1,
   DataMesh integrand = 0.5*Ricci*(Gradv1(0)*Gradv2(0)+Gradv1(1)*Gradv2(1));//(rp2*rp2);
 
   double integralrp2 = (3.*sqrt(2.)/8.0)*sb.ComputeCoefficients(integrand/(rp2*rp2))[0];
-  std::cout << "Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             " 
-            << integralrp2 << std::endl;
+  //std::cout << "Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             " 
+  //          << integralrp2 << std::endl;
 
   double areaRicci = sb.ComputeCoefficients(0.5*Ricci*rp2*rp2)[0];
   double integralRicci = sb.ComputeCoefficients(integrand)[0] / (2./3. * areaRicci);
@@ -716,8 +716,8 @@ double AKVInnerProduct(const DataMesh& v1,
 
   double area = sb.ComputeCoefficients(rp2*rp2)[0];
   double integral = sb.ComputeCoefficients(integrand)[0] / (2./3. * area);
-  std::cout << "Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : " 
-            << integral << std::endl;
+  //std::cout << "Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : " 
+  //          << integral << std::endl;
 
   return integralrp2;
 }
