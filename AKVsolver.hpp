@@ -89,6 +89,16 @@ double normalizeKVAtOnePoint(const SurfaceBasis& sb,
                               const double& thetap=M_PI/2.0,
                               const double& phip=0.0);
 
+//This routine will print the value of normalizeKVAtAllPoints for 
+//a range of scale factors in the neighborhood of scaleFactor1, scaleFactor2
+void TestScaleFactors(const DataMesh& rotated_v,
+                      const DataMesh& rotated_Psi,
+                      const double& rad,
+                      const SurfaceBasis& sb,
+                      const DataMesh& theta,
+                      const DataMesh& phi,
+                      const double& scaleFactor1,
+                      const double& scaleFactor2);
 
 bool KillingPath(const SurfaceBasis& sb,
                     const DataMesh& Psi_r,
@@ -112,17 +122,7 @@ double AKVInnerProduct(const DataMesh& v1,
                        const DataMesh& Ricci,
                        const DataMesh& rp2,
                        const SurfaceBasis& sb);
-/*
-//determines value of the integral
-//(\Theta_1 - \Theta_2) \oint ^2R((\vec \xi_1) \cdot (\vec \xi_2) d\Omega
-double AKVInnerProduct(const Tensor<DataMesh>& xi1,
-                       const double THETA1,
-                       const Tensor<DataMesh>& xi2,
-                       const double THETA2,
-                       const DataMesh& Ricci,
-                       //const DataMesh& rp2,
-                       const SurfaceBasis& sb);
-*/
+
 //performs diagnostics on the approximate Killing vector solution
 void KillingDiagnostics(const SurfaceBasis& sb,
                         const DataMesh& L,

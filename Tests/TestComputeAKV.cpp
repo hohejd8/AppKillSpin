@@ -37,12 +37,12 @@ DataMesh ConstructConformalFactor(const DataMesh& theta,
        //+ B*(1.0-3.0*cos(theta)*cos(theta)+3.0*sin(theta)*sin(theta)*cos(2.0*phi))
        //+ C*(1.0-3.0*cos(theta)*cos(theta)-3.0*sin(theta)*sin(theta)*cos(2.0*phi));
   switch(axisym){
-    case 0: //constant
+    case 0: //complete symmetry, constant
       //do nothing to Psi
       std::cout << "COMPLETELY SYMMETRIC" << std::endl;
       break;
-    case 1: 
-      Psi += 0.001*cos(theta)*cos(theta);//z axisymmetry
+    case 1: //z axisymmetry
+      Psi += 0.001*cos(theta)*cos(theta);
       std::cout << "Z AXISYMMETRY" << std::endl;
       break;
     case 2: //x axisymmetry
@@ -53,6 +53,13 @@ DataMesh ConstructConformalFactor(const DataMesh& theta,
       Psi += 0.001*(1.0-3.0*cos(theta)*cos(theta)-3.0*sin(theta)*sin(theta)*cos(2.0*phi));
       std::cout << "Y AXISYMMETRY" << std::endl;
       break;
+    case 4: //no symmetry
+      Psi += 0.001*(  sin(theta)*sin(theta)*cos(theta)*cos(theta)*cos(phi));
+                    //+ sin(theta)*cos(theta)*sin(phi));
+      std::cout << "NO AXISYMMETRY" << std::endl;
+      break;
+
+/*
     case 4: //xz axisymmetry
       Psi +=  0.001*(-1.0+3.0*cos(theta)*cos(theta)+3.0*sin(theta)*sin(theta)*cos(2.0*phi)
            +6.0*sin(2.0*theta)*cos(phi));
@@ -64,14 +71,15 @@ DataMesh ConstructConformalFactor(const DataMesh& theta,
            +3.0*sin(theta)*sin(theta)*sin(2.0*phi));
       std::cout << "xyz axisymmetry" << std::endl;
       break;
+*/
   } //end switch
 
   return Psi;
 }
 
-void TestScaleFactors(DataMesh v,
-                      DataMesh rotated_v,
-                      DataMesh rotated_Psi,
+void PrintSurfaceNormalization(const DataMesh& v,
+                      const DataMesh& rotated_v,
+                      const DataMesh& rotated_Psi,
                       const double& rad,
                       const DataMesh& Ricci,
                       const DataMesh& rp2,
@@ -82,8 +90,8 @@ void TestScaleFactors(DataMesh v,
 {
   //std::cout << "Scale factor is : " << scaleFactor << std::endl;
 
-  v *= scaleFactor;
-  rotated_v *= scaleFactor;
+  //v *= scaleFactor;
+  //rotated_v *= scaleFactor;
 
       //const double scaleAboveEquator =
       //          normalizeKVAtOnePoint(sb, rotated_Psi, rotated_v, rad, M_PI/4., 0.0);
@@ -96,7 +104,7 @@ void TestScaleFactors(DataMesh v,
       //          << std::setprecision(12)
       //          << scaleBelowEquator << std::endl;
       const double scaleOverSurface =
-                normalizeKVAtAllPoints(sb, rotated_Psi, theta, phi, rotated_v, rad);
+                normalizeKVAtAllPoints(sb, rotated_Psi, theta, phi, rotated_v*scaleFactor, rad);
       //std::cout << "scale factor over surface    : " 
       //          << std::setprecision(12)
       //          << scaleOverSurface << std::endl;
@@ -160,9 +168,9 @@ int main(){
   const int axes = 3; //the number of perpendicular axes
 
   //create conformal factors for every rotation
-  const int syms = 4; //the number of axisymmetries we are testing
+  const int syms = 5; //the number of axisymmetries we are testing
 
-  for(int s=3; s<4; s++){//index over conformal factor symmetries
+  for(int s=4; s<5; s++){//index over conformal factor symmetries
   //for(int s=0; s<syms; s++){//index over conformal factor symmetries
     //create conformal factor
     const DataMesh Psi = ConstructConformalFactor(theta, phi, s);
@@ -184,8 +192,8 @@ int main(){
     const DataMesh Ricci = 2.0 * (1.0-2.0*llncf) / (rp2*rp2);
     const Tensor<DataMesh> GradRicci = sb.Gradient(Ricci);
 
-    //for(int a=0; a<axes; a++){//index over perpendicular AKV axes
-    for(int a=0; a<1; a++){//index over perpendicular AKV axes
+    for(int a=0; a<axes; a++){//index over perpendicular AKV axes
+    //for(int a=0; a<1; a++){//index over perpendicular AKV axes
       //for printing
       switch(a){
         case 0:
@@ -250,23 +258,17 @@ int main(){
       //std::cout << "scale factor over surface    : " 
       //          << std::setprecision(12)
       //          << scaleOverSurface << std::endl;
-      double scaleInnerProduct = AKVInnerProduct(v[a], v[a], Ricci, rp2, sb);
+      double scaleInnerProduct = 1./AKVInnerProduct(v[a], v[a], Ricci, rp2, sb);
 
 
       //std::cout << "\nUsing the scale factor from the path length at the equator" << std::endl;
-      TestScaleFactors(v[a], rotated_v[a], rotated_Psi,
+      PrintSurfaceNormalization(v[a], rotated_v[a], rotated_Psi,
                        rad, Ricci, rp2, sb, theta, phi, scaleAtEquator);
       //std::cout << "Using the scale factor from the inner product / r2p4" << std::endl;
-      TestScaleFactors(v[a], rotated_v[a], rotated_Psi,
-                       rad, Ricci, rp2, sb, theta, phi, 1./scaleInnerProduct);
-      const double difference = fabs(scaleAtEquator-1./scaleInnerProduct);
-      for(int i=0; i<=80; i++){
-        const double deviation = (1.-2.*difference)+(difference/20.)*i;
-        //std::cout << "Using inner product scale factor times " << deviation << std::endl;
-        TestScaleFactors(v[a], rotated_v[a], rotated_Psi, 
-                         //rad, Ricci, rp2, sb, theta, phi, 0.5+0.1*i);
-                         rad, Ricci, rp2, sb, theta, phi, (1./scaleInnerProduct)*deviation);
-      }
+      PrintSurfaceNormalization(v[a], rotated_v[a], rotated_Psi,
+                       rad, Ricci, rp2, sb, theta, phi, scaleInnerProduct);
+      //TestScaleFactors(rotated_v[a], rotated_Psi, rad, sb, theta,
+      //                 phi, scaleAtEquator, scaleInnerProduct);
 
       std::cout << std::endl;
     }//end loop over perpendicular AKV axes

@@ -114,22 +114,27 @@ namespace ComputeItems {
                                           sb,thetap,phip);
 
     //determine scale factor at the equator
-    const double scale = normalizeKVAtOnePoint(sb, rotated_Psi, rotated_v, mRad, M_PI/2., 0.0);
+    const double scaleAtEquator = normalizeKVAtOnePoint(sb, rotated_Psi, rotated_v, mRad, M_PI/2., 0.0);
     const double avgScale = normalizeKVAtAllPoints(sb, rotated_Psi, theta, phi, rotated_v, mRad);
-    if(mVerbose) std::cout << "scale factor = " << scale << std::endl;
-    if(mVerbose) std::cout << "average scale factor = " << avgScale << std::endl;
+    const double scaleInnerProduct = 1./AKVInnerProduct(v, v, Ricci, rp2, sb);
+    TestScaleFactors(rotated_v, rotated_Psi, mRad, sb, theta,
+                     phi, scaleAtEquator, scaleInnerProduct);
+    if(mVerbose) std::cout << "scale factor at equator = " << scaleAtEquator << std::endl;
+    if(mVerbose) std::cout << "scale factor over surface = " << avgScale << std::endl;
+    if(mVerbose) std::cout << "scale factor from inner product = " << avgScale << std::endl;
 
     //compute the inner product
+/*
     const double residual_ip_equator = AKVInnerProduct(v*scale, v*scale, Ricci, rp2, sb);
     std::cout << "Residual from the inner product of v scaled by the equator = "
               << residual_ip_equator << std::endl;
     const double residual_ip_average = AKVInnerProduct(v*avgScale, v*avgScale, Ricci, rp2, sb);
     std::cout << "Residual from the inner product of v scaled by average scale factor = "
               << residual_ip_average << std::endl;
-
+*/
     //scale L, v
-    v *= scale;
-    L *= scale;
+    v *= scaleAtEquator;
+    L *= scaleAtEquator;
 
     //create xi (1-form)
     Tensor<DataMesh> tmp_xi = sb.Gradient(v);

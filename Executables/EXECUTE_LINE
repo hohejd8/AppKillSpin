@@ -1,4 +1,4 @@
-NOTE: be sure to make apprpriate changes to DoMultipleRuns and EllipticInfo before every run
+NOTE: be sure to make appropriate changes to DoMultipleRuns and EllipticInfo before every run
 
 DoMultipleRuns -c "/usr/local/mpi/bin/mpirun /home/hohejd8/SpEC/AppKillSpin/Executables/SpellsAKS > Spells.out 2>&1"
 

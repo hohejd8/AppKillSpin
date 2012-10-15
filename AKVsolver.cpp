@@ -499,7 +499,7 @@ double normalizeKVAtAllPoints(const SurfaceBasis& sb,
   //for(int i=0; i<theta.Size(); i++)
   for(int i=0; i<scaleFactor.Size(); i++)
       scaleFactor[i] = normalizeKVAtOnePoint(sb,Psi,xi,rad,theta[i],phi[i])-1.;
-      //avgScaleFactor += normalizeKVAtOnePoint(sb,Psi,xi,rad,theta[i],phi[i]);
+
 
   //return avgScaleFactor/theta.Size();
   scaleFactor *= scaleFactor;
@@ -540,14 +540,7 @@ double normalizeKVAtOnePoint(const SurfaceBasis& sb,
                               const double& thetap, /*=M_PI/2.0*/
                               const double& phip /*=0.0*/)
 {
-  //rotate v
-//-:  DataMesh rotated_v = RotateOnSphere(v,
-//-:                       theta,
-//-:                       phi,
-//-:                       sb,
-//-:                       thetap,
-//-:                       phip);
-  //DataMesh rotated_v = v;
+
   //rotate Psi
 /*
   DataMesh rotated_Psi = RotateOnSphere(Psi,
@@ -594,6 +587,30 @@ double normalizeKVAtOnePoint(const SurfaceBasis& sb,
 */
   return scale;
 } //end normalizeKillingVector
+
+
+//This routine will print the value of normalizeKVAtAllPoints for 
+//a range of scale factors in the neighborhood of scaleFactor1, scaleFactor2
+void TestScaleFactors(const DataMesh& rotated_v,
+                      const DataMesh& rotated_Psi,
+                      const double& rad,
+                      const SurfaceBasis& sb,
+                      const DataMesh& theta,
+                      const DataMesh& phi,
+                      const double& scaleFactor1,
+                      const double& scaleFactor2)
+{
+  const double difference = fabs(scaleFactor1-scaleFactor2);
+
+  for(int i=0; i<=80; i++){
+    const double deviation = (1.-2.*difference)+(difference/20.)*i;
+    double scaleFactor = scaleFactor1*deviation;
+    //rotated_v *= scaleFactor;
+    const double scaleOverSurface =
+                normalizeKVAtAllPoints(sb, rotated_Psi, theta, phi, rotated_v*scaleFactor, rad);
+    std::cout << std::setprecision(15) << scaleFactor << " " << scaleOverSurface << std::endl;
+  }
+}
 
 bool KillingPath(const SurfaceBasis& sb,
                  const DataMesh& Psi,
