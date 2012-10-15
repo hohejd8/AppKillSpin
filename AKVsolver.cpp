@@ -601,7 +601,7 @@ void TestScaleFactors(const DataMesh& rotated_v,
                       const double& scaleFactor2)
 {
   const double difference = fabs(scaleFactor1-scaleFactor2);
-
+  std::cout << "scale factors " << scaleFactor1 << " " << scaleFactor2 << std::endl;
   for(int i=0; i<=80; i++){
     const double deviation = (1.-2.*difference)+(difference/20.)*i;
     double scaleFactor = scaleFactor1*deviation;

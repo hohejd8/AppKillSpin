@@ -121,7 +121,7 @@ namespace ComputeItems {
                      phi, scaleAtEquator, scaleInnerProduct);
     if(mVerbose) std::cout << "scale factor at equator = " << scaleAtEquator << std::endl;
     if(mVerbose) std::cout << "scale factor over surface = " << avgScale << std::endl;
-    if(mVerbose) std::cout << "scale factor from inner product = " << avgScale << std::endl;
+    if(mVerbose) std::cout << "scale factor from inner product = " << scaleInnerProduct << std::endl;
 
     //compute the inner product
 /*
