@@ -54,8 +54,10 @@ DataMesh ConstructConformalFactor(const DataMesh& theta,
       std::cout << "Y AXISYMMETRY" << std::endl;
       break;
     case 4: //no symmetry
-      Psi += 0.001*(  sin(theta)*sin(theta)*cos(theta)*cos(theta)*cos(phi));
-                    //+ sin(theta)*cos(theta)*sin(phi));
+      const double tp = M_PI/6.;
+      const double pp = M_PI/6.;
+      Psi+=0.001*(  1.0-3.0*cos(theta+tp)*cos(theta+tp)-3.0*sin(theta+tp)*sin(theta+tp)*cos(2.0*phi+pp)
+                  + 1.0-3.0*cos(theta+tp)*cos(theta+tp)+3.0*sin(theta+tp)*sin(theta+tp)*cos(2.0*phi+pp));
       std::cout << "NO AXISYMMETRY" << std::endl;
       break;
 
