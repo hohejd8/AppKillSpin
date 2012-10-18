@@ -602,8 +602,8 @@ void TestScaleFactors(const DataMesh& rotated_v,
 {
   const double difference = fabs(scaleFactor1-scaleFactor2);
   std::cout << "scale factors " << scaleFactor1 << " " << scaleFactor2 << std::endl;
-  for(int i=0; i<=80; i++){
-    const double deviation = (1.-2.*difference)+(difference/20.)*i;
+  for(int i=0; i<=400; i++){
+    const double deviation = (1.-2.*difference)+(difference/100.)*i;
     double scaleFactor = scaleFactor1*deviation;
     //rotated_v *= scaleFactor;
     const double scaleOverSurface =
@@ -711,7 +711,8 @@ int PathDerivs(double t_required_by_solver, const double y[], double f[], void *
   return GSL_SUCCESS;
 }
 
-double AKVInnerProduct(const DataMesh& v1,
+//double* AKVInnerProduct(const DataMesh& v1,
+MyVector<double> AKVInnerProduct(const DataMesh& v1,
                        const DataMesh& v2,
                        const DataMesh& Ricci,
                        const DataMesh& rp2,
@@ -721,22 +722,21 @@ double AKVInnerProduct(const DataMesh& v1,
   const Tensor<DataMesh> Gradv2 = sb.Gradient(v2);
 
   DataMesh integrand = 0.5*Ricci*(Gradv1(0)*Gradv2(0)+Gradv1(1)*Gradv2(1));//(rp2*rp2);
-
-  double integralrp2 = (3.*sqrt(2.)/8.0)*sb.ComputeCoefficients(integrand/(rp2*rp2))[0];
-  //std::cout << "Integral of (integrand) / r^2 Psi^4 = 8*Pi/3 :             " 
-  //          << integralrp2 << std::endl;
-
-  double areaRicci = sb.ComputeCoefficients(0.5*Ricci*rp2*rp2)[0];
-  double integralRicci = sb.ComputeCoefficients(integrand)[0] / (2./3. * areaRicci);
-  //std::cout << "Integral of (integrand) = 2/3 Integral of (0.5 * ^2R r^2 Psi^4) dA : " 
-  //          << integralRicci << std::endl;
-
   double area = sb.ComputeCoefficients(rp2*rp2)[0];
-  double integral = sb.ComputeCoefficients(integrand)[0] / (2./3. * area);
-  //std::cout << "Integral of (integrand) = 2/3 Integral of (r^2 Psi^4) dA : " 
-  //          << integral << std::endl;
 
-  return integralrp2;
+  double ip1 = (3.*sqrt(2.)/8.0)*sb.ComputeCoefficients(integrand/(rp2*rp2))[0];
+  //std::cout << "ip1 : " 
+  //          << 1./ip1 << std::endl;
+
+  double ip2 = sb.ComputeCoefficients(integrand)[0] / (2./3. * area);
+  //std::cout << "ip2 : " 
+  //          << 1./sqrt(ip2) << std::endl;
+  //std::cout << "ip3 : "
+  //          << 1./ip2 << std::endl;
+
+  //double ip[3]={1./ip1, 1./sqrt(ip2), 1./ip2};
+
+  return MyVector<double>(MV::fill,1./ip1, 1./sqrt(ip2), 1./ip2) ;
 }
 
 

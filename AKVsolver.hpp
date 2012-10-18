@@ -117,7 +117,8 @@ int PathDerivs(double t_required_by_solver,
 //determines value of the integral
 // \frac{1}{2} \oint ^2R((_s \vec \nabla v_1) \cdot (_s \vec \nabla v_2) d\Omega
 //and returns the ratio of this result to (8*\pi / 3)
-double AKVInnerProduct(const DataMesh& v1,
+//double* AKVInnerProduct(const DataMesh& v1,
+MyVector<double> AKVInnerProduct(const DataMesh& v1,
                        const DataMesh& v2,
                        const DataMesh& Ricci,
                        const DataMesh& rp2,
