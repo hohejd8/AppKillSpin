@@ -115,13 +115,33 @@ namespace ComputeItems {
 
     //determine scale factor at the equator
     const double scaleAtEquator = normalizeKVAtOnePoint(sb, rotated_Psi, rotated_v, mRad, M_PI/2., 0.0);
-    const double avgScale = normalizeKVAtAllPoints(sb, rotated_Psi, theta, phi, rotated_v, mRad);
-    const double scaleInnerProduct = 1./AKVInnerProduct(v, v, Ricci, rp2, sb);
-    TestScaleFactors(rotated_v, rotated_Psi, mRad, sb, theta,
-                     phi, scaleAtEquator, scaleInnerProduct);
     if(mVerbose) std::cout << "scale factor at equator = " << scaleAtEquator << std::endl;
-    if(mVerbose) std::cout << "scale factor over surface = " << avgScale << std::endl;
-    if(mVerbose) std::cout << "scale factor from inner product = " << scaleInnerProduct << std::endl;
+    const double avgScale = normalizeKVAtAllPoints(sb, rotated_Psi, theta, phi, rotated_v, mRad);
+    MyVector<double> scaleInnerProduct = AKVInnerProduct(v, v, Ricci, rp2, sb);
+    if(mVerbose) std::cout << "scale factor ip1 = " << scaleInnerProduct[0] << std::endl;
+    if(mVerbose) std::cout << "scale factor ip2 = " << scaleInnerProduct[1] << std::endl;
+    if(mVerbose) std::cout << "scale factor ip3 = " << scaleInnerProduct[2] << std::endl;
+    std::cout << std::setprecision(15) 
+              << scaleInnerProduct[0] << " " 
+              << normalizeKVAtAllPoints(sb, rotated_Psi, theta, phi,
+                                        rotated_v*scaleAtEquator, mRad) << std::endl;
+    std::cout << std::setprecision(15) 
+              << scaleInnerProduct[0] << " " 
+              << normalizeKVAtAllPoints(sb, rotated_Psi, theta, phi,
+                                        rotated_v*scaleInnerProduct[0], mRad) << std::endl;
+    std::cout << std::setprecision(15) 
+              << scaleInnerProduct[1] << " " 
+              << normalizeKVAtAllPoints(sb, rotated_Psi, theta, phi,
+                                        rotated_v*scaleInnerProduct[1], mRad) << std::endl;
+    std::cout << std::setprecision(15) 
+              << scaleInnerProduct[2] << " " 
+              << normalizeKVAtAllPoints(sb, rotated_Psi, theta, phi,
+                                        rotated_v*scaleInnerProduct[2], mRad) << std::endl;
+
+
+    TestScaleFactors(rotated_v, rotated_Psi, mRad, sb, theta,
+                     phi, scaleAtEquator, scaleInnerProduct[0]);
+    //if(mVerbose) std::cout << "scale factor from inner product = " << scaleInnerProduct << std::endl;
 
     //compute the inner product
 /*

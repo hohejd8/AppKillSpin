@@ -505,11 +505,7 @@ double normalizeKVAtAllPoints(const SurfaceBasis& sb,
   scaleFactor *= scaleFactor;
   const DataMesh r2p4 = rad*rad*Psi*Psi*Psi*Psi;
   const double area = sb.ComputeCoefficients(r2p4)[0];
-  //return sqrt(sb.ComputeCoefficients(scaleFactor)[0]/8.);
-//std::cout << "Integral (T/(2*pi) - 1) dOmega / 4*pi                     = " 
-//          << sqrt(sb.ComputeCoefficients(scaleFactor)[0]/8.) << std::endl;
-//std::cout << "Integral (T/(2*pi) - 1) r2p4 dOmega / Integral r2p4 dOmega= " 
-//          << sqrt(sb.ComputeCoefficients(scaleFactor*r2p4)[0])/area << std::endl;
+
   return sqrt(sb.ComputeCoefficients(scaleFactor*r2p4)[0])/area;
 }
 
@@ -671,7 +667,7 @@ bool KillingPath(const SurfaceBasis& sb,
 
     ASSERT(status==GSL_SUCCESS,"Path Integration failed");
     if(limit_h && h > hmax) h = hmax;
-    if(fabs(y[1] - phi) < 1.e-11) break;
+    if(fabs(y[1] - phi) < 1.e-12) break;
     else if(y[1] > phi) { //if solver went too far...
       if(!limit_h) hmax = h;
       limit_h = true;

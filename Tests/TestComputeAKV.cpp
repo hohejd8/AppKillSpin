@@ -31,7 +31,8 @@ DataMesh ConstructConformalFactor(const DataMesh& theta,
   //double C = 0.001*(1.0/(tmd*tmd)-1.0/tmd + 0.25);
 
   DataMesh Psi(theta); //copy constructor to get the right size
-
+      const double tp = M_PI/2.;
+      const double pp = M_PI/2.;
   Psi = 1.28 ;
        //+ 0.001*sin(theta)*sin(theta)*cos(2.0*phi)*cos(theta)
        //+ B*(1.0-3.0*cos(theta)*cos(theta)+3.0*sin(theta)*sin(theta)*cos(2.0*phi))
@@ -54,11 +55,19 @@ DataMesh ConstructConformalFactor(const DataMesh& theta,
       std::cout << "Y AXISYMMETRY" << std::endl;
       break;
     case 4: //no symmetry
-      const double tp = M_PI/6.;
-      const double pp = M_PI/6.;
       Psi+=0.001*(  1.0-3.0*cos(theta+tp)*cos(theta+tp)-3.0*sin(theta+tp)*sin(theta+tp)*cos(2.0*phi+pp)
-                  + 1.0-3.0*cos(theta+tp)*cos(theta+tp)+3.0*sin(theta+tp)*sin(theta+tp)*cos(2.0*phi+pp));
+                  + 1.0-3.0*cos(theta)*cos(theta)+3.0*sin(theta)*sin(theta)*cos(2.0*phi));
       std::cout << "NO AXISYMMETRY" << std::endl;
+      break;
+    case 5: //off-axis symmetry
+      Psi += 0.001*(1.0-3.0*cos(theta+tp)*cos(theta+tp)-3.0*sin(theta+tp)*sin(theta+tp)*(cos(phi)+sin(phi)));
+                    //+3.*sin(theta)*sin(theta)*sin(phi));
+                    //)*sin(phi);
+      //Psi+=+ 0.001*(-1.0+3.0*cos(theta)*cos(theta) //);
+      //       +3.0*sqrt(2.0)*sin(2.0*theta)*(cos(phi)+sin(phi))
+      //       +3.0*sin(theta)*sin(theta)*sin(2.0*phi));
+
+      std::cout << "OFF-AXIS AXISYMMETRY" << std::endl;
       break;
 
 /*
@@ -172,7 +181,7 @@ int main(){
   //create conformal factors for every rotation
   const int syms = 5; //the number of axisymmetries we are testing
 
-  for(int s=1; s<2; s++){//index over conformal factor symmetries
+  for(int s=5; s<6; s++){//index over conformal factor symmetries
   //for(int s=0; s<syms; s++){//index over conformal factor symmetries
     //create conformal factor
     const DataMesh Psi = ConstructConformalFactor(theta, phi, s);
@@ -275,8 +284,8 @@ int main(){
                        rad, Ricci, rp2, sb, theta, phi, scaleInnerProduct[1]);
       PrintSurfaceNormalization(v[a], rotated_v[a], rotated_Psi,
                        rad, Ricci, rp2, sb, theta, phi, scaleInnerProduct[2]);
-      TestScaleFactors(rotated_v[a], rotated_Psi, rad, sb, theta,
-                       phi, scaleAtEquator, scaleInnerProduct[0]);
+      //TestScaleFactors(rotated_v[a], rotated_Psi, rad, sb, theta,
+      //                 phi, scaleAtEquator, scaleInnerProduct[0]);
 
       std::cout << std::endl;
     }//end loop over perpendicular AKV axes
