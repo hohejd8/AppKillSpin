@@ -55,12 +55,13 @@ DataMesh ConstructConformalFactor(const DataMesh& theta,
       std::cout << "Y AXISYMMETRY" << std::endl;
       break;
     case 4: //no symmetry
-      Psi+=0.001*(  1.0-3.0*cos(theta+tp)*cos(theta+tp)-3.0*sin(theta+tp)*sin(theta+tp)*cos(2.0*phi+pp)
-                  + 1.0-3.0*cos(theta)*cos(theta)+3.0*sin(theta)*sin(theta)*cos(2.0*phi));
+      //Psi+=0.001*(  1.0-3.0*cos(theta+tp)*cos(theta+tp)-3.0*sin(theta+tp)*sin(theta+tp)*cos(2.0*phi+pp)
+      //            + 1.0-3.0*cos(theta+tp)*cos(theta)+3.0*sin(theta+tp)*sin(theta)*cos(2.0*phi));
+      Psi += 0.001*(phi+theta);
       std::cout << "NO AXISYMMETRY" << std::endl;
       break;
     case 5: //off-axis symmetry
-      Psi += 0.001*(1.0-3.0*cos(theta+tp)*cos(theta+tp)-3.0*sin(theta+tp)*sin(theta+tp)*(cos(phi)+sin(phi)));
+      Psi += 0.1*(1.0-3.0*cos(theta+tp)*cos(theta+tp)-3.0*sin(theta+tp)*sin(theta+tp)*(cos(phi)+sin(phi)));
                     //+3.*sin(theta)*sin(theta)*sin(phi));
                     //)*sin(phi);
       //Psi+=+ 0.001*(-1.0+3.0*cos(theta)*cos(theta) //);
@@ -166,6 +167,7 @@ int main(){
   const double min_thetap = op.Get<double>("min_theta",1.e-5);
   const std::string solver = op.Get<std::string>("Solver","Newton");
   const bool verbose = op.Get<bool>("Verbose", false);
+  const MyVector<bool> printDiagnostic = MyVector<bool>(MV::Size(6), true);
 
   //create skm
   const StrahlkorperMesh skm(Nth, Nph);
@@ -181,7 +183,7 @@ int main(){
   //create conformal factors for every rotation
   const int syms = 5; //the number of axisymmetries we are testing
 
-  for(int s=5; s<6; s++){//index over conformal factor symmetries
+  for(int s=4; s<5; s++){//index over conformal factor symmetries
   //for(int s=0; s<syms; s++){//index over conformal factor symmetries
     //create conformal factor
     const DataMesh Psi = ConstructConformalFactor(theta, phi, s);
@@ -284,8 +286,21 @@ int main(){
                        rad, Ricci, rp2, sb, theta, phi, scaleInnerProduct[1]);
       PrintSurfaceNormalization(v[a], rotated_v[a], rotated_Psi,
                        rad, Ricci, rp2, sb, theta, phi, scaleInnerProduct[2]);
-      //TestScaleFactors(rotated_v[a], rotated_Psi, rad, sb, theta,
-      //                 phi, scaleAtEquator, scaleInnerProduct[0]);
+      TestScaleFactors(rotated_v[a], rotated_Psi, rad, sb, theta,
+                       phi, scaleAtEquator, scaleInnerProduct[0]);
+
+      //scale L, v
+      v[a] *= scaleAtEquator;
+      L *= scaleAtEquator;
+
+      //create xi (1-form)
+      Tensor<DataMesh> tmp_xi = sb.Gradient(v[a]);
+      Tensor<DataMesh> xi(2,"1",DataMesh::Empty);
+      xi(0) = tmp_xi(1);
+      xi(1) = -tmp_xi(0);
+
+      //perform diagnostics
+      KillingDiagnostics(sb, L, Psi, xi, rad, printDiagnostic);
 
       std::cout << std::endl;
     }//end loop over perpendicular AKV axes
