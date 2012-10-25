@@ -31,8 +31,8 @@ DataMesh ConstructConformalFactor(const DataMesh& theta,
   //double C = 0.001*(1.0/(tmd*tmd)-1.0/tmd + 0.25);
 
   DataMesh Psi(theta); //copy constructor to get the right size
-      const double tp = M_PI/2.;
-      const double pp = M_PI/2.;
+      const double tp = M_PI/4.;
+      const double pp = M_PI/4.;
   Psi = 1.28 ;
        //+ 0.001*sin(theta)*sin(theta)*cos(2.0*phi)*cos(theta)
        //+ B*(1.0-3.0*cos(theta)*cos(theta)+3.0*sin(theta)*sin(theta)*cos(2.0*phi))
@@ -61,29 +61,14 @@ DataMesh ConstructConformalFactor(const DataMesh& theta,
       std::cout << "NO AXISYMMETRY" << std::endl;
       break;
     case 5: //off-axis symmetry
-      Psi += 0.1*(1.0-3.0*cos(theta+tp)*cos(theta+tp)-3.0*sin(theta+tp)*sin(theta+tp)*(cos(phi)+sin(phi)));
-                    //+3.*sin(theta)*sin(theta)*sin(phi));
-                    //)*sin(phi);
-      //Psi+=+ 0.001*(-1.0+3.0*cos(theta)*cos(theta) //);
+      Psi += 0.001*(3.0*sqrt(2.0)*sin(2.0*theta)*(cos(phi)+sin(phi))
+                     +3.0*sin(theta)*sin(theta)*sin(2.0*phi));
+      //Psi+= 0.001*(-1.0+3.0*cos(theta)*cos(theta) //);
       //       +3.0*sqrt(2.0)*sin(2.0*theta)*(cos(phi)+sin(phi))
       //       +3.0*sin(theta)*sin(theta)*sin(2.0*phi));
 
       std::cout << "OFF-AXIS AXISYMMETRY" << std::endl;
       break;
-
-/*
-    case 4: //xz axisymmetry
-      Psi +=  0.001*(-1.0+3.0*cos(theta)*cos(theta)+3.0*sin(theta)*sin(theta)*cos(2.0*phi)
-           +6.0*sin(2.0*theta)*cos(phi));
-      std::cout << "xz axisymmetry" << std::endl;
-      break;
-    case 5: //xyz axisymmetry
-      Psi +=  0.001*(-1.0+3.0*cos(theta)*cos(theta)
-           +3.0*sqrt(2.0)*sin(2.0*theta)*(cos(phi)+sin(phi))
-           +3.0*sin(theta)*sin(theta)*sin(2.0*phi));
-      std::cout << "xyz axisymmetry" << std::endl;
-      break;
-*/
   } //end switch
 
   return Psi;
@@ -183,7 +168,7 @@ int main(){
   //create conformal factors for every rotation
   const int syms = 5; //the number of axisymmetries we are testing
 
-  for(int s=4; s<5; s++){//index over conformal factor symmetries
+  for(int s=5; s<6; s++){//index over conformal factor symmetries
   //for(int s=0; s<syms; s++){//index over conformal factor symmetries
     //create conformal factor
     const DataMesh Psi = ConstructConformalFactor(theta, phi, s);
@@ -191,7 +176,7 @@ int main(){
     //set the initial guesses to be along particular axes
     double THETA[3] = {0.,0.,0.};
     double thetap[3] = {0.,M_PI/2.,M_PI/2.};
-    double phip[3] = {0.,0.,M_PI/2.};
+    double phip[3] = {0.,0.,-M_PI/2.};
 
     //save the v solutions along particular axes
     MyVector<DataMesh> v(MV::Size(3),DataMesh::Empty);
