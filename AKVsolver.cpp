@@ -771,6 +771,9 @@ void KillingDiagnostics(const SurfaceBasis& sb,
 
     //-----SS-------
     if(printDiagnostic[2]){
+      //re-defining variables
+        DataMesh div = sb.Divergence(xi);
+        DataMesh vort = sb.Vorticity(xi);
       Tensor<DataMesh> Dxtheta = xi;
       Tensor<DataMesh> Dxphi = xi;
 

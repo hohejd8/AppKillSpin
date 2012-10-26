@@ -168,15 +168,15 @@ int main(){
   //create conformal factors for every rotation
   const int syms = 5; //the number of axisymmetries we are testing
 
-  for(int s=5; s<6; s++){//index over conformal factor symmetries
+  for(int s=4; s<5; s++){//index over conformal factor symmetries
   //for(int s=0; s<syms; s++){//index over conformal factor symmetries
     //create conformal factor
     const DataMesh Psi = ConstructConformalFactor(theta, phi, s);
 
     //set the initial guesses to be along particular axes
     double THETA[3] = {0.,0.,0.};
-    double thetap[3] = {0.,M_PI/2.,M_PI/2.};
-    double phip[3] = {0.,0.,-M_PI/2.};
+    double thetap[3] = {0.,M_PI/2.,0.};
+    double phip[3] = {0.,0.,0.};
 
     //save the v solutions along particular axes
     MyVector<DataMesh> v(MV::Size(3),DataMesh::Empty);
@@ -195,12 +195,26 @@ int main(){
       //for printing
       switch(a){
         case 0:
+          std::cout << thetap[0]*180./M_PI << " " << phip[0]*180./M_PI << std::endl;
           std::cout << "z-axis analysis" << std::endl;
           break;
         case 1:
+          thetap[1] = M_PI/2.;
+          phip[1] = phip[0]+M_PI/2.;
+          std::cout << thetap[1]*180./M_PI << " " << phip[1]*180./M_PI << std::endl;
           std::cout << "x-axis analysis" << std::endl;
           break;
         case 2:
+          //perform the cross product of the previous two solutions
+          const double alpha = sin(thetap[0])*sin(phip[0])*cos(thetap[1])
+                            -sin(thetap[1])*sin(phip[1])*cos(thetap[0]);
+          const double beta = cos(thetap[0])*sin(thetap[1])*cos(thetap[1])
+                            -cos(thetap[1])*sin(thetap[0])*cos(phip[0]);
+          const double gamma = sin(thetap[0])*cos(phip[0])*sin(thetap[1])*sin(phip[1])
+                            -sin(thetap[1])*cos(phip[1])*sin(thetap[0])*sin(phip[0]);
+          thetap[2] = atan2(sqrt(alpha*alpha+beta*beta),gamma);
+          phip[2] = atan2(beta, gamma);
+          std::cout << thetap[2]*180./M_PI << " " << phip[2]*180./M_PI << std::endl;
           std::cout << "y-axis analysis" << std::endl;
           break;
       }
@@ -271,8 +285,8 @@ int main(){
                        rad, Ricci, rp2, sb, theta, phi, scaleInnerProduct[1]);
       PrintSurfaceNormalization(v[a], rotated_v[a], rotated_Psi,
                        rad, Ricci, rp2, sb, theta, phi, scaleInnerProduct[2]);
-      TestScaleFactors(rotated_v[a], rotated_Psi, rad, sb, theta,
-                       phi, scaleAtEquator, scaleInnerProduct[0]);
+      //TestScaleFactors(rotated_v[a], rotated_Psi, rad, sb, theta,
+      //                 phi, scaleAtEquator, scaleInnerProduct[0]);
 
       //scale L, v
       v[a] *= scaleAtEquator;
