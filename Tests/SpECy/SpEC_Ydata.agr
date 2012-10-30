@@ -84,7 +84,7 @@
 @timestamp rot 0
 @timestamp font 0
 @timestamp char size 1.000000
-@timestamp def "Wed Oct 24 13:53:25 2012"
+@timestamp def "Tue Oct 30 15:32:27 2012"
 @r0 off
 @link r0 to g0
 @r0 type above
@@ -131,7 +131,7 @@
 @g0 fixedpoint format general general
 @g0 fixedpoint prec 6, 6
 @with g0
-@    world 1.00033605322, 2.21938901717e-07, 1.00033855998, 4.0165592009e-07
+@    world 1.00033593178, 2.37154167233e-07, 1.00033870714, 3.77661418423e-07
 @    stack world 0, 0, 0, 0
 @    znorm 1
 @    view 0.150000, 0.100000, 0.950000, 0.800000
@@ -213,7 +213,7 @@
 @    yaxis  label color 1
 @    yaxis  label place normal
 @    yaxis  tick on
-@    yaxis  tick major 5e-08
+@    yaxis  tick major 2e-08
 @    yaxis  tick minor ticks 1
 @    yaxis  tick default 6
 @    yaxis  tick place rounded true
@@ -481,7 +481,7 @@
 @g1 fixedpoint format general general
 @g1 fixedpoint prec 6, 6
 @with g1
-@    world 1.00008125246, -2.73718151842e-06, 1.00035604546, 6.36906134745e-05
+@    world 1.00006776471, -3.78823529412e-06, 1.00036894118, 6.60470588235e-05
 @    stack world 0, 0, 0, 0
 @    znorm 1
 @    view 0.220000, 0.150000, 0.470000, 0.400000
@@ -917,7 +917,7 @@
 @    s5 errorbar riser clip off
 @    s5 errorbar riser clip length 0.100000
 @    s5 comment "/home/hohejd8/SpEC/AppKillSpin/Tests/zSymxAxis_minimum.out"
-@    s5 legend  "Min: (1.000338, 2.460e-07)*"
+@    s5 legend  "Min: (1.0003377, 2.459e-07)"
 @target G0.S0
 @type xy
 1.000095343 6.095746173e-05
@@ -1334,7 +1334,7 @@
 &
 @target G0.S3
 @type xy
-1.000337801 2.459835435e-07
+1.000337795 2.459128154e-07
 &
 @target G1.S0
 @type xy
@@ -1760,5 +1760,5 @@
 &
 @target G1.S5
 @type xy
-1.000337801 2.459835435e-07
+1.000337795 2.459128154e-07
 &

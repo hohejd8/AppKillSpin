@@ -84,7 +84,7 @@
 @timestamp rot 0
 @timestamp font 0
 @timestamp char size 1.000000
-@timestamp def "Wed Oct 24 13:53:40 2012"
+@timestamp def "Tue Oct 30 15:31:35 2012"
 @r0 off
 @link r0 to g0
 @r0 type above
@@ -135,7 +135,7 @@
 @    stack world 0, 0, 0, 0
 @    znorm 1
 @    view 0.150000, 0.100000, 0.950000, 0.800000
-@    title "\-\-SpEC, \"x-axis\" analysis \n\xQ\f{}=-1.196806e-06   S\sij\N\-\-S\Sij\N\-\-=0.00738601275953 \n\xq\f{}'=89.999947  \xf\f{}'=-10.291004"
+@    title "\-\-SpEC, \"x-axis\" analysis \n\xQ\f{}=-1.197e-06   S\sij\N\-\-S\Sij\N\-\-=7.386e-03 \n\xq\f{}'=90.000  \xf\f{}'=-10.291"
 @    title font 0
 @    title size 1.500000
 @    title color 1

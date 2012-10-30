@@ -61,8 +61,15 @@ DataMesh ConstructConformalFactor(const DataMesh& theta,
       std::cout << "NO AXISYMMETRY" << std::endl;
       break;
     case 5: //off-axis symmetry
-      Psi += 0.001*(3.0*sqrt(2.0)*sin(2.0*theta)*(cos(phi)+sin(phi))
-                     +3.0*sin(theta)*sin(theta)*sin(2.0*phi));
+      //Psi += 0.001*(3.0*sqrt(2.0)*sin(2.0*theta)*(cos(phi)+sin(phi))
+      //               +3.0*sin(theta)*sin(theta)*sin(2.0*phi));
+
+      //Psi += 0.01*(1.0-3.0*cos(theta)*cos(theta)-3.0*sin(theta)*sin(theta)*(cos(phi)+sin(phi)))//;
+      //       *sin(2.0*theta);
+
+      Psi += 0.001*(-1.0+3.0*cos(theta)*cos(theta)
+             +3.0*sqrt(2.0)*sin(2.0*theta)*(cos(phi)+sin(phi)));
+
       //Psi+= 0.001*(-1.0+3.0*cos(theta)*cos(theta) //);
       //       +3.0*sqrt(2.0)*sin(2.0*theta)*(cos(phi)+sin(phi))
       //       +3.0*sin(theta)*sin(theta)*sin(2.0*phi));
@@ -208,7 +215,7 @@ int main(){
           //perform the cross product of the previous two solutions
           const double alpha = sin(thetap[0])*sin(phip[0])*cos(thetap[1])
                             -sin(thetap[1])*sin(phip[1])*cos(thetap[0]);
-          const double beta = cos(thetap[0])*sin(thetap[1])*cos(thetap[1])
+          const double beta = cos(thetap[0])*sin(thetap[1])*cos(phi[1])
                             -cos(thetap[1])*sin(thetap[0])*cos(phip[0]);
           const double gamma = sin(thetap[0])*cos(phip[0])*sin(thetap[1])*sin(phip[1])
                             -sin(thetap[1])*cos(phip[1])*sin(thetap[0])*sin(phip[0]);
@@ -285,8 +292,8 @@ int main(){
                        rad, Ricci, rp2, sb, theta, phi, scaleInnerProduct[1]);
       PrintSurfaceNormalization(v[a], rotated_v[a], rotated_Psi,
                        rad, Ricci, rp2, sb, theta, phi, scaleInnerProduct[2]);
-      //TestScaleFactors(rotated_v[a], rotated_Psi, rad, sb, theta,
-      //                 phi, scaleAtEquator, scaleInnerProduct[0]);
+      TestScaleFactors(rotated_v[a], rotated_Psi, rad, sb, theta,
+                       phi, scaleAtEquator*0.99, scaleInnerProduct[0]);
 
       //scale L, v
       v[a] *= scaleAtEquator;
