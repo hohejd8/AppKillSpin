@@ -84,7 +84,7 @@
 @timestamp rot 0
 @timestamp font 0
 @timestamp char size 1.000000
-@timestamp def "Thu Oct 25 14:17:11 2012"
+@timestamp def "Tue Oct 30 16:12:19 2012"
 @r0 off
 @link r0 to g0
 @r0 type above
@@ -135,7 +135,7 @@
 @    stack world 0, 0, 0, 0
 @    znorm 1
 @    view 0.150000, 0.100000, 0.950000, 0.800000
-@    title "\-\-no axisymmetry, x-axis analysis \n\xQ\f{}=-9.88488238571e-05   S\sij\N\-\-S\Sij\N\-\-=-5.823e-05 \n\xq\f{}'=85.929   \xf\f{}'=-7.514"
+@    title "\-\-no axisymmetry, x-axis analysis \n\xQ\f{}=-9.88488238571e-05   S\sij\N\-\-S\Sij\N\-\-=2.637e-05 \n\xq\f{}'=85.929   \xf\f{}'=-7.514"
 @    title font 0
 @    title size 1.500000
 @    title color 1

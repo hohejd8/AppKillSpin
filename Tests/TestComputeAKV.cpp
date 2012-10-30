@@ -175,7 +175,7 @@ int main(){
   //create conformal factors for every rotation
   const int syms = 5; //the number of axisymmetries we are testing
 
-  for(int s=4; s<5; s++){//index over conformal factor symmetries
+  for(int s=1; s<2; s++){//index over conformal factor symmetries
   //for(int s=0; s<syms; s++){//index over conformal factor symmetries
     //create conformal factor
     const DataMesh Psi = ConstructConformalFactor(theta, phi, s);
@@ -292,8 +292,8 @@ int main(){
                        rad, Ricci, rp2, sb, theta, phi, scaleInnerProduct[1]);
       PrintSurfaceNormalization(v[a], rotated_v[a], rotated_Psi,
                        rad, Ricci, rp2, sb, theta, phi, scaleInnerProduct[2]);
-      TestScaleFactors(rotated_v[a], rotated_Psi, rad, sb, theta,
-                       phi, scaleAtEquator*0.99, scaleInnerProduct[0]);
+      //TestScaleFactors(rotated_v[a], rotated_Psi, rad, sb, theta,
+      //                 phi, scaleAtEquator*0.99, scaleInnerProduct[0]);
 
       //scale L, v
       v[a] *= scaleAtEquator;
