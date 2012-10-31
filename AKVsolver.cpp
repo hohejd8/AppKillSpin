@@ -200,7 +200,10 @@ void findTtp(struct rparams * p,
   else if(solver=="Hybrid") T = gsl_multiroot_fsolver_hybrid;
   else if(solver=="Newton") T = gsl_multiroot_fsolver_dnewton;
   else if(solver=="Broyden") T = gsl_multiroot_fsolver_broyden;
-  else std::cout << "Solver option '" << solver << "' not valid." << std::endl;
+  else{
+    std::cout << "Solver option '" << solver << "' not valid." << std::endl;
+    T = gsl_multiroot_fsolver_dnewton;
+  }
 
   s = gsl_multiroot_fsolver_alloc(T, n);
 
@@ -493,15 +496,11 @@ double normalizeKVAtAllPoints(const SurfaceBasis& sb,
   xi(1) = -tmp_xi(0);
 
   //create storage
-  double avgScaleFactor = 0.0;
   DataMesh scaleFactor(Mesh(theta.Extents()));
 
-  //for(int i=0; i<theta.Size(); i++)
   for(int i=0; i<scaleFactor.Size(); i++)
       scaleFactor[i] = normalizeKVAtOnePoint(sb,Psi,xi,rad,theta[i],phi[i])-1.;
 
-
-  //return avgScaleFactor/theta.Size();
   scaleFactor *= scaleFactor;
   const DataMesh r2p4 = rad*rad*Psi*Psi*Psi*Psi;
   const double area = sb.ComputeCoefficients(r2p4)[0];
@@ -510,44 +509,28 @@ double normalizeKVAtAllPoints(const SurfaceBasis& sb,
 }
 
 double normalizeKVAtOnePoint(const SurfaceBasis& sb,
-                              const DataMesh& Psi,
-                              //const DataMesh& theta,
-                              //const DataMesh& phi,
-                              const DataMesh& v,
+                              const DataMesh& rotated_Psi,
+                              const DataMesh& rotated_v,
                               const double& rad,
                               const double& thetap, /*=M_PI/2.0*/
                               const double& phip /*=0.0*/)
 {
   //create xi
-  Tensor<DataMesh> tmp_xi = sb.Gradient(v);
+  Tensor<DataMesh> tmp_xi = sb.Gradient(rotated_v);
   Tensor<DataMesh> xi(2,"1",DataMesh::Empty);
   xi(0) = tmp_xi(1);
   xi(1) = -tmp_xi(0);
 
-  return normalizeKVAtOnePoint(sb, Psi, xi, rad, thetap, phip);
+  return normalizeKVAtOnePoint(sb, rotated_Psi, xi, rad, thetap, phip);
 }
 
 double normalizeKVAtOnePoint(const SurfaceBasis& sb,
-                              const DataMesh& Psi,
-                              //const DataMesh& theta,
-                              //const DataMesh& phi,
+                              const DataMesh& rotated_Psi,
                               const Tensor<DataMesh>& xi,
                               const double& rad,
                               const double& thetap, /*=M_PI/2.0*/
                               const double& phip /*=0.0*/)
 {
-
-  //rotate Psi
-/*
-  DataMesh rotated_Psi = RotateOnSphere(Psi,
-                         theta,
-                         phi,
-                         sb,
-                         thetap,
-                         phip);
-*/
-  DataMesh rotated_Psi = Psi;
-
   //Rescale the Killing vector. For a rotational Killing vector,
   //the affine path length should be 2*Pi.  Also, test various
   //paths to ensure we have an actual Killing field
@@ -601,7 +584,7 @@ void TestScaleFactors(const DataMesh& rotated_v,
   for(int i=0; i<=400; i++){
     const double deviation = (1.-2.*difference)+(difference/100.)*i;
     double scaleFactor = scaleFactor1*deviation;
-    //rotated_v *= scaleFactor;
+
     const double scaleOverSurface =
                 normalizeKVAtAllPoints(sb, rotated_Psi, theta, phi, rotated_v*scaleFactor, rad);
     std::cout << std::setprecision(15) << scaleFactor << " " << scaleOverSurface << std::endl;
@@ -617,7 +600,6 @@ bool KillingPath(const SurfaceBasis& sb,
                  const double& phi, /*=0.0*/
                  const bool printSteps /*=false*/)
 {
-  //bool printSteps = false;
   //perform harmonic analysis on Psi, xi
   //to save from repetitive computation in PathDerivs
   const DataMesh Psi_ha = sb.ComputeCoefficients(Psi);
@@ -717,20 +699,12 @@ MyVector<double> AKVInnerProduct(const DataMesh& v1,
   const Tensor<DataMesh> Gradv1 = sb.Gradient(v1);
   const Tensor<DataMesh> Gradv2 = sb.Gradient(v2);
 
-  DataMesh integrand = 0.5*Ricci*(Gradv1(0)*Gradv2(0)+Gradv1(1)*Gradv2(1));//(rp2*rp2);
+  DataMesh integrand = 0.5*Ricci*(Gradv1(0)*Gradv2(0)+Gradv1(1)*Gradv2(1));
   double area = sb.ComputeCoefficients(rp2*rp2)[0];
 
   double ip1 = (3.*sqrt(2.)/8.0)*sb.ComputeCoefficients(integrand/(rp2*rp2))[0];
-  //std::cout << "ip1 : " 
-  //          << 1./ip1 << std::endl;
 
   double ip2 = sb.ComputeCoefficients(integrand)[0] / (2./3. * area);
-  //std::cout << "ip2 : " 
-  //          << 1./sqrt(ip2) << std::endl;
-  //std::cout << "ip3 : "
-  //          << 1./ip2 << std::endl;
-
-  //double ip[3]={1./ip1, 1./sqrt(ip2), 1./ip2};
 
   return MyVector<double>(MV::fill,1./ip1, 1./sqrt(ip2), 1./ip2) ;
 }
@@ -744,40 +718,34 @@ void KillingDiagnostics(const SurfaceBasis& sb,
                         const MyVector<bool>& printDiagnostic)
 {
   const DataMesh& rp2 = rad*Psi*Psi;
+  const DataMesh& r2p4 = rp2*rp2;
   const double rp22_00 = sb.ComputeCoefficients(rp2*rp2)[0];//(0,0) component of coefficients
 
-  DataMesh div = sb.Divergence(xi)/rp2;
+  DataMesh div = sb.Divergence(xi);
 
   //-----Divergence-------
   if(printDiagnostic[0]){
-    //const DataMesh& div2norm = sb.ComputeCoefficients(div*div);
     std::cout << "L2 Norm of Divergence = "
               << std::setprecision(12)
-              //<< sqrt(sqrt(2.)*div2norm[0]/4.) << std::endl;
-              << sb.ComputeCoefficients(div*div)[0]/rp22_00 << std::endl;
+              << sb.ComputeCoefficients(div*div/r2p4)[0]/rp22_00 << std::endl;
   }
 
   if(printDiagnostic[1] || printDiagnostic[2]){
-    DataMesh vort = sb.Vorticity(xi)/rp2 - 2.0*rp2*L;
+    DataMesh vort = sb.Vorticity(xi);
+    DataMesh vortM2L = vort/rp2 - 2.0*rp2*L;
 
     //-----Vorticity-------
     if(printDiagnostic[1]){
-      //const DataMesh vort2norm = sb.ComputeCoefficients(vort*vort);
       std::cout << "L2 Norm of Vorticity = "
                 << std::setprecision(12)
-                //<< sqrt(sqrt(2.)*vort2norm[0]/4.) << std::endl;
-                << sb.ComputeCoefficients(vort*vort)[0]/rp22_00 << std::endl;
+                << sb.ComputeCoefficients(vortM2L*vortM2L)[0]/rp22_00 << std::endl;
     }
 
     //-----SS-------
     if(printDiagnostic[2]){
-      //re-defining variables
-        DataMesh div = sb.Divergence(xi);
-        DataMesh vort = sb.Vorticity(xi);
-      Tensor<DataMesh> Dxtheta = xi;
-      Tensor<DataMesh> Dxphi = xi;
-
-      Dxtheta = sb.VectorColatitudeDerivative(xi);
+      //Tensor<DataMesh> Dxtheta(2,"1",DataMesh::Empty);
+      Tensor<DataMesh> Dxtheta = sb.VectorColatitudeDerivative(xi);
+      Tensor<DataMesh> Dxphi(2,"1",DataMesh::Empty);
 
       Tensor<DataMesh> gradlncf = sb.Gradient(log(Psi));
 
@@ -821,7 +789,6 @@ void KillingDiagnostics(const SurfaceBasis& sb,
 
       std::cout << "L2 Norm of f_L= "
                 << std::setprecision(12)
-                //<< sqrt(sqrt(2.)*fL_ha[0]/4.) << std::endl;
                 << sb.ComputeCoefficients(f_L*f_L)[0]/rp22_00 << std::endl;
     } //end f_L
 
@@ -833,7 +800,6 @@ void KillingDiagnostics(const SurfaceBasis& sb,
 
       std::cout << "L2 Norm of f_lam= "
                 << std::setprecision(12)
-                //<< sqrt(sqrt(2.)*flam_ha[0]/4.) << std::endl;
                 << sb.ComputeCoefficients(f_lam*f_lam)[0]/rp22_00 << std::endl;
     } // end f_Lambda
 
@@ -842,11 +808,8 @@ void KillingDiagnostics(const SurfaceBasis& sb,
       xiGradL = xi(0)*GradL(0) + xi(1)*GradL(1);
       xiGradL /= rp2;
 
-      //const DataMesh xiGradL_ha = sb.ComputeCoefficients(xiGradL*xiGradL);
-
       std::cout << "L2 Norm of xi*Grad(L) = "
                 << std::setprecision(12)
-                //<< sqrt(sqrt(2.)*xiGradL_ha[0]/4.) << std::endl;
                 << sb.ComputeCoefficients(xiGradL*xiGradL)[0]/rp22_00 << std::endl;
     } //end xi*DivL
 
