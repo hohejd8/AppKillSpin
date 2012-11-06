@@ -99,6 +99,17 @@ void TestScaleFactors(const DataMesh& rotated_v,
                       const DataMesh& phi,
                       const double& scaleFactor1,
                       const double& scaleFactor2);
+void TestScaleFactors(const DataMesh& rotated_v,
+                      const DataMesh& rotated_Psi,
+                      const double& rad,
+                      const SurfaceBasis& sb,
+                      const DataMesh& theta,
+                      const DataMesh& phi,
+                      const double& scaleFactor1,
+                      const double& scaleFactor2,
+                      const double& scaleFactor3,
+                      const double& scaleFactor4);
+
 
 bool KillingPath(const SurfaceBasis& sb,
                     const DataMesh& Psi_r,
@@ -123,7 +134,11 @@ MyVector<double> AKVInnerProduct(const DataMesh& v1,
                        const DataMesh& Ricci,
                        const DataMesh& rp2,
                        const SurfaceBasis& sb);
-
+double AKVInnerProductAlt(const Tensor<DataMesh>& xi1,
+                          const Tensor<DataMesh>& xi2,
+                          const DataMesh& Ricci,
+                          const DataMesh& rp2,
+                          const SurfaceBasis& sb);
 //performs diagnostics on the approximate Killing vector solution
 void KillingDiagnostics(const SurfaceBasis& sb,
                         const DataMesh& L,

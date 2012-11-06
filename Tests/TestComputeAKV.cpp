@@ -61,18 +61,14 @@ DataMesh ConstructConformalFactor(const DataMesh& theta,
       std::cout << "NO AXISYMMETRY" << std::endl;
       break;
     case 5: //off-axis symmetry
-      //Psi += 0.001*(3.0*sqrt(2.0)*sin(2.0*theta)*(cos(phi)+sin(phi))
-      //               +3.0*sin(theta)*sin(theta)*sin(2.0*phi));
+      //based on Merzbacher Eq. 16.60
+      //Y(L,0)(thetap,phip) = sqrt(4*PI/(2L+1))\Sum(M=-L..L) Y(L,M)(theta,phi) Y(L,M)*(beta,alpha)
+      //assume z-symmetry in the new coordinate system (thetap, phip), where the new z-axis had
+      //coordinates (beta, alpha) in the old system
 
-      //Psi += 0.01*(1.0-3.0*cos(theta)*cos(theta)-3.0*sin(theta)*sin(theta)*(cos(phi)+sin(phi)))//;
-      //       *sin(2.0*theta);
-
-      Psi += 0.001*(-1.0+3.0*cos(theta)*cos(theta)
-             +3.0*sqrt(2.0)*sin(2.0*theta)*(cos(phi)+sin(phi)));
-
-      //Psi+= 0.001*(-1.0+3.0*cos(theta)*cos(theta) //);
-      //       +3.0*sqrt(2.0)*sin(2.0*theta)*(cos(phi)+sin(phi))
-      //       +3.0*sin(theta)*sin(theta)*sin(2.0*phi));
+      Psi+= 0.001*(-1.0+3.0*cos(theta)*cos(theta) //);
+             +3.0*sqrt(2.0)*sin(2.0*theta)*(cos(phi)+sin(phi))
+             +3.0*sin(theta)*sin(theta)*sin(2.0*phi));
 
       std::cout << "OFF-AXIS AXISYMMETRY" << std::endl;
       break;
@@ -92,29 +88,10 @@ void PrintSurfaceNormalization(const DataMesh& v,
                       const DataMesh& phi,
                       const double& scaleFactor)
 {
-  //std::cout << "Scale factor is : " << scaleFactor << std::endl;
-
-  //v *= scaleFactor;
-  //rotated_v *= scaleFactor;
-
-      //const double scaleAboveEquator =
-      //          normalizeKVAtOnePoint(sb, rotated_Psi, rotated_v, rad, M_PI/4., 0.0);
-      //std::cout << "scale factor at theta=Pi/4   : " 
-      //          << std::setprecision(12)
-      //          << scaleAboveEquator << std::endl;
-      //const double scaleBelowEquator =
-      //          normalizeKVAtOnePoint(sb, rotated_Psi, rotated_v, rad, 4.*M_PI/5., 0.0);
-      //std::cout << "scale factor at theta=4*Pi/5 : " 
-      //          << std::setprecision(12)
-      //          << scaleBelowEquator << std::endl;
-      const double scaleOverSurface =
+  const double scaleOverSurface =
                 normalizeKVAtAllPoints(sb, rotated_Psi, theta, phi, rotated_v*scaleFactor, rad);
-      //std::cout << "scale factor over surface    : " 
-      //          << std::setprecision(12)
-      //          << scaleOverSurface << std::endl;
-      //const double scaleInnerProduct = AKVInnerProduct(v, v, Ricci, rp2, sb);
-      std::cout << std::setprecision(15) << scaleFactor << " " << scaleOverSurface << std::endl;
-  //std::cout << std::endl;
+
+  std::cout << std::setprecision(15) << scaleFactor << " " << scaleOverSurface << std::endl;
 }
 
 int main(){
@@ -198,7 +175,7 @@ int main(){
     const Tensor<DataMesh> GradRicci = sb.Gradient(Ricci);
 
     for(int a=0; a<axes; a++){//index over perpendicular AKV axes
-    //for(int a=0; a<1; a++){//index over perpendicular AKV axes
+    //for(int a=2; a<3; a++){//index over perpendicular AKV axes
       //for printing
       switch(a){
         case 0:
@@ -207,7 +184,7 @@ int main(){
           break;
         case 1:
           thetap[1] = M_PI/2.;
-          phip[1] = phip[0]+M_PI/2.;
+          //phip[1] = phip[0]+M_PI/2.;
           std::cout << thetap[1]*180./M_PI << " " << phip[1]*180./M_PI << std::endl;
           std::cout << "x-axis analysis" << std::endl;
           break;
@@ -256,31 +233,9 @@ int main(){
       //          << std::setprecision(12)
       //          << scaleAtEquator << std::endl;
 
-      //scale L, v
-      //v[a] *= scaleAtEquator;
-      //rotated_v[a] *= scaleAtEquator;
-      //L *= scaleAtEquator;
-
       //compare scale factors
-      //const double scaleAboveEquator =
-      //          normalizeKVAtOnePoint(sb, rotated_Psi, rotated_v[a], rad, M_PI/4., 0.0);
-      //std::cout << "scale factor at theta=Pi/4   : " 
-      //          << std::setprecision(12)
-      //          << scaleAboveEquator << std::endl;
-      //const double scaleBelowEquator =
-      //          normalizeKVAtOnePoint(sb, rotated_Psi, rotated_v[a], rad, 4.*M_PI/5., 0.0);
-      //std::cout << "scale factor at theta=4*Pi/5 : " 
-      //          << std::setprecision(12)
-      //          << scaleBelowEquator << std::endl;
-      //const double scaleOverSurface =
-      //          normalizeKVAtAllPoints(sb, rotated_Psi, theta, phi, rotated_v[a], rad);
-      //std::cout << "scale factor over surface    : " 
-      //          << std::setprecision(12)
-      //          << scaleOverSurface << std::endl;
       MyVector<double> scaleInnerProduct = AKVInnerProduct(v[a], v[a], Ricci, rp2, sb);//[0];
-      //std::cout << "scale factor over surface    : " 
-      //          << std::setprecision(12)
-      //          << scaleOverSurface << std::endl;
+
 
       //std::cout << "\nUsing the scale factor from the path length at the equator" << std::endl;
       PrintSurfaceNormalization(v[a], rotated_v[a], rotated_Psi,
@@ -293,7 +248,7 @@ int main(){
       PrintSurfaceNormalization(v[a], rotated_v[a], rotated_Psi,
                        rad, Ricci, rp2, sb, theta, phi, scaleInnerProduct[2]);
       //TestScaleFactors(rotated_v[a], rotated_Psi, rad, sb, theta,
-      //                 phi, scaleAtEquator*0.99, scaleInnerProduct[0]);
+      //   phi, scaleAtEquator, scaleInnerProduct[0], scaleInnerProduct[1], scaleInnerProduct[2]);
 
       //scale L, v
       v[a] *= scaleAtEquator;
@@ -301,33 +256,33 @@ int main(){
 
       //create xi (1-form)
       Tensor<DataMesh> tmp_xi = sb.Gradient(v[a]);
-      Tensor<DataMesh> xi(2,"1",DataMesh::Empty);
-      xi(0) = tmp_xi(1);
-      xi(1) = -tmp_xi(0);
+      //Tensor<DataMesh> xi(2,"1",DataMesh::Empty);
+      xi[a](0) = tmp_xi(1);
+      xi[a](1) = -tmp_xi(0);
 
       //perform diagnostics
-      KillingDiagnostics(sb, L, Psi, xi, rad, printDiagnostic);
+      KillingDiagnostics(sb, L, Psi, xi[a], rad, printDiagnostic);
 
       std::cout << std::endl;
     }//end loop over perpendicular AKV axes
 
 
     //compute inner product for each individual AKV solution
-    //const double zz = AKVInnerProduct(v[0], v[0], Ricci, rp2, sb);
-    //std::cout << "z-z inner product = " << zz << std::endl;
-    //const double xx = AKVInnerProduct(v[1], v[1], Ricci, rp2, sb);
-    //std::cout << "x-x inner product = " << xx << std::endl;
-    //const double yy = AKVInnerProduct(v[2], v[2], Ricci, rp2, sb);
-    //std::cout << "y-y inner product = " << yy << std::endl;
+    const double zz = AKVInnerProductAlt(xi[0], xi[0], Ricci, rp2, sb);
+    std::cout << "z-z inner product = " << zz << std::endl;
+    const double xx = AKVInnerProductAlt(xi[1], xi[1], Ricci, rp2, sb);
+    std::cout << "x-x inner product = " << xx << std::endl;
+    const double yy = AKVInnerProductAlt(xi[2], xi[2], Ricci, rp2, sb);
+    std::cout << "y-y inner product = " << yy << std::endl;
 
 
     //compute inner products between AKV solutions
     std::cout << "z-x inner product : " << std::endl;
-    //AKVInnerProduct(v[0], v[1], Ricci, rp2, sb);
+    std::cout << AKVInnerProductAlt(xi[0], xi[1], Ricci, rp2, sb) << std::endl;
     std::cout << "z-y inner product : " << std::endl;
-    //AKVInnerProduct(v[0], v[2], Ricci, rp2, sb);
+    std::cout << AKVInnerProductAlt(xi[0], xi[2], Ricci, rp2, sb) << std::endl;
     std::cout << "x-y inner product : " << std::endl;
-    //AKVInnerProduct(v[1], v[2], Ricci, rp2, sb);
+    std::cout << AKVInnerProductAlt(xi[1], xi[2], Ricci, rp2, sb) << std::endl;
     std::cout << "\n" << std::endl;
   }
 

@@ -7,6 +7,7 @@
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_roots.h>
+#include <stdlib.h>
 
 
 //this function determines which AKVsolver to run based on initial guess
@@ -208,7 +209,7 @@ void findTtp(struct rparams * p,
   s = gsl_multiroot_fsolver_alloc(T, n);
 
   gsl_multiroot_fsolver_set(s, &f, x);
-  if(verbose) print_state(iter, s);
+  //if(verbose) print_state(iter, s); //uncomment this later
 
   do {
     iter++;
@@ -591,6 +592,58 @@ void TestScaleFactors(const DataMesh& rotated_v,
   }
 }
 
+void TestScaleFactors(const DataMesh& rotated_v,
+                      const DataMesh& rotated_Psi,
+                      const double& rad,
+                      const SurfaceBasis& sb,
+                      const DataMesh& theta,
+                      const DataMesh& phi,
+                      const double& scaleFactor1,
+                      const double& scaleFactor2,
+                      const double& scaleFactor3,
+                      const double& scaleFactor4)
+{
+  //quick routine to determine the minimum and maximum values of the scale
+  //factors that were passed in
+  double min = scaleFactor1 < scaleFactor2 ? scaleFactor1 : scaleFactor2;
+         min = scaleFactor3 < min ? scaleFactor3 : min;
+         min = scaleFactor4 < min ? scaleFactor4 : min;
+
+  double max = scaleFactor1 > scaleFactor2 ? scaleFactor1 : scaleFactor2;
+         max = scaleFactor3 > min ? scaleFactor3 : min;
+         max = scaleFactor4 > min ? scaleFactor4 : min;
+
+  //start just outside these values
+  min *= 0.9;
+  max *= 1.1;
+
+  //evaluate the function at these two scale factors
+  double lowSurfaceValue = 
+           normalizeKVAtAllPoints(sb, rotated_Psi, theta, phi, rotated_v*min, rad);
+  //std::cout << std::setprecision(15) << min << " " << lowSurfaceValue << std::endl;
+  double highSurfaceValue = 
+           normalizeKVAtAllPoints(sb, rotated_Psi, theta, phi, rotated_v*max, rad);
+  //std::cout << std::setprecision(15) << max << " " << highSurfaceValue << std::endl;
+
+  //do a bisection to find the minimum surface value
+  //this assumes that the function is continuous and symmetric about the minimum
+  //stops when the difference in SurfaceValue between min/max is less than 1e-04%
+  while(fabs(lowSurfaceValue-highSurfaceValue)/lowSurfaceValue > 1.e-06){
+    const double difference = max-min;
+    if(lowSurfaceValue < highSurfaceValue){
+      max -= difference/4.;
+      highSurfaceValue = normalizeKVAtAllPoints(sb,rotated_Psi,theta,phi,rotated_v*max,rad);
+      std::cout << std::setprecision(15) << max << " " << highSurfaceValue << std::endl;
+    } else {
+      min += difference/4.;
+      lowSurfaceValue = normalizeKVAtAllPoints(sb,rotated_Psi,theta,phi,rotated_v*min,rad);
+      std::cout << std::setprecision(15) << min << " " << lowSurfaceValue << std::endl;
+    }
+  }
+
+  return;
+}
+
 bool KillingPath(const SurfaceBasis& sb,
                  const DataMesh& Psi,
                  const Tensor<DataMesh>& xi,
@@ -689,7 +742,6 @@ int PathDerivs(double t_required_by_solver, const double y[], double f[], void *
   return GSL_SUCCESS;
 }
 
-//double* AKVInnerProduct(const DataMesh& v1,
 MyVector<double> AKVInnerProduct(const DataMesh& v1,
                        const DataMesh& v2,
                        const DataMesh& Ricci,
@@ -709,6 +761,15 @@ MyVector<double> AKVInnerProduct(const DataMesh& v1,
   return MyVector<double>(MV::fill,1./ip1, 1./sqrt(ip2), 1./ip2) ;
 }
 
+double AKVInnerProductAlt(const Tensor<DataMesh>& xi1,
+                          const Tensor<DataMesh>& xi2,
+                          const DataMesh& Ricci,
+                          const DataMesh& rp2,
+                          const SurfaceBasis& sb)
+{
+  const DataMesh integrand = xi1(0)*xi2(0) + xi1(1)*xi2(1) * Ricci;
+  return sb.ComputeCoefficients(integrand)[0]*sqrt(2.)*M_PI;
+}
 
 void KillingDiagnostics(const SurfaceBasis& sb,
                         const DataMesh& L,
@@ -718,6 +779,7 @@ void KillingDiagnostics(const SurfaceBasis& sb,
                         const MyVector<bool>& printDiagnostic)
 {
   const DataMesh& rp2 = rad*Psi*Psi;
+  const DataMesh& r2p2 = rad*rp2;
   const DataMesh& r2p4 = rp2*rp2;
   const double rp22_00 = sb.ComputeCoefficients(rp2*rp2)[0];//(0,0) component of coefficients
 
@@ -725,20 +787,25 @@ void KillingDiagnostics(const SurfaceBasis& sb,
 
   //-----Divergence-------
   if(printDiagnostic[0]){
+    DataMesh tmp_div = div/r2p2; //only rp2?
     std::cout << "L2 Norm of Divergence = "
               << std::setprecision(12)
-              << sb.ComputeCoefficients(div*div/r2p4)[0]/rp22_00 << std::endl;
+              //<< sb.ComputeCoefficients(div*div)[0])/rp22_00 << std::endl;
+              << sqrt(sqrt(2.)*sb.ComputeCoefficients(tmp_div*tmp_div)[0]/4.) << std::endl;
   }
 
   if(printDiagnostic[1] || printDiagnostic[2]){
     DataMesh vort = sb.Vorticity(xi);
-    DataMesh vortM2L = vort/rp2 - 2.0*rp2*L;
+    //std::cout << "vort" << std::endl;
+    //std::cout << vort << std::endl;
+    DataMesh vortM2L = vort/r2p2 - 2.0*Psi*Psi*L; //only rp2 and rp2?
 
     //-----Vorticity-------
     if(printDiagnostic[1]){
       std::cout << "L2 Norm of Vorticity = "
                 << std::setprecision(12)
-                << sb.ComputeCoefficients(vortM2L*vortM2L)[0]/rp22_00 << std::endl;
+                //<< sb.ComputeCoefficients(vortM2L*vortM2L)[0]/rp22_00 << std::endl;
+                << sqrt(sqrt(2.)*sb.ComputeCoefficients(vortM2L*vortM2L)[0]/4.) << std::endl;
     }
 
     //-----SS-------
@@ -760,14 +827,18 @@ void KillingDiagnostics(const SurfaceBasis& sb,
                    + Dxphi(0)*Dxphi(0)
                    + Dxphi(1)*Dxphi(1);
 
-      const DataMesh p4r2 = rad*rad*Psi*Psi*Psi*Psi;
-      SS /= p4r2;
-      SS -= 2.0*p4r2*L*L;
+      //const DataMesh p4r2 = rad*rad*Psi*Psi*Psi*Psi;
+      SS /= r2p4;
+      SS -= 2.0*r2p4*L*L;
 
       DataMesh SS_ha = sb.ComputeCoefficients(SS);
 
       std::cout << "Surface Average S_{ij}S^{ij} = "
                 << std::setprecision(12) << sqrt(2.)*SS_ha[0]/4. << std::endl;
+      DataMesh tmp = r2p4;
+      tmp = 1.;
+      const double area = sb.ComputeCoefficients(tmp)[0]*M_PI*sqrt(2.);
+      std::cout << "Surface area " << area << std::endl;
     }
   }
 

@@ -84,7 +84,7 @@
 @timestamp rot 0
 @timestamp font 0
 @timestamp char size 1.000000
-@timestamp def "Wed Oct 31 14:12:03 2012"
+@timestamp def "Thu Nov  1 15:40:12 2012"
 @r0 off
 @link r0 to g0
 @r0 type above
@@ -425,9 +425,9 @@
 @    s3 type xy
 @    s3 symbol 1
 @    s3 symbol size 0.570000
-@    s3 symbol color 1
+@    s3 symbol color 3
 @    s3 symbol pattern 1
-@    s3 symbol fill color 1
+@    s3 symbol fill color 3
 @    s3 symbol fill pattern 0
 @    s3 symbol linewidth 1.0
 @    s3 symbol linestyle 1
@@ -459,7 +459,7 @@
 @    s3 avalue offset 0.000000 , 0.000000
 @    s3 errorbar on
 @    s3 errorbar place both
-@    s3 errorbar color 1
+@    s3 errorbar color 3
 @    s3 errorbar pattern 1
 @    s3 errorbar size 1.000000
 @    s3 errorbar linewidth 1.0
@@ -472,18 +472,18 @@
 @    s3 legend  ""
 @    s4 hidden false
 @    s4 type xy
-@    s4 symbol 0
-@    s4 symbol size 1.000000
-@    s4 symbol color 5
+@    s4 symbol 1
+@    s4 symbol size 0.570000
+@    s4 symbol color 8
 @    s4 symbol pattern 1
-@    s4 symbol fill color 5
+@    s4 symbol fill color 8
 @    s4 symbol fill pattern 0
 @    s4 symbol linewidth 1.0
 @    s4 symbol linestyle 1
 @    s4 symbol char 65
 @    s4 symbol char font 0
 @    s4 symbol skip 0
-@    s4 line type 1
+@    s4 line type 0
 @    s4 line linestyle 1
 @    s4 line linewidth 1.0
 @    s4 line color 5
@@ -508,7 +508,7 @@
 @    s4 avalue offset 0.000000 , 0.000000
 @    s4 errorbar on
 @    s4 errorbar place both
-@    s4 errorbar color 5
+@    s4 errorbar color 8
 @    s4 errorbar pattern 1
 @    s4 errorbar size 1.000000
 @    s4 errorbar linewidth 1.0

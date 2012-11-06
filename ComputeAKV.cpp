@@ -100,6 +100,15 @@ namespace ComputeItems {
     RunAKVsolvers(THETA, thetap, phip, mMin_thetap,
                   mResidualSize, mVerbose, &p, mSolver);
 
+//------FOR TESTING ONLY ---------//
+//force the THETA, thetap, phip solution
+THETA = -3.1121890542705e-06;
+thetap = 1.59480548535815e-09;
+phip = -0.446097386040383;
+//------FOR TESTING ONLY ---------//
+
+
+
     if(mVerbose){
       std::cout << "Solution found with : Theta  = " << THETA << "\n"
 	      << "                      thetap = " << (180.0/M_PI)*thetap << "\n"
@@ -140,18 +149,9 @@ namespace ComputeItems {
 
 
     TestScaleFactors(rotated_v, rotated_Psi, mRad, sb, theta,
-                     phi, scaleAtEquator, scaleInnerProduct[0]);
-    //if(mVerbose) std::cout << "scale factor from inner product = " << scaleInnerProduct << std::endl;
+    //                 phi, scaleAtEquator, scaleInnerProduct[0]);
+             phi, scaleAtEquator, scaleInnerProduct[0],scaleInnerProduct[1] ,scaleInnerProduct[2]);
 
-    //compute the inner product
-/*
-    const double residual_ip_equator = AKVInnerProduct(v*scale, v*scale, Ricci, rp2, sb);
-    std::cout << "Residual from the inner product of v scaled by the equator = "
-              << residual_ip_equator << std::endl;
-    const double residual_ip_average = AKVInnerProduct(v*avgScale, v*avgScale, Ricci, rp2, sb);
-    std::cout << "Residual from the inner product of v scaled by average scale factor = "
-              << residual_ip_average << std::endl;
-*/
     //scale L, v
     v *= scaleAtEquator;
     L *= scaleAtEquator;
