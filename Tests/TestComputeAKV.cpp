@@ -66,10 +66,9 @@ DataMesh ConstructConformalFactor(const DataMesh& theta,
       //assume z-symmetry in the new coordinate system (thetap, phip), where the new z-axis had
       //coordinates (beta, alpha) in the old system
 
-      Psi+= 0.001*(-1.0+3.0*cos(theta)*cos(theta) //);
-             +3.0*sqrt(2.0)*sin(2.0*theta)*(cos(phi)+sin(phi))
-             +3.0*sin(theta)*sin(theta)*sin(2.0*phi));
-
+      Psi+= 0.01*(-1.0+3.0*cos(theta)*cos(theta)
+		   +3.0*sqrt(2.0)*sin(2.0*theta)*(cos(phi)+sin(phi))
+		   +3.0*sin(theta)*sin(theta)*sin(2.0*phi));
       std::cout << "OFF-AXIS AXISYMMETRY" << std::endl;
       break;
   } //end switch
@@ -156,6 +155,8 @@ int main(){
   //for(int s=0; s<syms; s++){//index over conformal factor symmetries
     //create conformal factor
     const DataMesh Psi = ConstructConformalFactor(theta, phi, s);
+    std::cout << "Psi coefficients:" << std::endl;
+    std::cout << sb.ComputeCoefficients(Psi) << std::endl;
 
     //set the initial guesses to be along particular axes
     double THETA[3] = {0.,0.,0.};

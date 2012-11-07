@@ -750,15 +750,18 @@ MyVector<double> AKVInnerProduct(const DataMesh& v1,
 {
   const Tensor<DataMesh> Gradv1 = sb.Gradient(v1);
   const Tensor<DataMesh> Gradv2 = sb.Gradient(v2);
+  const DataMesh& r2p4 = rp2*rp2;
 
   DataMesh integrand = 0.5*Ricci*(Gradv1(0)*Gradv2(0)+Gradv1(1)*Gradv2(1));
-  double area = sb.ComputeCoefficients(rp2*rp2)[0];
+  double area = sb.ComputeCoefficients(r2p4)[0];
 
-  double ip1 = (3.*sqrt(2.)/8.0)*sb.ComputeCoefficients(integrand/(rp2*rp2))[0];
+  double ip1 = (3.*sqrt(2.)/8.0)*sb.ComputeCoefficients(integrand/r2p4)[0];
 
-  double ip2 = sb.ComputeCoefficients(integrand)[0] / (2./3. * area);
+  //double ip2 = sb.ComputeCoefficients(integrand)[0] / (2./3. * area);//previous
+  double ip2 = sb.ComputeCoefficients(integrand*r2p4)[0] / (2./3. * area); //dA = r2p4*dOmega
+  std::cout << "value of IP : " << ip2 << std::endl;
 
-  return MyVector<double>(MV::fill,1./ip1, 1./sqrt(ip2), 1./ip2) ;
+  return MyVector<double>(MV::fill, 1./ip1, 1./sqrt(ip2), 1./ip2) ;
 }
 
 double AKVInnerProductAlt(const Tensor<DataMesh>& xi1,
@@ -835,10 +838,12 @@ void KillingDiagnostics(const SurfaceBasis& sb,
 
       std::cout << "Surface Average S_{ij}S^{ij} = "
                 << std::setprecision(12) << sqrt(2.)*SS_ha[0]/4. << std::endl;
-      DataMesh tmp = r2p4;
-      tmp = 1.;
-      const double area = sb.ComputeCoefficients(tmp)[0]*M_PI*sqrt(2.);
-      std::cout << "Surface area " << area << std::endl;
+
+      //compute the area integral as above in ip1, ip2
+      const double intSSdA = sb.ComputeCoefficients(SS*r2p4)[0]; //*Pi*sqrt(2)
+      const double area = sb.ComputeCoefficients(r2p4)[0]; //*Pi*sqrt(2)
+      std::cout << "area : " << area << std::endl;
+      std::cout << "(Integral SS dA)/A " << intSSdA/area << std::endl;
     }
   }
 
