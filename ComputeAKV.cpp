@@ -126,7 +126,7 @@ phip = -0.446097386040383;
     const double scaleAtEquator = normalizeKVAtOnePoint(sb, rotated_Psi, rotated_v, mRad, M_PI/2., 0.0);
     if(mVerbose) std::cout << "scale factor at equator = " << scaleAtEquator << std::endl;
     const double avgScale = normalizeKVAtAllPoints(sb, rotated_Psi, theta, phi, rotated_v, mRad);
-    MyVector<double> scaleInnerProduct = AKVInnerProduct(v, v, Ricci, rp2, sb);
+    MyVector<double> scaleInnerProduct = InnerProductScaleFactors(v, v, Ricci, rp2, sb);
     if(mVerbose) std::cout << "scale factor ip1 = " << scaleInnerProduct[0] << std::endl;
     if(mVerbose) std::cout << "scale factor ip2 = " << scaleInnerProduct[1] << std::endl;
     if(mVerbose) std::cout << "scale factor ip3 = " << scaleInnerProduct[2] << std::endl;
@@ -148,8 +148,7 @@ phip = -0.446097386040383;
                                         rotated_v*scaleInnerProduct[2], mRad) << std::endl;
 
 
-    TestScaleFactors(rotated_v, rotated_Psi, mRad, sb, theta,
-    //                 phi, scaleAtEquator, scaleInnerProduct[0]);
+    OptimizeScaleFactor(rotated_v, rotated_Psi, mRad, sb, theta,
              phi, scaleAtEquator, scaleInnerProduct[0],scaleInnerProduct[1] ,scaleInnerProduct[2]);
 
     //scale L, v

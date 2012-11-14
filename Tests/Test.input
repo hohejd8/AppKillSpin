@@ -2,6 +2,7 @@ Nth = 14;
 Nph = 28;
 #Radius = 0.785798;
 Radius = 1.0;
+Solver = Broyden;
 #AKVGuess = 0.0, 0.0, 0.0;
 #AKVGuess = 0.0, 3.1415926535/2.0, 0.0;
 AKVGuess = 0.0, 3.1415926535/2.0, 3.1415926535/2.0;

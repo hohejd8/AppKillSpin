@@ -90,7 +90,8 @@ double normalizeKVAtOnePoint(const SurfaceBasis& sb,
                               const double& phip=0.0);
 
 //This routine will print the value of normalizeKVAtAllPoints for 
-//a range of scale factors in the neighborhood of scaleFactor1, scaleFactor2
+//a range of scale factors in the neighborhood of scaleFactor1-4
+/*
 void TestScaleFactors(const DataMesh& rotated_v,
                       const DataMesh& rotated_Psi,
                       const double& rad,
@@ -99,7 +100,8 @@ void TestScaleFactors(const DataMesh& rotated_v,
                       const DataMesh& phi,
                       const double& scaleFactor1,
                       const double& scaleFactor2);
-void TestScaleFactors(const DataMesh& rotated_v,
+*/
+void OptimizeScaleFactor(const DataMesh& rotated_v,
                       const DataMesh& rotated_Psi,
                       const double& rad,
                       const SurfaceBasis& sb,
@@ -129,15 +131,15 @@ int PathDerivs(double t_required_by_solver,
 // \frac{1}{2} \oint ^2R((_s \vec \nabla v_1) \cdot (_s \vec \nabla v_2) d\Omega
 //and returns the ratio of this result to (8*\pi / 3)
 //double* AKVInnerProduct(const DataMesh& v1,
-MyVector<double> AKVInnerProduct(const DataMesh& v1,
+MyVector<double> InnerProductScaleFactors(const DataMesh& v1,
                        const DataMesh& v2,
                        const DataMesh& Ricci,
-                       const DataMesh& rp2,
+                       const DataMesh& r2p4,
                        const SurfaceBasis& sb);
-double AKVInnerProductAlt(const Tensor<DataMesh>& xi1,
+double AKVInnerProduct(const Tensor<DataMesh>& xi1,
                           const Tensor<DataMesh>& xi2,
                           const DataMesh& Ricci,
-                          const DataMesh& rp2,
+                          const DataMesh& r2p4,
                           const SurfaceBasis& sb);
 //performs diagnostics on the approximate Killing vector solution
 void KillingDiagnostics(const SurfaceBasis& sb,

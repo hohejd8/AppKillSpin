@@ -3,19 +3,17 @@
 #include <iomanip>
 #include "Utils/StringParsing/ReadFileIntoString.hpp"
 #include "Utils/StringParsing/OptionParser.hpp"
-//#include "Utils/Tensor/Tensor.hpp"
-//#include "Spectral/BasisFunctions/YlmSpherepack.hpp"
 #include "Utils/Math/Gaqd.hpp"
 #include "Utils/ErrorHandling/Require.hpp"
-//#include "Utils/LowLevelUtils/SimpleNorms.hpp"
-//#include "Utils/ErrorHandling/Assert.hpp"
 #include "AppKillSpin/AKVsolver.hpp"
 #include "Spectral/BasisFunctions/SpherePackIterator.hpp"
 #include "Utils/LowLevelUtils/Position.hpp"
-//This test file essentially copies and replaces
+//This test file copies and replaces some
 //pieces of the ComputeAKV ComputeItem. The test
 //is actually for the AKVsolver functions, which
-//are called by ComputeAKV.
+//are called by ComputeAKV.  Some additional work
+//needs to be done to actually make this a test of
+//ComputeAKV.
 
 int NumberOfTestsFailed = 0;
 
@@ -55,8 +53,6 @@ DataMesh ConstructConformalFactor(const DataMesh& theta,
       std::cout << "Y AXISYMMETRY" << std::endl;
       break;
     case 4: //no symmetry
-      //Psi+=0.001*(  1.0-3.0*cos(theta+tp)*cos(theta+tp)-3.0*sin(theta+tp)*sin(theta+tp)*cos(2.0*phi+pp)
-      //            + 1.0-3.0*cos(theta+tp)*cos(theta)+3.0*sin(theta+tp)*sin(theta)*cos(2.0*phi));
       Psi += 0.001*(phi+theta);
       std::cout << "NO AXISYMMETRY" << std::endl;
       break;
@@ -66,7 +62,7 @@ DataMesh ConstructConformalFactor(const DataMesh& theta,
       //assume z-symmetry in the new coordinate system (thetap, phip), where the new z-axis had
       //coordinates (beta, alpha) in the old system
 
-      Psi+= 0.01*(-1.0+3.0*cos(theta)*cos(theta)
+      Psi+= 0.01*(5./(32.*M_PI))*(-1.0+3.0*cos(theta)*cos(theta)
 		   +3.0*sqrt(2.0)*sin(2.0*theta)*(cos(phi)+sin(phi))
 		   +3.0*sin(theta)*sin(theta)*sin(2.0*phi));
       std::cout << "OFF-AXIS AXISYMMETRY" << std::endl;
@@ -116,7 +112,7 @@ int main(){
     "Solver = <std::string> which gsl multidimensional root finding algorith  \n"
     "        should be used. [default Newton]                                 \n"
     "Verbose=<bool> Print spectral coefficients and warnings if true          \n"
-    "        [default true]                                                   \n"
+    "        [default false]                                                  \n"
     ; 
 
   std::string Options = ReadFileIntoString("Test.input");
@@ -152,16 +148,15 @@ int main(){
   const int syms = 5; //the number of axisymmetries we are testing
 
   for(int s=1; s<2; s++){//index over conformal factor symmetries
+  //for(int s=5; s<6; s++){//index over conformal factor symmetries
   //for(int s=0; s<syms; s++){//index over conformal factor symmetries
     //create conformal factor
     const DataMesh Psi = ConstructConformalFactor(theta, phi, s);
-    std::cout << "Psi coefficients:" << std::endl;
-    std::cout << sb.ComputeCoefficients(Psi) << std::endl;
 
     //set the initial guesses to be along particular axes
     double THETA[3] = {0.,0.,0.};
-    double thetap[3] = {0.,M_PI/2.,0.};
-    double phip[3] = {0.,0.,0.};
+    double thetap[3] = {0.,0.,0.}; //guess for z-axisymmetry
+    double phip[3] = {0.,0.,0.}; //guess for z-axisymmetry
 
     //save the v solutions along particular axes
     MyVector<DataMesh> v(MV::Size(3),DataMesh::Empty);
@@ -171,38 +166,43 @@ int main(){
 
     //compute some useful quantities
     const DataMesh rp2 = rad * Psi * Psi;
+    const DataMesh r2p4 = rp2*rp2;
     const DataMesh llncf = sb.ScalarLaplacian(log(Psi));
     const DataMesh Ricci = 2.0 * (1.0-2.0*llncf) / (rp2*rp2);
     const Tensor<DataMesh> GradRicci = sb.Gradient(Ricci);
 
     for(int a=0; a<axes; a++){//index over perpendicular AKV axes
-    //for(int a=2; a<3; a++){//index over perpendicular AKV axes
+    //for(int a=2; a<3; a++){//index over a particular AKV axis
       //for printing
       switch(a){
         case 0:
-          std::cout << thetap[0]*180./M_PI << " " << phip[0]*180./M_PI << std::endl;
+          std::cout << "symmetry axis guess : " 
+                    << thetap[0]*180./M_PI << " " << phip[0]*180./M_PI << std::endl;
           std::cout << "z-axis analysis" << std::endl;
           break;
         case 1:
           thetap[1] = M_PI/2.;
-          //phip[1] = phip[0]+M_PI/2.;
-          std::cout << thetap[1]*180./M_PI << " " << phip[1]*180./M_PI << std::endl;
+          phip[1] = atan2(sin(phip[0]), -cos(phip[0]));
+          std::cout << "symmetry axis guess : "
+                    << thetap[1]*180./M_PI << " " << phip[1]*180./M_PI << std::endl;
           std::cout << "x-axis analysis" << std::endl;
           break;
         case 2:
           //perform the cross product of the previous two solutions
           const double alpha = sin(thetap[0])*sin(phip[0])*cos(thetap[1])
                             -sin(thetap[1])*sin(phip[1])*cos(thetap[0]);
-          const double beta = cos(thetap[0])*sin(thetap[1])*cos(phi[1])
+          const double beta = cos(thetap[0])*sin(thetap[1])*cos(phip[1])
                             -cos(thetap[1])*sin(thetap[0])*cos(phip[0]);
           const double gamma = sin(thetap[0])*cos(phip[0])*sin(thetap[1])*sin(phip[1])
                             -sin(thetap[1])*cos(phip[1])*sin(thetap[0])*sin(phip[0]);
           thetap[2] = atan2(sqrt(alpha*alpha+beta*beta),gamma);
-          phip[2] = atan2(beta, gamma);
-          std::cout << thetap[2]*180./M_PI << " " << phip[2]*180./M_PI << std::endl;
+          phip[2] = atan2(beta, alpha);
+          std::cout << "symmetry axis guess : "
+                    << thetap[2]*180./M_PI << " " << phip[2]*180./M_PI << std::endl;
           std::cout << "y-axis analysis" << std::endl;
           break;
       }
+
       //create L, v
       DataMesh L(DataMesh::Empty);
 
@@ -225,30 +225,31 @@ int main(){
 
       DataMesh rotated_Psi = RotateOnSphere(Psi,theta,phi,
                                             sb,thetap[a],phip[a]);
+      //create xi (1-form)
+      Tensor<DataMesh> tmp_xi = sb.Gradient(v[a]);
+      xi[a](0) = tmp_xi(1);
+      xi[a](1) = -tmp_xi(0);
 
-      //determine scale factor
-      //std::cout << "\nUnscaled results" << std::endl;
-      const double scaleAtEquator =
-                normalizeKVAtOnePoint(sb, rotated_Psi, rotated_v[a], rad, M_PI/2., 0.0);
-      //std::cout << "scale factor at equator      : " 
-      //          << std::setprecision(12)
-      //          << scaleAtEquator << std::endl;
+      //perform diagnostics
+      //note that Psi and xi are unscaled and unrotated at this point
+      KillingDiagnostics(sb, L, Psi, xi[a], rad, printDiagnostic);
 
       //compare scale factors
-      MyVector<double> scaleInnerProduct = AKVInnerProduct(v[a], v[a], Ricci, rp2, sb);//[0];
-
-
-      //std::cout << "\nUsing the scale factor from the path length at the equator" << std::endl;
+      std::cout << "\n" << POSITION << std::endl;
+      const double scaleAtEquator =
+                normalizeKVAtOnePoint(sb, rotated_Psi, rotated_v[a], rad, M_PI/2., 0.0);
+                //normalizeKVAtOnePoint(sb, rotated_Psi, rotated_v[a], rad, M_PI/4., 0.0);
+      //std::cout<<"scale factor at equator: "<<std::setprecision(12)<<scaleAtEquator<<std::endl;
+      MyVector<double> scaleInnerProduct = InnerProductScaleFactors(v[a], v[a], Ricci, r2p4, sb);
       PrintSurfaceNormalization(v[a], rotated_v[a], rotated_Psi,
                        rad, Ricci, rp2, sb, theta, phi, scaleAtEquator);
-      //std::cout << "Using the scale factor from the inner product / r2p4" << std::endl;
       PrintSurfaceNormalization(v[a], rotated_v[a], rotated_Psi,
                        rad, Ricci, rp2, sb, theta, phi, scaleInnerProduct[0]);
       PrintSurfaceNormalization(v[a], rotated_v[a], rotated_Psi,
                        rad, Ricci, rp2, sb, theta, phi, scaleInnerProduct[1]);
       PrintSurfaceNormalization(v[a], rotated_v[a], rotated_Psi,
                        rad, Ricci, rp2, sb, theta, phi, scaleInnerProduct[2]);
-      //TestScaleFactors(rotated_v[a], rotated_Psi, rad, sb, theta,
+      //OptimizeScaleFactor(rotated_v[a], rotated_Psi, rad, sb, theta,
       //   phi, scaleAtEquator, scaleInnerProduct[0], scaleInnerProduct[1], scaleInnerProduct[2]);
 
       //scale L, v
@@ -256,34 +257,30 @@ int main(){
       L *= scaleAtEquator;
 
       //create xi (1-form)
-      Tensor<DataMesh> tmp_xi = sb.Gradient(v[a]);
-      //Tensor<DataMesh> xi(2,"1",DataMesh::Empty);
-      xi[a](0) = tmp_xi(1);
-      xi[a](1) = -tmp_xi(0);
-
-      //perform diagnostics
-      KillingDiagnostics(sb, L, Psi, xi[a], rad, printDiagnostic);
+      //tmp_xi = sb.Gradient(v[a]);
+      //xi[a](0) = tmp_xi(1);
+      //xi[a](1) = -tmp_xi(0);
 
       std::cout << std::endl;
     }//end loop over perpendicular AKV axes
 
 
     //compute inner product for each individual AKV solution
-    const double zz = AKVInnerProductAlt(xi[0], xi[0], Ricci, rp2, sb);
+    const double zz = AKVInnerProduct(xi[0], xi[0], Ricci, r2p4, sb);
     std::cout << "z-z inner product = " << zz << std::endl;
-    const double xx = AKVInnerProductAlt(xi[1], xi[1], Ricci, rp2, sb);
+    const double xx = AKVInnerProduct(xi[1], xi[1], Ricci, r2p4, sb);
     std::cout << "x-x inner product = " << xx << std::endl;
-    const double yy = AKVInnerProductAlt(xi[2], xi[2], Ricci, rp2, sb);
+    const double yy = AKVInnerProduct(xi[2], xi[2], Ricci, r2p4, sb);
     std::cout << "y-y inner product = " << yy << std::endl;
 
 
     //compute inner products between AKV solutions
-    std::cout << "z-x inner product : " << std::endl;
-    std::cout << AKVInnerProductAlt(xi[0], xi[1], Ricci, rp2, sb) << std::endl;
-    std::cout << "z-y inner product : " << std::endl;
-    std::cout << AKVInnerProductAlt(xi[0], xi[2], Ricci, rp2, sb) << std::endl;
-    std::cout << "x-y inner product : " << std::endl;
-    std::cout << AKVInnerProductAlt(xi[1], xi[2], Ricci, rp2, sb) << std::endl;
+    std::cout << "z-x inner product : "
+              << AKVInnerProduct(xi[0], xi[1], Ricci, r2p4, sb) << std::endl;
+    std::cout << "x-y inner product : "
+              << AKVInnerProduct(xi[1], xi[2], Ricci, r2p4, sb) << std::endl;
+    std::cout << "y-z inner product : "
+              << AKVInnerProduct(xi[2], xi[0], Ricci, r2p4, sb) << std::endl;
     std::cout << "\n" << std::endl;
   }
 

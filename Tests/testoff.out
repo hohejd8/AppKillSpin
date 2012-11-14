@@ -1,0 +1,76 @@
+OFF-AXIS AXISYMMETRY
+symmetry axis guess : 0 0
+z-axis analysis
+Starting the gsl 1D root finder at thetap = 0.0.
+Starting the gsl multidimensional root finder.
+Solution found with : THETA[0] = 5.36811e-13
+                     thetap[0] = 45
+                       phip[0] = 45
+L2 Norm of Divergence = 5.28270622807e-15
+L2 Norm of Vorticity = 4.94598980313e-14
+Surface Average S_{ij}S^{ij} = 4.47326005062e-16
+area : 7.59258933938
+(Integral SS dA)/A 4.59519787846e-16
+L2 Norm of f_L= 3.4597645327e-24
+L2 Norm of f_lam= 3.45723778197e-20
+L2 Norm of xi*Grad(L) = 1.07379951065e-20
+
+TestComputeAKV.cpp (line 238; main)
+value of IP : 2.69140465691
+0.992542914698591 1.88274438183694e-14
+0.992542914698615 1.88274438183694e-14
+0.60955163460953 0.228025507228836
+0.37155319525515 0.606552580284004
+
+symmetry axis guess : 90 134.999998485163
+x-axis analysis
+Starting the gsl multidimensional root finder.
+Solution found with : THETA[1] = -4.61122322155269e-05
+                     thetap[1] = 90.0000010224625
+                       phip[1] = 134.99999897723
+L2 Norm of Divergence = 6.90335352952e-15
+L2 Norm of Vorticity = 7.4707528721e-14
+Surface Average S_{ij}S^{ij} = 8.23166282106e-05
+area : 7.59258933938
+(Integral SS dA)/A 8.21684435155e-05
+L2 Norm of f_L= 9.20852511693e-09
+L2 Norm of f_lam= 9.13578600163e-05
+L2 Norm of xi*Grad(L) = 5.72793368296e-06
+
+TestComputeAKV.cpp (line 238; main)
+value of IP : 2.6812756046
+1.00372113058112 2.89566280274867e-06
+1.0037978418899 2.56540806193505e-05
+0.610701900609914 0.233558756902936
+0.372956811408562 0.613787049252467
+
+symmetry axis guess : 44.9999996919459 -135.000002045232
+y-axis analysis
+Starting the gsl multidimensional root finder.
+Solution found with : THETA[2] = -4.61122322156179e-05
+                     thetap[2] = 44.9999999995489
+                       phip[2] = -135.000002470003
+L2 Norm of Divergence = 4.61528636048e-15
+L2 Norm of Vorticity = 5.41175194215e-14
+Surface Average S_{ij}S^{ij} = 8.23166282108e-05
+area : 7.59258933938
+(Integral SS dA)/A 8.21684435157e-05
+L2 Norm of f_L= 9.20852511694e-09
+L2 Norm of f_lam= 9.13578600163e-05
+L2 Norm of xi*Grad(L) = 5.72793368296e-06
+
+TestComputeAKV.cpp (line 238; main)
+value of IP : 2.6812756046
+1.0037211305812 2.89566277156175e-06
+1.0037978418899 2.56540806299743e-05
+0.610701900609914 0.233558756902941
+0.372956811408562 0.61378704925247
+
+z-z inner product = 22.2664500037212
+x-x inner product = 22.5999472230531
+y-y inner product = 22.5999472230568
+z-x inner product : 4.17896649388698e-07
+x-y inner product : 1.18474328787362e-07
+y-z inner product : -1.19979398546113e-07
+
+
