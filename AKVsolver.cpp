@@ -762,20 +762,45 @@ MyVector<double> InnerProductScaleFactors(const DataMesh& v1,
                        const DataMesh& r2p4,
                        const SurfaceBasis& sb)
 {
+  //ip1: Integral ( 0.5 * Ricci * gradient(v_1)*gradient(v_2) ) / r2p4 dOmega = (8.*Pi/3.) (1/s)
+  //in the Ricci argument, one factor of r2p4 compensates for the dA integral in AKVInnerProduct
+  //                       one factor of r2p4 compensates for the integrand division by r2p4
+  const double s_ip1 = (8./(3.*sqrt(2.)) / AKVInnerProduct(v1,v2,Ricci/(r2p4*r2p4),r2p4,sb);
+
+  const double tmp_ip = AKVInnerProduct(v1,v2,Ricci,r2p4,sb);
+  const double area = SurfaceArea(r2p4,sb);
+
+  //ip3: Integral ( 0.5 * Ricci * gradient(v_1)*gradient(v_2) ) * r2p4 dOmega = (2/3)A s
+  const double s_ip3 = (2./3.)*area / tmp_ip;
+
+  //ip2: Integral ( 0.5 * Ricci * gradient(v_1)*gradient(v_2) ) * r2p4 dOmega = (2/3)A s^2
+  const s_ip2 = sqrt(s_ip3);
+
+  return MyVector<double>(MV::fill, s_ip1, s_ip2, s_ip3) ;
+}
+
+//this function returns the proper area of the surface
+//   (1./(sqrt(2.)*Pi) Integral 1. dA
+// = (1./(sqrt(2.)*Pi) Integral r2p4 dOmega
+double SurfaceArea(const DataMesh& r2p4,
+                   const SurfaceBasis& sb)
+{
+  return sb.ComputeCoefficients(r2p4)[0];
+}
+
+//this function returns the value of
+//   (1./(sqrt(2.)*Pi) Integral ( 0.5 * Ricci * gradient(v_1)*gradient(v_2) ) dA
+// = (1./(sqrt(2.)*Pi) Integral ( 0.5 * Ricci * gradient(v_1)*gradient(v_2) ) * r2p4 dOmega
+double AKVInnerProduct(const DataMesh& v1,
+                       const DataMesh& v2,
+                       const DataMesh& Ricci,
+                       const DataMesh& r2p4,
+                       const SurfaceBasis& sb)
+{
   const Tensor<DataMesh> Gradv1 = sb.Gradient(v1);
   const Tensor<DataMesh> Gradv2 = sb.Gradient(v2);
-  //const DataMesh& r2p4 = rp2*rp2;
-
-  const DataMesh integrand = 0.5*Ricci*(Gradv1(0)*Gradv2(0)+Gradv1(1)*Gradv2(1));
-  const double area = sb.ComputeCoefficients(r2p4)[0]; //*Pi*sqrt(2.)
-
-  const double ip1 = (3.*sqrt(2.)/8.0)*sb.ComputeCoefficients(integrand/r2p4)[0];
-
-  //double ip2 = sb.ComputeCoefficients(integrand)[0] / (2./3. * area);//previous
-  const double ip2 = sb.ComputeCoefficients(integrand*r2p4)[0] / (2./3. * area); //dA = r2p4*dOmega
-  std::cout << "value of IP2 : " << ip2 << std::endl;
-
-  return MyVector<double>(MV::fill, 1./ip1, 1./sqrt(ip2), 1./ip2) ;
+  const DataMesh integrand = 0.5*Ricci*r2p4*(Gradv1(0)*Gradv2(0)+Gradv1(1)*Gradv2(1));
+  return sb.ComputeCoefficients(integrand)[0];
 }
 
 double AKVInnerProduct(const Tensor<DataMesh>& xi1,
@@ -828,7 +853,6 @@ void KillingDiagnostics(const SurfaceBasis& sb,
     //-----SS-------
     if(printDiagnostic[2]){
       Tensor<DataMesh> gradlncf = sb.Gradient(log(Psi));
-      //Tensor<DataMesh> Dxtheta(2,"1",DataMesh::Empty);
       Tensor<DataMesh> Dxtheta = sb.VectorColatitudeDerivative(xi);
       Tensor<DataMesh> Dxphi(2,"1",DataMesh::Empty);
 
@@ -842,22 +866,12 @@ void KillingDiagnostics(const SurfaceBasis& sb,
                    + Dxphi(0)*Dxphi(0)
                    + Dxphi(1)*Dxphi(1);
 
-      //SS /= r2p4;//original
-      SS /= r2p4*r2p4;
-      //SS -= 2.0*r2p4*L*L; //original
-      SS -= 2.*L*L;
+      //these factors of r2p4 are setup to do a dA integral
+      SS /= r2p4;//original
+      SS -= 2.0*r2p4*L*L; //original
 
-
-      DataMesh SS_ha = sb.ComputeCoefficients(SS);
-
-      std::cout << "Surface Average S_{ij}S^{ij} = "
-                << std::setprecision(12) << sqrt(2.)*SS_ha[0]/4. << std::endl;
-
-      //compute the area integral as above in ip1, ip2
-      const double intSSdA = sb.ComputeCoefficients(SS*r2p4)[0]; //*Pi*sqrt(2)
-      const double area = sb.ComputeCoefficients(r2p4)[0]; //*Pi*sqrt(2)
-      std::cout << "area : " << area << std::endl;
-      std::cout << "(Integral SS dA)/A " << intSSdA/area << std::endl;
+      const double intSSdA = sb.ComputeCoefficients(SS)[0]*M_PI*sqrt(2.);
+      std::cout << "Integral SS dA " << intSSdA << std::endl;
     }
   }
 

@@ -153,10 +153,10 @@ int main(){
     //create conformal factor
     const DataMesh Psi = ConstructConformalFactor(theta, phi, s);
 
-    //set the initial guesses to be along particular axes
+    //set the initial guesses
     double THETA[3] = {0.,0.,0.};
-    double thetap[3] = {0.,0.,0.}; //guess for z-axisymmetry
-    double phip[3] = {0.,0.,0.}; //guess for z-axisymmetry
+    double thetap[3] = {0.,0.,0.};
+    double phip[3] = {0.,0.,0.};
 
     //save the v solutions along particular axes
     MyVector<DataMesh> v(MV::Size(3),DataMesh::Empty);
