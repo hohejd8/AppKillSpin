@@ -89,25 +89,13 @@ namespace ComputeItems {
 
     //if the initial guess for thetap is close to zero or pi,
     //try solving at thetap = zero
-    bool oneDSolutionFound = false;
     double THETA = mAKVGuess[0];
     double thetap = mAKVGuess[1];
     double phip = mAKVGuess[2];
-    bool thetapGuessIsZero = thetap < 1.e-5 || M_PI-thetap < 1.e-5;
-
 
     //run the appropriate AKV solvers here
     RunAKVsolvers(THETA, thetap, phip, mMin_thetap,
                   mResidualSize, mVerbose, &p, mSolver);
-
-//------FOR TESTING ONLY ---------//
-//force the THETA, thetap, phip solution
-THETA = -3.1121890542705e-06;
-thetap = 1.59480548535815e-09;
-phip = -0.446097386040383;
-//------FOR TESTING ONLY ---------//
-
-
 
     if(mVerbose){
       std::cout << "Solution found with : Theta  = " << THETA << "\n"
@@ -125,7 +113,7 @@ phip = -0.446097386040383;
     //determine scale factor at the equator
     const double scaleAtEquator = normalizeKVAtOnePoint(sb, rotated_Psi, rotated_v, mRad, M_PI/2., 0.0);
     if(mVerbose) std::cout << "scale factor at equator = " << scaleAtEquator << std::endl;
-    const double avgScale = normalizeKVAtAllPoints(sb, rotated_Psi, theta, phi, rotated_v, mRad);
+    //const double avgScale = normalizeKVAtAllPoints(sb, rotated_Psi, theta, phi, rotated_v, mRad);
     MyVector<double> scaleInnerProduct = InnerProductScaleFactors(v, v, Ricci, rp2, sb);
     if(mVerbose) std::cout << "scale factor ip1 = " << scaleInnerProduct[0] << std::endl;
     if(mVerbose) std::cout << "scale factor ip2 = " << scaleInnerProduct[1] << std::endl;

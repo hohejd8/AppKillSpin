@@ -23,7 +23,7 @@ void RunAKVsolvers(double& THETA,
   //if the initial guess for thetap is close to zero or pi,
   //try solving at thetap = zero
   bool oneDSolutionFound = false;
-////TEMPORARILY DISABLED; THIS IS IMPORTANT TO KEEP IN
+
   const bool thetapGuessIsZero = thetap < min_thetap;
   const bool thetapGuessIsPi = M_PI-fmod(thetap,M_PI) < min_thetap;
 
@@ -56,13 +56,13 @@ void RunAKVsolvers(double& THETA,
       THETA = THETA_saved;
     }
   }
-/////TEMPORARILY DISABLED; THIS IS IMPORTANT TO KEEP IN
+
   //if theta=0 was not a good solution
   //or initial guess was not close to zero
   //try the multidimensional root finder
   if(!oneDSolutionFound){
     findTtp(p, THETA, thetap, phip, solver,residualSize, verbose);
-/////TEMPORARILY DISABLED; THIS IS IMPORTANT TO KEEP IN
+
     //if thetap solution is close to zero,
     //and we didn't already try thetap=0,
     //try thetap=0 now
@@ -97,7 +97,7 @@ void RunAKVsolvers(double& THETA,
       } //end if(oneDSolution)
     } // end if(thetap < min_thetap)
   } // end if(!oneDSolutionFound)
-/////TEMPORARILY DISABLED; THIS IS IMPORTANT TO KEEP IN
+
   //get thetap, phip within standard bounds
   if(thetap < 0.0){
     thetap = -thetap;
@@ -261,6 +261,22 @@ double AKVsolver1D(double THETA, void *params)
   AKVsolver(x, params, f);
 
   return gsl_vector_get(f,0);
+}
+
+//This function will run AKVsolver exactly once with the solution thetap, phip
+void EvaluateAKV(double THETA, double thetap, double phip, void *params)
+{
+  gsl_vector * x = gsl_vector_alloc(3);
+  gsl_vector_set(x,0,THETA);
+  gsl_vector_set(x,1,thetap);
+  gsl_vector_set(x,2,phip);
+
+  gsl_vector * f = gsl_vector_alloc(3);
+  gsl_vector_set(f,0,0.0);
+  gsl_vector_set(f,1,0.0);
+  gsl_vector_set(f,2,0.0);
+
+  AKVsolver(x, params, f);
 }
 
 //function header required for use with gsl multidimensional root finders
@@ -490,6 +506,17 @@ DataMesh RotateOnSphere
     result[i] = sb.Evaluate(collocationvalues, newTheta, newPhi);
   }
   return result;
+}
+
+//This function computes the approximate Killing vector xi (1-form) given
+//the scalar quantity v on the surface
+Tensor<DataMesh> ComputeXi(const DataMesh& v, const SurfaceBasis& sb)
+{
+  Tensor<DataMesh> xi(2,"1",DataMesh::Empty);
+  Tensor<DataMesh> tmp_xi = sb.Gradient(v);
+  xi(0) = tmp_xi(1);
+  xi(1) = -tmp_xi(0);
+  return xi;
 }
 
 double normalizeKVAtAllPoints(const SurfaceBasis& sb,
@@ -763,18 +790,17 @@ MyVector<double> InnerProductScaleFactors(const DataMesh& v1,
                        const SurfaceBasis& sb)
 {
   //ip1: Integral ( 0.5 * Ricci * gradient(v_1)*gradient(v_2) ) / r2p4 dOmega = (8.*Pi/3.) (1/s)
-  //in the Ricci argument, one factor of r2p4 compensates for the dA integral in AKVInnerProduct
-  //                       one factor of r2p4 compensates for the integrand division by r2p4
-  const double s_ip1 = (8./(3.*sqrt(2.)) / AKVInnerProduct(v1,v2,Ricci/(r2p4*r2p4),r2p4,sb);
+  //in the Ricci argument, r2p4 compensates for the integrand division by r2p4
+  const double s_ip1 = (8./(3.*sqrt(2.))) / AKVInnerProduct(v1,v2,Ricci/r2p4,sb);
 
-  const double tmp_ip = AKVInnerProduct(v1,v2,Ricci,r2p4,sb);
+  const double tmp_ip = AKVInnerProduct(v1,v2,Ricci,sb);
   const double area = SurfaceArea(r2p4,sb);
 
-  //ip3: Integral ( 0.5 * Ricci * gradient(v_1)*gradient(v_2) ) * r2p4 dOmega = (2/3)A s
+  //ip3: Integral ( 0.5 * Ricci * gradient(v_1)*gradient(v_2) ) dOmega = (2/3)A s
   const double s_ip3 = (2./3.)*area / tmp_ip;
 
-  //ip2: Integral ( 0.5 * Ricci * gradient(v_1)*gradient(v_2) ) * r2p4 dOmega = (2/3)A s^2
-  const s_ip2 = sqrt(s_ip3);
+  //ip2: Integral ( 0.5 * Ricci * gradient(v_1)*gradient(v_2) ) dOmega = (2/3)A s^2
+  const double s_ip2 = sqrt(s_ip3);
 
   return MyVector<double>(MV::fill, s_ip1, s_ip2, s_ip3) ;
 }
@@ -789,29 +815,137 @@ double SurfaceArea(const DataMesh& r2p4,
 }
 
 //this function returns the value of
-//   (1./(sqrt(2.)*Pi) Integral ( 0.5 * Ricci * gradient(v_1)*gradient(v_2) ) dA
-// = (1./(sqrt(2.)*Pi) Integral ( 0.5 * Ricci * gradient(v_1)*gradient(v_2) ) * r2p4 dOmega
+//   (1./(sqrt(2.)*Pi) Integral ( 0.5 * Ricci * D^i (v_1) * D_i (v_2) ) dA
+// = (1./(sqrt(2.)*Pi) Integral ( 0.5 * Ricci * (1/r2p4) * gradient(v_1)*gradient(v_2) ) * r2p4 dOmega
+// = (1./(sqrt(2.)*Pi) Integral ( 0.5 * Ricci * gradient(v_1)*gradient(v_2) ) dOmega
 double AKVInnerProduct(const DataMesh& v1,
                        const DataMesh& v2,
                        const DataMesh& Ricci,
-                       const DataMesh& r2p4,
                        const SurfaceBasis& sb)
 {
   const Tensor<DataMesh> Gradv1 = sb.Gradient(v1);
   const Tensor<DataMesh> Gradv2 = sb.Gradient(v2);
-  const DataMesh integrand = 0.5*Ricci*r2p4*(Gradv1(0)*Gradv2(0)+Gradv1(1)*Gradv2(1));
+  const DataMesh integrand = 0.5*Ricci*(Gradv1(0)*Gradv2(0)+Gradv1(1)*Gradv2(1));
   return sb.ComputeCoefficients(integrand)[0];
 }
 
-double AKVInnerProduct(const Tensor<DataMesh>& xi1,
-                          const Tensor<DataMesh>& xi2,
-                          const DataMesh& Ricci,
-                          const DataMesh& r2p4,
-                          const SurfaceBasis& sb)
+//this function will create an initial guess for the next axis of
+//symmetry based on previous solutions.  It requires theta, phi for
+//prior axes solutions, and an index which indicates whether this is
+//the first, second, or third guess
+void AxisInitialGuess(double theta[], double phi[], const int index)
 {
-  const DataMesh integrand = 0.5*Ricci*(xi1(0)*xi2(0) + xi1(1)*xi2(1) );
-  return sb.ComputeCoefficients(integrand)[0]*sqrt(2.)*M_PI;
+  switch(index){
+    case 0:
+      std::cout << "symmetry axis guess : " 
+                << theta[0]*180./M_PI << " " << phi[0]*180./M_PI << std::endl;
+      break;
+    case 1:
+      theta[1] = M_PI/2.;
+      phi[1] = atan2(sin(phi[0]), -cos(phi[0]));
+      std::cout << "symmetry axis guess : "
+                << theta[1]*180./M_PI << " " << phi[1]*180./M_PI << std::endl;
+      break;
+    case 2:
+      //perform the cross product of the previous two solutions
+      const double alpha = sin(theta[0])*sin(phi[0])*cos(theta[1])
+                        -sin(theta[1])*sin(phi[1])*cos(theta[0]);
+      const double beta = cos(theta[0])*sin(theta[1])*cos(phi[1])
+                        -cos(theta[1])*sin(theta[0])*cos(phi[0]);
+      const double gamma = sin(theta[0])*cos(phi[0])*sin(theta[1])*sin(phi[1])
+                        -sin(theta[1])*cos(phi[1])*sin(theta[0])*sin(phi[0]);
+      theta[2] = atan2(sqrt(alpha*alpha+beta*beta),gamma);
+      phi[2] = atan2(beta, alpha);
+      std::cout << "symmetry axis guess : "
+                << theta[2]*180./M_PI << " " << phi[2]*180./M_PI << std::endl;
+      break;
+  }
 }
+
+
+//Modified Gram Schmidt orthogonalization
+//in spherical coordinates, the input represents the theta and phi
+//coordinates of 3 vectors.
+//NOTE: (theta[0], phi[0]) should represent the "best" solution
+//ie, the solution from the axis of exact symmetry
+//void GramSchmidtOrthogonalization(MyVector<double>& theta,
+//                                  MyVector<double>& phi)
+void GramSchmidtOrthogonalization(double THETA[],
+                                  double thetap[],
+                                  double phip[],
+                                  const double symmetry_tol)
+{
+  const int axes = 3; //number of orthogonal axes
+
+  //Sort the symmetry axes such that the (an) exact symmetry axis is at position [0]
+  //The Gram Schmidt orthogonalization routine will treat this solution as fixed
+  //and will adjust the others accordingly
+  double THETA_tmp[3];
+  double thetap_tmp[3];
+  double phip_tmp[3];
+
+  int front = 0;
+  int back = axes-1;
+  for(int i=0; i<axes; i++){
+    if(fabs(THETA[i]) < symmetry_tol){
+      THETA_tmp[front] = THETA[i];
+      thetap_tmp[front] = thetap[i];
+      phip_tmp[front] = phip[i];
+      front++;
+    } else {
+      THETA_tmp[back] = THETA[i];
+      thetap_tmp[back] = thetap[i];
+      phip_tmp[back] = phip[i];
+      back--;
+    }
+  }
+
+  //determine the Cartesian representation for all the vectors
+  MyVector<MyVector<double> > v(MV::Size(axes), MV::Size(axes));
+  for(int i=0; i<v.Size(); i++){
+    v[i][0] = sin(thetap_tmp[i])*cos(phip_tmp[i]); //x
+    v[i][1] = sin(thetap_tmp[i])*sin(phip_tmp[i]); //y
+    v[i][2] = cos(thetap_tmp[i]); //z
+  }
+
+  //modified Gram Schmidt othogonalization
+  for(int i=0; i<v.Size(); i++){
+    const double normalize = sqrt(v[i][0]*v[i][0] + v[i][1]*v[i][1] + v[i][2]*v[i][2]);
+    v[i][0] /= normalize;
+    v[i][1] /= normalize;
+    v[i][2] /= normalize;
+    for(int j=i+1; j<v.Size(); j++){
+      const double proj = Projection(v[i],v[j]);
+      v[j][0] -= proj*v[j][0];
+      v[j][1] -= proj*v[j][1];
+      v[j][2] -= proj*v[j][2];
+    }
+  }
+
+  //compute the spherical coordinates from the orthogonalization
+  //and save them to the original arrays.  THETA was also shuffled, so
+  //it is correctly replaced here
+  for(int i=0; i<v.Size(); i++){
+    THETA[i] = THETA_tmp[i];
+    thetap[i] = acos(v[i][2]);
+    phip[i] = atan2(v[i][1], v[i][0]);
+    //std::cout << thetap[i]*180./M_PI << " " << phip[i]*180./M_PI << std::endl;
+  }
+}
+
+//this is a helper function for GramSchmidtOrthogonalization
+//computes the normalization factor of the projection of v2 onto v1
+double Projection(MyVector<double> v1, MyVector<double> v2)
+{
+  double ip11 = 0.; //inner product of v1 \cdot v1
+  double ip12 = 0.; //inner product of v1 \cdot v2
+  for(int i=0; i<3; i++){
+    ip12 += v1[i]*v2[i];
+    ip11 += v1[i]*v1[i];
+  }
+  return (ip12/ip11);
+}
+
 
 void KillingDiagnostics(const SurfaceBasis& sb,
                         const DataMesh& L,
@@ -823,7 +957,7 @@ void KillingDiagnostics(const SurfaceBasis& sb,
   const DataMesh& rp2 = rad*Psi*Psi;
   const DataMesh& r2p2 = rad*rp2;
   const DataMesh& r2p4 = rp2*rp2;
-  const double rp22_00 = sb.ComputeCoefficients(rp2*rp2)[0];//(0,0) component of coefficients
+  const double r2p4_00 = sb.ComputeCoefficients(r2p4)[0];//(0,0) component of coefficients
 
   DataMesh div = sb.Divergence(xi);
 
@@ -832,25 +966,23 @@ void KillingDiagnostics(const SurfaceBasis& sb,
     DataMesh tmp_div = div/r2p2; //only rp2?
     std::cout << "L2 Norm of Divergence = "
               << std::setprecision(12)
-              //<< sb.ComputeCoefficients(div*div)[0])/rp22_00 << std::endl;
+              //<< sb.ComputeCoefficients(div*div)[0])/r2p4_00 << std::endl;
               << sqrt(sqrt(2.)*sb.ComputeCoefficients(tmp_div*tmp_div)[0]/4.) << std::endl;
   }
 
   if(printDiagnostic[1] || printDiagnostic[2]){
     DataMesh vort = sb.Vorticity(xi);
-    //std::cout << "vort" << std::endl;
-    //std::cout << vort << std::endl;
     DataMesh vortM2L = vort/r2p2 - 2.0*Psi*Psi*L; //only rp2 and rp2?
 
     //-----Vorticity-------
     if(printDiagnostic[1]){
       std::cout << "L2 Norm of Vorticity = "
                 << std::setprecision(12)
-                //<< sb.ComputeCoefficients(vortM2L*vortM2L)[0]/rp22_00 << std::endl;
+                //<< sb.ComputeCoefficients(vortM2L*vortM2L)[0]/r2p4_00 << std::endl;
                 << sqrt(sqrt(2.)*sb.ComputeCoefficients(vortM2L*vortM2L)[0]/4.) << std::endl;
     }
 
-    //-----SS-------
+    //-----S_{ij}S^{ij}-------
     if(printDiagnostic[2]){
       Tensor<DataMesh> gradlncf = sb.Gradient(log(Psi));
       Tensor<DataMesh> Dxtheta = sb.VectorColatitudeDerivative(xi);
@@ -867,11 +999,11 @@ void KillingDiagnostics(const SurfaceBasis& sb,
                    + Dxphi(1)*Dxphi(1);
 
       //these factors of r2p4 are setup to do a dA integral
-      SS /= r2p4;//original
-      SS -= 2.0*r2p4*L*L; //original
+      SS /= r2p4;
+      SS -= 2.0*r2p4*L*L;
 
       const double intSSdA = sb.ComputeCoefficients(SS)[0]*M_PI*sqrt(2.);
-      std::cout << "Integral SS dA " << intSSdA << std::endl;
+      std::cout << "Integral S_{ij}S^{ij} dA " << intSSdA << std::endl;
     }
   }
 
@@ -893,7 +1025,7 @@ void KillingDiagnostics(const SurfaceBasis& sb,
 
       std::cout << "L2 Norm of f_L= "
                 << std::setprecision(12)
-                << sb.ComputeCoefficients(f_L*f_L)[0]/rp22_00 << std::endl;
+                << sb.ComputeCoefficients(f_L*f_L)[0]/r2p4_00 << std::endl;
     } //end f_L
 
     //-----Norm of f_Lambda-------
@@ -904,7 +1036,7 @@ void KillingDiagnostics(const SurfaceBasis& sb,
 
       std::cout << "L2 Norm of f_lam= "
                 << std::setprecision(12)
-                << sb.ComputeCoefficients(f_lam*f_lam)[0]/rp22_00 << std::endl;
+                << sb.ComputeCoefficients(f_lam*f_lam)[0]/r2p4_00 << std::endl;
     } // end f_Lambda
 
     //-----Norm of xi*GradL-------
@@ -914,7 +1046,7 @@ void KillingDiagnostics(const SurfaceBasis& sb,
 
       std::cout << "L2 Norm of xi*Grad(L) = "
                 << std::setprecision(12)
-                << sb.ComputeCoefficients(xiGradL*xiGradL)[0]/rp22_00 << std::endl;
+                << sb.ComputeCoefficients(xiGradL*xiGradL)[0]/r2p4_00 << std::endl;
     } //end xi*DivL
 
   } //end print conditionals

@@ -1,0 +1,290 @@
+COMPLETELY SYMMETRIC
+symmetry axis guess : 0 0
+Starting the gsl 1D root finder at thetap = 0.0.
+Solution found with : THETA[0] = -5.55561e-16
+                     thetap[0] = 0
+                       phip[0] = 0
+<v_0|v_0> = 22.4884
+-THETA <v_0|v_0> = 1.24937e-14
+L2 Norm of Divergence = 1.77294320262e-15
+L2 Norm of Vorticity = 2.03274340501e-14
+Integral S_{ij}S^{ij} dA 1.17654843357e-14
+L2 Norm of f_L= 1.32994134772e-29
+L2 Norm of f_lam= 2.9966346968e-28
+L2 Norm of xi*Grad(L) = 1.15534135759e-32
+
+symmetry axis guess : 90 180
+Starting the gsl multidimensional root finder.
+Solution found with : THETA[1] = 5.06942319204e-16
+                     thetap[1] = 90.0000035057
+                       phip[1] = -179.999980609
+<v_1|v_1> = 22.4883961742
+<v_0|v_1> = -1.37597389402e-06
+-THETA <v_1|v_1> = -1.14003197117e-14
+L2 Norm of Divergence = 6.61311341193e-15
+L2 Norm of Vorticity = 7.34822646083e-14
+Integral S_{ij}S^{ij} dA 6.7760270414e-15
+L2 Norm of f_L= 5.15705638223e-28
+L2 Norm of f_lam= 1.39095971943e-26
+L2 Norm of xi*Grad(L) = 2.33064892341e-29
+
+symmetry axis guess : 90 -89.999980609
+Starting the gsl multidimensional root finder.
+Solution found with : THETA[2] = 7.17524065005e-16
+                     thetap[2] = 90.0000202036
+                       phip[2] = -89.9999785009
+<v_2|v_2> = 22.4883961742
+<v_0|v_2> = -7.92982790463e-06
+<v_1|v_2> = -8.27437898532e-07
+-THETA <v_2|v_2> = -1.61359654384e-14
+L2 Norm of Divergence = 5.76101068387e-15
+L2 Norm of Vorticity = 7.70955243839e-14
+Integral S_{ij}S^{ij} dA 9.86853618707e-15
+L2 Norm of f_L= 3.89014176928e-28
+L2 Norm of f_lam= 1.43960907469e-26
+L2 Norm of xi*Grad(L) = 2.08498350105e-29
+
+
+
+Z AXISYMMETRY
+symmetry axis guess : 0 0
+Starting the gsl 1D root finder at thetap = 0.0.
+Solution found with : THETA[0] = -7.77533403744e-16
+                     thetap[0] = 0
+                       phip[0] = 0
+<v_0|v_0> = 22.5306425375
+-THETA <v_0|v_0> = 1.75183271807e-14
+L2 Norm of Divergence = 1.46353304719e-15
+L2 Norm of Vorticity = 1.43387227087e-14
+Integral S_{ij}S^{ij} dA 9.61905449705e-16
+L2 Norm of f_L= 2.38908215328e-29
+L2 Norm of f_lam= 1.828699975e-28
+L2 Norm of xi*Grad(L) = 1.9862665254e-31
+
+symmetry axis guess : 90 180
+Starting the gsl multidimensional root finder.
+Solution found with : THETA[1] = -1.30012993405e-06
+                     thetap[1] = 90.0001202077
+                       phip[1] = 179.999999989
+<v_1|v_1> = 22.5024593128
+<v_0|v_1> = -4.72697492001e-05
+-THETA <v_1|v_1> = 2.92561209424e-05
+L2 Norm of Divergence = 7.84087446772e-15
+L2 Norm of Vorticity = 7.0948267778e-14
+Integral S_{ij}S^{ij} dA 2.92561208443e-05
+L2 Norm of f_L= 7.58845305513e-12
+L2 Norm of f_lam= 2.59545479543e-06
+L2 Norm of xi*Grad(L) = 1.64482241653e-07
+
+symmetry axis guess : 90 -90.0000000108
+Starting the gsl multidimensional root finder.
+Solution found with : THETA[2] = -1.30012992654e-06
+                     thetap[2] = 89.9999086527
+                       phip[2] = -90.0000000274
+<v_2|v_2> = 22.5024593128
+<v_0|v_2> = 3.59208393915e-05
+<v_1|v_2> = 6.47038216567e-09
+-THETA <v_2|v_2> = 2.92561207735e-05
+L2 Norm of Divergence = 6.72494453743e-15
+L2 Norm of Vorticity = 6.80379106815e-14
+Integral S_{ij}S^{ij} dA 2.92561208586e-05
+L2 Norm of f_L= 7.58845305617e-12
+L2 Norm of f_lam= 2.59545479543e-06
+L2 Norm of xi*Grad(L) = 1.64482241653e-07
+
+
+
+X AXISYMMETRY
+symmetry axis guess : 0 0
+Starting the gsl 1D root finder at thetap = 0.0.
+Solution found with : THETA[0] = -4.6601784492e-05
+                     thetap[0] = 0
+                       phip[0] = 0
+<v_0|v_0> = 22.432392029
+-THETA <v_0|v_0> = 0.00104538949898
+L2 Norm of Divergence = 1.58911651916e-15
+L2 Norm of Vorticity = 1.67015809271e-14
+Integral S_{ij}S^{ij} dA 0.00104538949898
+L2 Norm of f_L= 9.40303261146e-09
+L2 Norm of f_lam= 9.2324074079e-05
+L2 Norm of xi*Grad(L) = 5.78807482875e-06
+
+symmetry axis guess : 90 180
+Starting the gsl multidimensional root finder.
+Solution found with : THETA[1] = 4.29764546997e-16
+                     thetap[1] = 90
+                       phip[1] = -180
+<v_1|v_1> = 22.6029032654
+<v_0|v_1> = 1.47050062188e-12
+-THETA <v_1|v_1> = -9.71392648268e-15
+L2 Norm of Divergence = 6.35279134674e-15
+L2 Norm of Vorticity = 7.34567731758e-14
+Integral S_{ij}S^{ij} dA -1.41901722648e-14
+L2 Norm of f_L= 4.42260517275e-28
+L2 Norm of f_lam= 2.341455142e-26
+L2 Norm of xi*Grad(L) = 2.95211523891e-28
+
+symmetry axis guess : 90 -89.9999999998
+Starting the gsl multidimensional root finder.
+Solution found with : THETA[2] = -4.66017844916e-05
+                     thetap[2] = 90.0000000094
+                       phip[2] = -89.9999999998
+<v_2|v_2> = 22.432392029
+<v_0|v_2> = -3.66691998261e-09
+<v_1|v_2> = 1.80360974876e-12
+-THETA <v_2|v_2> = 0.00104538949897
+L2 Norm of Divergence = 8.24629960296e-15
+L2 Norm of Vorticity = 8.01233557677e-14
+Integral S_{ij}S^{ij} dA 0.00104538949896
+L2 Norm of f_L= 9.40303261151e-09
+L2 Norm of f_lam= 9.2324074079e-05
+L2 Norm of xi*Grad(L) = 5.78807482876e-06
+
+
+
+Y AXISYMMETRY
+symmetry axis guess : 0 0
+Starting the gsl 1D root finder at thetap = 0.0.
+Solution found with : THETA[0] = -4.6601784492e-05
+                     thetap[0] = 0
+                       phip[0] = 0
+<v_0|v_0> = 22.432392029
+-THETA <v_0|v_0> = 0.00104538949898
+L2 Norm of Divergence = 1.53206293011e-15
+L2 Norm of Vorticity = 1.50197524637e-14
+Integral S_{ij}S^{ij} dA 0.00104538949899
+L2 Norm of f_L= 9.40303261155e-09
+L2 Norm of f_lam= 9.2324074079e-05
+L2 Norm of xi*Grad(L) = 5.78807482875e-06
+
+symmetry axis guess : 90 180
+Starting the gsl multidimensional root finder.
+Solution found with : THETA[1] = -4.66017844912e-05
+                     thetap[1] = 90.0000000349
+                       phip[1] = 180
+<v_1|v_1> = 22.432392029
+<v_0|v_1> = -1.36535742066e-08
+-THETA <v_1|v_1> = 0.00104538949896
+L2 Norm of Divergence = 7.53315509985e-15
+L2 Norm of Vorticity = 6.99060796358e-14
+Integral S_{ij}S^{ij} dA 0.00104538949896
+L2 Norm of f_L= 9.40303261154e-09
+L2 Norm of f_lam= 9.2324074079e-05
+L2 Norm of xi*Grad(L) = 5.78807482875e-06
+
+symmetry axis guess : 90 -90.0000000002
+Starting the gsl multidimensional root finder.
+Solution found with : THETA[2] = 8.49277209131e-17
+                     thetap[2] = 90
+                       phip[2] = -90.0000000002
+<v_2|v_2> = 22.6029032654
+<v_0|v_2> = -1.37887331589e-12
+<v_1|v_2> = -2.80294285729e-12
+-THETA <v_2|v_2> = -1.91961306035e-15
+L2 Norm of Divergence = 8.47275156031e-15
+L2 Norm of Vorticity = 8.0302732263e-14
+Integral S_{ij}S^{ij} dA 1.13637829346e-14
+L2 Norm of f_L= 4.38968423648e-28
+L2 Norm of f_lam= 1.8087065116e-26
+L2 Norm of xi*Grad(L) = 2.54294583919e-28
+
+
+
+NO AXISYMMETRY
+symmetry axis guess : 0 0
+Starting the gsl 1D root finder at thetap = 0.0.
+Starting the gsl multidimensional root finder.
+Solution found with : THETA[0] = -0.000104076005278
+                     thetap[0] = 4.62336678314
+                       phip[0] = 177.188857455
+<v_0|v_0> = 22.8098299201
+-THETA <v_0|v_0> = 0.00237395597915
+L2 Norm of Divergence = 1.90829836337e-15
+L2 Norm of Vorticity = 0.00533874534836
+Integral S_{ij}S^{ij} dA 0.00411949248734
+L2 Norm of f_L= 0.000311907366257
+L2 Norm of f_lam= 0.185580381436
+L2 Norm of xi*Grad(L) = 2.45781691866e-06
+
+symmetry axis guess : 90 2.81114254496
+Starting the gsl multidimensional root finder.
+Solution found with : THETA[1] = -9.88488237416e-05
+                     thetap[1] = 85.9285702645
+                       phip[1] = -7.51440755521
+<v_1|v_1> = 22.8127535762
+<v_0|v_1> = -0.213541828597
+-THETA <v_1|v_1> = 0.00225501385732
+L2 Norm of Divergence = 7.21715399573e-15
+L2 Norm of Vorticity = 0.00186948558365
+Integral S_{ij}S^{ij} dA 0.00310035976357
+L2 Norm of f_L= 0.000303350953182
+L2 Norm of f_lam= 0.123893145789
+L2 Norm of xi*Grad(L) = 0.000130118718908
+
+symmetry axis guess : 89.6222532998 82.5124807329
+Starting the gsl multidimensional root finder.
+Solution found with : THETA[2] = -3.38793706752e-05
+                     thetap[2] = 89.747545432
+                       phip[2] = 80.5684203052
+<v_2|v_2> = 22.8163070579
+<v_0|v_2> = -0.109125864579
+<v_1|v_2> = 0.732557826152
+-THETA <v_2|v_2> = 0.000773002124252
+L2 Norm of Divergence = 6.45258847089e-15
+L2 Norm of Vorticity = 0.00030306972361
+Integral S_{ij}S^{ij} dA 0.000331075356978
+L2 Norm of f_L= 4.25687459177e-05
+L2 Norm of f_lam= 0.00322555483058
+L2 Norm of xi*Grad(L) = 7.87700923491e-05
+
+
+
+OFF-AXIS AXISYMMETRY
+symmetry axis guess : 0 0
+Starting the gsl 1D root finder at thetap = 0.0.
+Starting the gsl multidimensional root finder.
+Solution found with : THETA[0] = -4.61122322123e-05
+                     thetap[0] = 129.593759803
+                       phip[0] = 79.1991908337
+<v_0|v_0> = 22.4326866889
+-THETA <v_0|v_0> = 0.00103442125775
+L2 Norm of Divergence = 4.27265943354e-15
+L2 Norm of Vorticity = 4.96711860026e-14
+Integral S_{ij}S^{ij} dA 0.00103442125782
+L2 Norm of f_L= 9.20852511693e-09
+L2 Norm of f_lam= 9.13578600163e-05
+L2 Norm of xi*Grad(L) = 5.72793368296e-06
+
+symmetry axis guess : 90 100.800809166
+Starting the gsl multidimensional root finder.
+Solution found with : THETA[1] = 1.09411561408e-12
+                     thetap[1] = 44.9999996392
+                       phip[1] = 44.9999979307
+<v_1|v_1> = 22.6022875048
+<v_0|v_1> = -3.90127333082e-07
+-THETA <v_1|v_1> = -2.4729515673e-11
+L2 Norm of Divergence = 5.3530671447e-15
+L2 Norm of Vorticity = 5.42105622016e-14
+Integral S_{ij}S^{ij} dA 5.77679946933e-15
+L2 Norm of f_L= 6.32425231757e-24
+L2 Norm of f_lam= 6.32026896688e-20
+L2 Norm of xi*Grad(L) = 1.96303728643e-20
+
+symmetry axis guess : 107.834226282 -26.2327882168
+Starting the gsl multidimensional root finder.
+Solution found with : THETA[2] = -4.61122322154e-05
+                     thetap[2] = 107.834225357
+                       phip[2] = -26.2327874811
+<v_2|v_2> = 22.4326866889
+<v_0|v_2> = -3.88729959958e-08
+<v_1|v_2> = 4.52581533215e-07
+-THETA <v_2|v_2> = 0.00103442125782
+L2 Norm of Divergence = 6.74562344347e-15
+L2 Norm of Vorticity = 6.65294640953e-14
+Integral S_{ij}S^{ij} dA 0.00103442125782
+L2 Norm of f_L= 9.20852511693e-09
+L2 Norm of f_lam= 9.13578600163e-05
+L2 Norm of xi*Grad(L) = 5.72793368296e-06
+
+
+

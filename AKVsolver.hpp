@@ -40,7 +40,12 @@ void findTtp(struct rparams * p,
              const bool verbose);
 
 //function header for use with gsl 1D root finder
+//runs AKVsolver at thetap, phip = 0
 double AKVsolver1D(double THETA, void *params);
+
+//similar to AKVsolver1D, this function runs AKVsolver once
+//at thetap, phip != 0
+void EvaluateAKV(double THETA, double thetap, double phip, void *params);
 
 //function header for use with gsl multidimensional root finder
 int AKVsolver(const gsl_vector * x,
@@ -58,6 +63,10 @@ DataMesh RotateOnSphere
           const SurfaceBasis& sb,
           const double Theta,
           const double Phi);
+
+//This function computes the approximate Killing vector xi (1-form) given
+//the scalar quantity v on the surface
+Tensor<DataMesh> ComputeXi(const DataMesh& v, const SurfaceBasis& sb);
 
 //calls normalizeKVAtOnePoint for every point in the mesh,
 //then returns the average of all the scale factors
@@ -129,18 +138,41 @@ int PathDerivs(double t_required_by_solver,
 
 //determines value of the integral
 // \frac{1}{2} \oint ^2R((_s \vec \nabla v_1) \cdot (_s \vec \nabla v_2) d\Omega
-//and returns the ratio of this result to (8*\pi / 3)
-//double* AKVInnerProduct(const DataMesh& v1,
+double AKVInnerProduct(const DataMesh& v1,
+                       const DataMesh& v2,
+                       const DataMesh& Ricci,
+                       const SurfaceBasis& sb);
+
+//this function will create an initial guess for the next axis of
+//symmetry based on previous solutions.  It requires theta, phi for
+//prior axes solutions, and an index which indicates whether this is
+//the first, second, or third guess
+void AxisInitialGuess(double theta[], double phi[], const int index);
+
+//void GramSchmidtOrthogonalization(MyVector<double>& theta,
+//                                  MyVector<double>& phi);
+
+void GramSchmidtOrthogonalization(double THETA[],
+                                  double theta[],
+                                  double phi[],
+                                  const double symmetry_tol);
+
+double Projection(MyVector<double> v1, MyVector<double> v2);
+
+
+//returns the proper area integral
+//   \frac{1}{\sqrt{2} \pi} \oint 1 dA
+// = \frac{1}{\sqrt{2} \pi} \oint r^2 Psi^4 d\Omega
+double SurfaceArea(const DataMesh& r2p4,
+                   const SurfaceBasis& sb);
+
+//returns the scaling factors related to various forms of the AKVInnerProduct
 MyVector<double> InnerProductScaleFactors(const DataMesh& v1,
                        const DataMesh& v2,
                        const DataMesh& Ricci,
                        const DataMesh& r2p4,
                        const SurfaceBasis& sb);
-double AKVInnerProduct(const Tensor<DataMesh>& xi1,
-                          const Tensor<DataMesh>& xi2,
-                          const DataMesh& Ricci,
-                          const DataMesh& r2p4,
-                          const SurfaceBasis& sb);
+
 //performs diagnostics on the approximate Killing vector solution
 void KillingDiagnostics(const SurfaceBasis& sb,
                         const DataMesh& L,
