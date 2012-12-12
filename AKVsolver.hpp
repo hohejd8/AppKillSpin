@@ -8,6 +8,13 @@
 //#include "gsl/gsl_vector.h"
 #include "gsl/gsl_multiroots.h"
 
+void PrintSurfaceNormalization(const SurfaceBasis& sb,
+                      const DataMesh& rotated_Psi,
+                      const DataMesh& theta,
+                      const DataMesh& phi,
+                      const DataMesh& rotated_v,
+                      const double& scaleFactor,
+                      const double& rad);
 
 //this function determines which AKVsolver to run based on initial guess
 void RunAKVsolvers(double& THETA,
@@ -149,15 +156,12 @@ double AKVInnerProduct(const DataMesh& v1,
 //the first, second, or third guess
 void AxisInitialGuess(double theta[], double phi[], const int index);
 
-//void GramSchmidtOrthogonalization(MyVector<double>& theta,
-//                                  MyVector<double>& phi);
+void GramSchmidtOrthogonalization(const DataMesh& fixedMesh,
+                                  const double fixedInnerProduct,
+                                  DataMesh& flexibleMesh,
+                                  const double crossTermInnerProduct);
 
-void GramSchmidtOrthogonalization(double THETA[],
-                                  double theta[],
-                                  double phi[],
-                                  const double symmetry_tol);
 
-double Projection(MyVector<double> v1, MyVector<double> v2);
 
 
 //returns the proper area integral

@@ -6,7 +6,7 @@
 #include "Utils/Math/Gaqd.hpp"
 #include "Utils/ErrorHandling/Require.hpp"
 #include "AppKillSpin/AKVsolver.hpp"
-#include "Spectral/BasisFunctions/SpherePackIterator.hpp"
+#include "Spectral/BasisFunctions/SpherePackIterator.hpp"//can probably be deleted
 #include "Utils/LowLevelUtils/Position.hpp"
 //This test file copies and replaces some
 //pieces of the ComputeAKV ComputeItem. The test
@@ -21,23 +21,14 @@ DataMesh ConstructConformalFactor(const DataMesh& theta,
                                   const DataMesh& phi,
                                   const int& axisym)
 {
-  //double D = 1.e-9;
-  //const double tpd = 2.0+D;
-  //const double tmd = 2.0-D;
-
-  //double B = 0.001*(1.0/(tpd*tpd)-1.0/tpd + 0.25);
-  //double C = 0.001*(1.0/(tmd*tmd)-1.0/tmd + 0.25);
-
   DataMesh Psi(theta); //copy constructor to get the right size
-      const double tp = M_PI/4.;
-      const double pp = M_PI/4.;
+
   Psi = 1.28 ;
-       //+ 0.001*sin(theta)*sin(theta)*cos(2.0*phi)*cos(theta)
-       //+ B*(1.0-3.0*cos(theta)*cos(theta)+3.0*sin(theta)*sin(theta)*cos(2.0*phi))
-       //+ C*(1.0-3.0*cos(theta)*cos(theta)-3.0*sin(theta)*sin(theta)*cos(2.0*phi));
+
   switch(axisym){
     case 0: //complete symmetry, constant
       //do nothing to Psi
+      //Psi = 1.0; //delete this later
       std::cout << "COMPLETELY SYMMETRIC" << std::endl;
       break;
     case 1: //z axisymmetry
@@ -53,7 +44,11 @@ DataMesh ConstructConformalFactor(const DataMesh& theta,
       std::cout << "Y AXISYMMETRY" << std::endl;
       break;
     case 4: //no symmetry
-      Psi += 0.001*(phi+theta);
+      //Psi += 0.001*(phi+theta); //too difficult to analize with small l,m
+      //Psi += 0.001*(sin(theta)*(cos(phi)+sin(theta)) + cos(theta)*sin(2.*phi));
+      Psi += 0.001*(0.//-1.0+3.0*cos(theta)*cos(theta)
+		   +3.0*sqrt(2.0)*sin(2.0*theta)*(cos(phi)+sin(phi))
+		   +3.0*sin(theta)*sin(theta)*sin(2.0*phi));
       std::cout << "NO AXISYMMETRY" << std::endl;
       break;
     case 5: //off-axis symmetry
@@ -62,7 +57,8 @@ DataMesh ConstructConformalFactor(const DataMesh& theta,
       //assume z-symmetry in the new coordinate system (thetap, phip), where the new z-axis had
       //coordinates (beta, alpha) in the old system
 
-      Psi+= 0.01*(5./(32.*M_PI))*(-1.0+3.0*cos(theta)*cos(theta)
+      Psi+= 0.001//*(5./(32.*M_PI))
+                   *(-1.0+3.0*cos(theta)*cos(theta)
 		   +3.0*sqrt(2.0)*sin(2.0*theta)*(cos(phi)+sin(phi))
 		   +3.0*sin(theta)*sin(theta)*sin(2.0*phi));
       std::cout << "OFF-AXIS AXISYMMETRY" << std::endl;
@@ -71,7 +67,7 @@ DataMesh ConstructConformalFactor(const DataMesh& theta,
 
   return Psi;
 }
-
+/*
 void PrintSurfaceNormalization(const SurfaceBasis& sb,
                       const DataMesh& rotated_Psi,
                       const DataMesh& theta,
@@ -85,7 +81,7 @@ void PrintSurfaceNormalization(const SurfaceBasis& sb,
 
   std::cout << std::setprecision(15) << scaleFactor << " " << scaleOverSurface << std::endl;
 }
-
+*/
 int main(){
 
   const std::string Help =
@@ -118,7 +114,7 @@ int main(){
   OptionParser op(Options,Help);
   const int Nth = op.Get<int>("Nth", 3);
   const int Nph = op.Get<int>("Nph", 4);
-  const double rad = op.Get<int>("Radius",1.0);
+  const double rad = op.Get<double>("Radius",1.0);
   MyVector<double> AKVGuess =
                 op.Get<MyVector<double> >("AKVGuess",MyVector<double>(MV::Size(3),0.0));
       //must be three-dimensional
@@ -147,15 +143,15 @@ int main(){
   //create conformal factors for every rotation
   const int syms = 5; //the number of axisymmetries we are testing
 
-  for(int s=0; s<6; s++){//index over conformal factor symmetries
+  for(int s=4; s<5; s++){//index over conformal factor symmetries
   //for(int s=0; s<syms; s++){//index over conformal factor symmetries
     //create conformal factor
     const DataMesh Psi = ConstructConformalFactor(theta, phi, s);
 
     //set the initial guesses
-    double THETA[3] = {0.,0.,0.};
-    double thetap[3] = {0.,0.,0.};
-    double phip[3] = {0.,0.,0.};
+    double THETA[3] = {AKVGuess[0],0.,0.};
+    double thetap[3] = {AKVGuess[1],0.,0.};
+    double phip[3] = {AKVGuess[2],0.,0.};
 
     //save the v, xi solutions along particular axes
     MyVector<DataMesh> v(MV::Size(3),DataMesh::Empty);
@@ -169,6 +165,7 @@ int main(){
     double v0v1 = 0.;
     double v0v2 = 0.;
     double v1v2 = 0.;
+    //int symmetries[3] = 0; //counts the number of symmetries
 
     //compute some useful quantities
     const DataMesh rp2 = rad * Psi * Psi;
@@ -208,6 +205,7 @@ int main(){
         case 0:
           //compute inner product <v_0|v_0>
           v0v0 = AKVInnerProduct(v[0],v[0],Ricci,sb)*sqrt(2.)*M_PI;
+          //if(v0v0<symmetry_tol) //symmetries++;
           std::cout << "<v_0|v_0> = " << v0v0 << std::endl;
           std::cout << "-THETA <v_0|v_0> = " << -THETA[a]*v0v0 << std::endl;
           break;
@@ -215,6 +213,7 @@ int main(){
           //compute inner products <v_1|v_1>, <v_0|v_1>
           v1v1 = AKVInnerProduct(v[1],v[1],Ricci,sb)*sqrt(2.)*M_PI;
           v0v1 = AKVInnerProduct(v[0],v[1],Ricci,sb)*sqrt(2.)*M_PI;
+          //if(v1v1<symmetry_tol) //symmetries++;
           std::cout << "<v_1|v_1> = " << v1v1 << std::endl;
           std::cout << "<v_0|v_1> = " << v0v1 << std::endl;
           std::cout << "-THETA <v_1|v_1> = " << -THETA[a]*v1v1 << std::endl;
@@ -225,6 +224,7 @@ int main(){
           v2v2 = AKVInnerProduct(v[2],v[2],Ricci,sb)*sqrt(2.)*M_PI;
           v0v2 = AKVInnerProduct(v[0],v[2],Ricci,sb)*sqrt(2.)*M_PI;
           v1v2 = AKVInnerProduct(v[1],v[2],Ricci,sb)*sqrt(2.)*M_PI;
+          //if(v2v2<symmetry_tol) //symmetries++;
           std::cout << "<v_2|v_2> = " << v2v2 << std::endl;
           std::cout << "<v_0|v_2> = " << v0v2 << std::endl;
           std::cout << "<v_1|v_2> = " << v1v2 << std::endl;
@@ -234,12 +234,70 @@ int main(){
           break;
       }
 
+      //Gram Schmidt orthogonalization
+      switch(a){
+        case 1:
+          if(v0v0<symmetry_tol && v1v1<symmetry_tol){ //two symmetries, v2v2 should also be symmetric
+            GramSchmidtOrthogonalization(v[0], v0v0, v[1], v0v1);
+          }
+          break;
+        case 2:
+          if(v0v0<symmetry_tol){
+            if(v1v1<symmetry_tol){
+              REQUIRE(v2v2<symmetry_tol, "Three symmetries required, but only two found.");
+              GramSchmidtOrthogonalization(v[0], v0v0, v[2], v0v2);
+              GramSchmidtOrthogonalization(v[1], v1v1, v[2], v1v2);
+            } else if(v2v2<symmetry_tol){
+              REQUIRE(false, "Three symmetries required, but only two found.");
+            } else {
+              GramSchmidtOrthogonalization(v[1], v1v1, v[2], v1v2);
+            }
+          } else if(v1v1<symmetry_tol){
+            if(v2v2<symmetry_tol){
+              REQUIRE(false, "Three symmetries required, but only two found.");
+            } else {
+              GramSchmidtOrthogonalization(v[0], v0v0, v[2], v0v2);
+            }
+          } else if(v2v2<symmetry_tol){
+              GramSchmidtOrthogonalization(v[0], v0v0, v[1], v0v1);
+          }
+        break;
+      }
+
       //create xi (1-form)
       xi[a] = ComputeXi(v[a], sb);
 
       //perform diagnostics
       //Psi and xi are unscaled and unrotated
       KillingDiagnostics(sb, L, Psi, xi[a], rad, printDiagnostic);
+
+      //rotate v, Psi for analysis
+      rotated_v[a] = RotateOnSphere(v[a],theta,phi,
+                                          sb,thetap[a],phip[a]);
+
+      DataMesh rotated_Psi = RotateOnSphere(Psi,theta,phi,
+                                            sb,thetap[a],phip[a]);
+
+      //compare scale factors
+//remove this later
+//std::cout << "L coefficients" << std::endl;
+//std::cout << sb.ComputeCoefficients(L) << std::endl;
+//remove this later
+      const double scaleAtEquator =
+                normalizeKVAtOnePoint(sb, rotated_Psi, rotated_v[a], rad, M_PI/2., 0.0);
+      PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleAtEquator,rad);
+      MyVector<double> scaleInnerProduct = InnerProductScaleFactors(v[a], v[a], Ricci, r2p4, sb);
+      PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleInnerProduct[0],rad);
+      PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleInnerProduct[1],rad);
+      PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleInnerProduct[2],rad);
+      OptimizeScaleFactor(rotated_v[a], rotated_Psi, rad, sb, theta,
+         phi, scaleAtEquator, scaleInnerProduct[0], scaleInnerProduct[1], scaleInnerProduct[2]);
+
+      //scale v
+      v[a] *= scaleAtEquator;
+
+      //recompute scaled xi (1-form)
+      xi[a] = ComputeXi(v[a], sb);
 
       if(badAKVSolution){
         v[a] = 0.;
@@ -250,66 +308,6 @@ int main(){
       }
       std::cout << std::endl;
     }//end loop over perpendicular AKV axes
-
-
-
-    //This function will re-order the solutions to make sure that the (an) axis
-    //of symmetry sits at the [0] position, if one exists
-    GramSchmidtOrthogonalization(THETA, thetap, phip, symmetry_tol);
-/*
-    std::cout << "After orthogonalization: " << std::endl;
-    for(int i=0; i<3; i++){
-      std::cout << "thetap[" << i << "] = " << (180.0/M_PI)*thetap[i] << "\n"
-                << "  phip[" << i << "] = " << (180.0/M_PI)*phip[i] 
-                << std::endl;
-    }
-*/
-    //Assume the solutions have changed due to orthogonalization, and recompute v
-    //for all of them.  Perform KillingDiagnostics as well.
-    //it would be nice to only compute v for thetap, phip that actually changed, but
-    //that will be a bit more involved.  and this calculation is pretty cheap
-    for(int a=0; a<axes; a++){
-      v[a] = 0.;
-      DataMesh L(DataMesh::Empty);
-      rparams p = {theta, phi, rp2, sb, llncf, GradRicci,
-                 L, v[a], L_resid_tol, v_resid_tol, verbose};
-      EvaluateAKV(THETA[a], thetap[a], phip[a], &p);
-
-      //compute unscaled xi (1-form)
-      xi[a] = ComputeXi(v[a], sb);
-
-      //perform diagnostics
-      //Psi and xi are unscaled and unrotated
-      //KillingDiagnostics(sb, L, Psi, xi[a], rad, printDiagnostic);
-
-      //rotate v, Psi for analysis
-      rotated_v[a] = RotateOnSphere(v[a],theta,phi,
-                                          sb,thetap[a],phip[a]);
-
-      DataMesh rotated_Psi = RotateOnSphere(Psi,theta,phi,
-                                            sb,thetap[a],phip[a]);
-
-      //compare scale factors
-      const double scaleAtEquator =
-                normalizeKVAtOnePoint(sb, rotated_Psi, rotated_v[a], rad, M_PI/2., 0.0);
-
-      MyVector<double> scaleInnerProduct = InnerProductScaleFactors(v[a], v[a], Ricci, r2p4, sb);
-/*
-      PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleAtEquator,rad);
-      PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleInnerProduct[0],rad);
-      PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleInnerProduct[1],rad);
-      PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleInnerProduct[2],rad);
-      OptimizeScaleFactor(rotated_v[a], rotated_Psi, rad, sb, theta,
-         phi, scaleAtEquator, scaleInnerProduct[0], scaleInnerProduct[1], scaleInnerProduct[2]);
-*/
-      //scale v
-      v[a] *= scaleAtEquator;
-
-      //recompute scaled xi (1-form)
-      xi[a] = ComputeXi(v[a], sb);
-
-    }//end loop for v, xi, and KillingDiagnostics
-
 
     std::cout << "\n" << std::endl;
   }

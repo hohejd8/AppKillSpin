@@ -9,6 +9,19 @@
 #include <gsl/gsl_roots.h>
 #include <stdlib.h>
 
+void PrintSurfaceNormalization(const SurfaceBasis& sb,
+                      const DataMesh& rotated_Psi,
+                      const DataMesh& theta,
+                      const DataMesh& phi,
+                      const DataMesh& rotated_v,
+                      const double& scaleFactor,
+                      const double& rad)
+{
+  const double scaleOverSurface =
+                normalizeKVAtAllPoints(sb, rotated_Psi, theta, phi, rotated_v*scaleFactor, rad);
+
+  std::cout << std::setprecision(15) << scaleFactor << " " << scaleOverSurface << std::endl;
+}
 
 //this function determines which AKVsolver to run based on initial guess
 void RunAKVsolvers(double& THETA,
@@ -31,6 +44,8 @@ void RunAKVsolvers(double& THETA,
     const double phip_saved = phip;
     const double THETA_saved = THETA;
     oneDSolutionFound = findTHETA(p,THETA,residualSize,verbose);
+    std::cout << "oneDSolutionFound = " << oneDSolutionFound << std::endl;
+    std::cout << POSITION << std::endl;
     if(oneDSolutionFound){
       thetap = 0.0;
       phip = 0.0;
@@ -61,6 +76,8 @@ void RunAKVsolvers(double& THETA,
   //or initial guess was not close to zero
   //try the multidimensional root finder
   if(!oneDSolutionFound){
+    std::cout << "oneDSolutionFound = " << oneDSolutionFound << std::endl;
+    std::cout << POSITION << std::endl;
     findTtp(p, THETA, thetap, phip, solver,residualSize, verbose);
 
     //if thetap solution is close to zero,
@@ -789,7 +806,25 @@ MyVector<double> InnerProductScaleFactors(const DataMesh& v1,
                        const DataMesh& r2p4,
                        const SurfaceBasis& sb)
 {
-  //ip1: Integral ( 0.5 * Ricci * gradient(v_1)*gradient(v_2) ) / r2p4 dOmega = (8.*Pi/3.) (1/s)
+  //determine s = sqrt(alpha^2 + beta^2 + gamma^2) for alpha, beta, gamma coefficients of Y_1^m
+/*
+  SpherePackIterator sit(v2.Extents()[0], v2.Extents()[1]);
+  const int l10a = sit(1,0,SpherePackIterator::a);
+  const int l11a = sit(1,1,SpherePackIterator::a);
+  const int l11b = sit(1,1,SpherePackIterator::b);
+  const DataMesh v_ha = sb.ComputeCoefficients(v2);
+  std::cout << "l10a = " << v_ha[l10a] << std::endl;
+  std::cout << "l11a = " << v_ha[l11a] << std::endl;
+  std::cout << "l11b = " << v_ha[l11b] << std::endl;
+  //I've include an extra factor of 2 for the l11a and l11b terms that seems to make s come out correctly,
+  //but I can't seem to recover that value from the notes about spherical harmonics
+  const double s = 0.25*sqrt(3.)
+                   *sqrt(2.*v_ha[l10a]*v_ha[l10a] + 4.*(v_ha[l11a]*v_ha[l11a] + v_ha[l11b]*v_ha[l11b]));
+  std::cout << "s = " << s << std::endl;
+*/
+
+  //it seems as though s=1 for all situations, so I have not bothered including it here
+  //ip1: Integral ( 0.5 * Ricci * gradient(v_1)*gradient(v_2) ) / r2p4 dOmega = (8.*Pi/3.) s
   //in the Ricci argument, r2p4 compensates for the integrand division by r2p4
   const double s_ip1 = (8./(3.*sqrt(2.))) / AKVInnerProduct(v1,v2,Ricci/r2p4,sb);
 
@@ -799,7 +834,8 @@ MyVector<double> InnerProductScaleFactors(const DataMesh& v1,
   //ip3: Integral ( 0.5 * Ricci * gradient(v_1)*gradient(v_2) ) dOmega = (2/3)A s
   const double s_ip3 = (2./3.)*area / tmp_ip;
 
-  //ip2: Integral ( 0.5 * Ricci * gradient(v_1)*gradient(v_2) ) dOmega = (2/3)A s^2
+  //ip2: Integral ( 0.5 * Ricci * gradient(v_1)*gradient(v_2) ) dOmega = (2/3)A
+  //since s=1, it looks like s_ip2 is just the sqrt of the scale factor for ip3
   const double s_ip2 = sqrt(s_ip3);
 
   return MyVector<double>(MV::fill, s_ip1, s_ip2, s_ip3) ;
@@ -863,88 +899,19 @@ void AxisInitialGuess(double theta[], double phi[], const int index)
 }
 
 
-//Modified Gram Schmidt orthogonalization
-//in spherical coordinates, the input represents the theta and phi
-//coordinates of 3 vectors.
-//NOTE: (theta[0], phi[0]) should represent the "best" solution
-//ie, the solution from the axis of exact symmetry
-//void GramSchmidtOrthogonalization(MyVector<double>& theta,
-//                                  MyVector<double>& phi)
-void GramSchmidtOrthogonalization(double THETA[],
-                                  double thetap[],
-                                  double phip[],
-                                  const double symmetry_tol)
+//Gram Schmidt orthogonalization
+//Takes the DataMesh that should not change (fixedMesh), the inner product of that
+//DataMesh with itself (fixedInnerProduct), the DataMesh that needs to be orthogonalized
+//(flexibleMesh), and the inner product of those two meshes (crossTermInnerProduct)
+void GramSchmidtOrthogonalization(const DataMesh& fixedMesh,
+                                  const double fixedInnerProduct,
+                                  DataMesh& flexibleMesh,
+                                  const double crossTermInnerProduct)
 {
-  const int axes = 3; //number of orthogonal axes
-
-  //Sort the symmetry axes such that the (an) exact symmetry axis is at position [0]
-  //The Gram Schmidt orthogonalization routine will treat this solution as fixed
-  //and will adjust the others accordingly
-  double THETA_tmp[3];
-  double thetap_tmp[3];
-  double phip_tmp[3];
-
-  int front = 0;
-  int back = axes-1;
-  for(int i=0; i<axes; i++){
-    if(fabs(THETA[i]) < symmetry_tol){
-      THETA_tmp[front] = THETA[i];
-      thetap_tmp[front] = thetap[i];
-      phip_tmp[front] = phip[i];
-      front++;
-    } else {
-      THETA_tmp[back] = THETA[i];
-      thetap_tmp[back] = thetap[i];
-      phip_tmp[back] = phip[i];
-      back--;
-    }
-  }
-
-  //determine the Cartesian representation for all the vectors
-  MyVector<MyVector<double> > v(MV::Size(axes), MV::Size(axes));
-  for(int i=0; i<v.Size(); i++){
-    v[i][0] = sin(thetap_tmp[i])*cos(phip_tmp[i]); //x
-    v[i][1] = sin(thetap_tmp[i])*sin(phip_tmp[i]); //y
-    v[i][2] = cos(thetap_tmp[i]); //z
-  }
-
-  //modified Gram Schmidt othogonalization
-  for(int i=0; i<v.Size(); i++){
-    const double normalize = sqrt(v[i][0]*v[i][0] + v[i][1]*v[i][1] + v[i][2]*v[i][2]);
-    v[i][0] /= normalize;
-    v[i][1] /= normalize;
-    v[i][2] /= normalize;
-    for(int j=i+1; j<v.Size(); j++){
-      const double proj = Projection(v[i],v[j]);
-      v[j][0] -= proj*v[j][0];
-      v[j][1] -= proj*v[j][1];
-      v[j][2] -= proj*v[j][2];
-    }
-  }
-
-  //compute the spherical coordinates from the orthogonalization
-  //and save them to the original arrays.  THETA was also shuffled, so
-  //it is correctly replaced here
-  for(int i=0; i<v.Size(); i++){
-    THETA[i] = THETA_tmp[i];
-    thetap[i] = acos(v[i][2]);
-    phip[i] = atan2(v[i][1], v[i][0]);
-    //std::cout << thetap[i]*180./M_PI << " " << phip[i]*180./M_PI << std::endl;
-  }
+  flexibleMesh -= (crossTermInnerProduct/fixedInnerProduct) * fixedMesh;
 }
 
-//this is a helper function for GramSchmidtOrthogonalization
-//computes the normalization factor of the projection of v2 onto v1
-double Projection(MyVector<double> v1, MyVector<double> v2)
-{
-  double ip11 = 0.; //inner product of v1 \cdot v1
-  double ip12 = 0.; //inner product of v1 \cdot v2
-  for(int i=0; i<3; i++){
-    ip12 += v1[i]*v2[i];
-    ip11 += v1[i]*v1[i];
-  }
-  return (ip12/ip11);
-}
+
 
 
 void KillingDiagnostics(const SurfaceBasis& sb,
