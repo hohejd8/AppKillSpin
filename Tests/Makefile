@@ -1,8 +1,8 @@
 CODE_HOME = ../..
 
-LINKED_LIBS = \
-    $(NULL)
-DYNAMIC_LINKED_LIBS = \
+FACTORY_LIBS = \
+    ComputeItems \
+    AppKillSpin \
     $(NULL)
 
 EXECUTABLES = \

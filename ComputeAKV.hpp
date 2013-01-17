@@ -31,26 +31,63 @@ namespace ComputeItems {
         "  momentum of a single object.                         \n"
         "                                                       \n"
         "Options:                                               \n"
-        "  StrahlkorperWithMesh = name of surface in DataBox    \n"
-        "  ConformalFactor = conformal factor in DataBox        \n"
-        "  AKVGuess = initial guess for AKV                     \n"
-        "  Radius = the radius of the surface                   \n"
+        "  AKVSolution = name of approximate Killing vector     \n"
+        "                solution in DataBox.                   \n"
+        "  WithRicciScaling = bool, true for using Ricci scalar \n"
+        "                scaling with the Lagrange multiplier   \n"
+        "                THETA.  Default true.                  \n"
+        "  StrahlkorperWithMesh = name of StrahlkorperWithMesh  \n"
+        "                         surface in DataBox.  Required.\n"
+        "  ConformalFactor = conformal factor in DataBox.       \n"
+        "                    Required.                          \n"
+        "  InterpolateConformalFactor = boolean, true if the    \n"
+        "         conformal factor needs to be interpolated     \n"
+        "         onto the Strahlkorper surface.  False for     \n"
+        "         testing purposes.  Default true.              \n"
+        "  AKVGuess = initial guess for THETA, thetap   and     \n"
+        "             phip of primary symmetry axis.            \n"
+        "             Default {0.0,0.0,0.0}.                    \n"
+        "  Radius = the radius of the surface.  Required.       \n"
         "  Solver = which multidimensional root-finding solver  \n"
         "           from the GSL library will be used.          \n"
         "           Options: Hybrids, Hybrid, Newton, Broyden.  \n"
         "           Default Newton.                             \n"
-        "  Verbose = Prints THETA, thetap and phip solutions.   \n"
-        "            Default false.                             \n"
+        "  Verbose = Prints THETA, thetap and phip solutions, as\n"
+        "            well as all other diagnostics from the     \n"
+        "            solution finder.  Default false.           \n"
         "  PrintResiduals = Prints the ic10, ic1p, ic1m         \n"
         "            residuals at each iteration of the solver. \n"
         "            Default to false.                          \n"
-        "  ResidualSize = determines the tolerance for residuals\n"
-        "            from the multidimensional root finder.     \n"
-        "            Default to 1.e-11.                         \n"
+        "  ResidualSize = determines the tolerance for ic10,    \n"
+        "            ic1p, and ic1m residuals from the          \n"
+        "            multidimensional root finder.              \n"
+        "            Default to 1.e-10.                         \n"
+        "  L_resid_tol = the tolerance for the variation in L   \n"
+        "                in the multidimensional root finder.   \n"
+        "                Default 1.e-12.                        \n"
+        "  v_resid_tol = the tolerance for the variation in v   \n"
+        "                in the multidimensional root finder.   \n"
+        "                Default 1.e-12.                        \n"
         "  min_thetap = for values less than this, thetap is    \n"
-        "               considered close to zero. Default 1.e-5 \n"
-        "  Output = name of approximate Killing vector solution \n"
-        "           in DataBox.                                 \n"
+        "               considered close to zero. Default 1.e-5.\n"
+        "  PrintTtpSolution = print the solution(s) for THETA,  \n"
+        "                     thetap, and phip.  Default true.  \n"
+        "  PrintInnerProducts = boolean to print all the inner  \n"
+        "               product values for the v solutions in   \n"
+        "               each direction.  Default false.         \n"
+        "  ScaleFactor = determine which method for finding the \n"
+        "                scale factor for v is to be used.      \n"
+        "                Options: Equator, InnerProduct1,       \n"
+        "                InnerProduct2, InnerProduct3, Optimize.\n"
+        "                See AKVSolver::InnerProductScaleFactors\n"
+        "                for details on InnerProduct methods.   \n"
+        "                Default Equator.                       \n"
+        "  PrintScaleFactor = prints the chosen scale factor.   \n"
+        "                     Default false.                    \n"
+        "  PrintSurfaceNormalization = prints the RMS deviation \n"
+        "                   from being properly scaled.  (Best  \n"
+        "                   return value is zero.)              \n"
+        "                   Default false.                      \n"
         "  DivNorm = print the L2 norm of the divergence of the \n"
         "            approximate Killing vector.  Default false.\n"
         "  VortNorm = print the L2 norm of the vorticity of the \n"
@@ -70,25 +107,29 @@ namespace ComputeItems {
         "  Conformal Factor                                     \n"
         "                                                       \n"
         "Presents to DataBox:                                   \n"
-        "  Tensor<DataMesh> [Output]                            \n";
+        "  Tensor<DataMesh> [AKVSolution]                       \n";
       };
 
       ComputeAKV(const std::string& opts);
-      std::string Output()         const {return mOutput;}
+      std::string Output()         const {return mAKVSolution;}
       const result_type& GetData() const {return *mResult;}
       void RecomputeData(const DataBoxAccess& box) const;
 
     private:
-      std::string mSkwm, mConformalFactor, mSolver;
+      std::string mAKVSolution;
+      std::string mSkwm, mConformalFactor, mSolver, mScaleFactor;
+
+
       MyVector<double> mAKVGuess;
       double mRad, mL_resid_tol, mv_resid_tol, mMin_thetap, mResidualSize;
       std::string mDivNorm, mVortNorm, mSS, mfLNorm, mfLambdaNorm, mXiDivLNorm;
+
       MyVector<bool> printDiagnostic;
-      bool mVerbose, mPrintResiduals;
-      std::string mOutput;
+      bool mVerbose, mInterpolateConformalFactor, mPrintResiduals,
+           mPrintTtpSolution, mPrintInnerProducts, mWithRicciScaling,
+           mPrintScaleFactor, mPrintSurfaceNormalization;
+
       mutable result_type* mResult;
-
-
   }; //class ComputeAKV
 } //namespace ComputeItems
 

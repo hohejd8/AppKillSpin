@@ -67,21 +67,7 @@ DataMesh ConstructConformalFactor(const DataMesh& theta,
 
   return Psi;
 }
-/*
-void PrintSurfaceNormalization(const SurfaceBasis& sb,
-                      const DataMesh& rotated_Psi,
-                      const DataMesh& theta,
-                      const DataMesh& phi,
-                      const DataMesh& rotated_v,
-                      const double& scaleFactor,
-                      const double& rad)
-{
-  const double scaleOverSurface =
-                normalizeKVAtAllPoints(sb, rotated_Psi, theta, phi, rotated_v*scaleFactor, rad);
 
-  std::cout << std::setprecision(15) << scaleFactor << " " << scaleOverSurface << std::endl;
-}
-*/
 int main(){
 
   const std::string Help =
@@ -189,7 +175,7 @@ int main(){
 
       //setup struct with all necessary data
       rparams p = {theta, phi, rp2, sb, llncf, GradRicci,
-                   L, v[a], L_resid_tol, v_resid_tol, verbose};
+                   L, v[a], L_resid_tol, v_resid_tol, verbose, true};
 
       RunAKVsolvers(THETA[a], thetap[a], phip[a], min_thetap,
                     residualSize, verbose, &p, solver);
@@ -279,12 +265,9 @@ int main(){
                                             sb,thetap[a],phip[a]);
 
       //compare scale factors
-//remove this later
-//std::cout << "L coefficients" << std::endl;
-//std::cout << sb.ComputeCoefficients(L) << std::endl;
-//remove this later
+
       const double scaleAtEquator =
-                normalizeKVAtOnePoint(sb, rotated_Psi, rotated_v[a], rad, M_PI/2., 0.0);
+                NormalizeAKVAtOnePoint(sb, rotated_Psi, rotated_v[a], rad, M_PI/2., 0.0);
       PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleAtEquator,rad);
       MyVector<double> scaleInnerProduct = InnerProductScaleFactors(v[a], v[a], Ricci, r2p4, sb);
       PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleInnerProduct[0],rad);

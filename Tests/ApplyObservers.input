@@ -1,0 +1,54 @@
+#ApplyObservers.input
+
+DataBoxItems=
+    Subdomain(Items=
+    #Domain(Items=
+	      #EvaluateScalarFormula(Output=ConformalFactor;
+				    #Formula=1.28+0.0; #spherical symmetry
+				    #Formula=1.28+0.0; #z-axis symmetry
+				    #Formula=1.28+0.0; #x-axis symmetry
+				    #Formula=1.28+0.0; #y-axis symmetry
+				    #Formula=1.28+0.0; #
+				    #Formula=1.28+0.0; #
+	      #),#;
+    #),
+    #Subdomain(Items=
+              AddStrahlkorperSurfaceAndMesh(
+                SurfaceName=TestSkS;
+                MeshName=TestSkM;
+                Nth=14;
+                Nph=28;
+                Center=0.,0.,0.;
+                Radius=0.85;
+              ),
+              ComputeStrahlkorperWithMesh(
+                Surface=TestSkS;
+                Mesh=TestSkM;
+                SKWMName=TestSkWM;
+              ),
+              ComputeS2ConformalFactor(
+                StrahlkorperWithMesh=TestSkWM;
+                Symmetry=OffAxis;
+              ),
+              ComputeAKV(
+                StrahlkorperWithMesh=TestSkWM;
+                ConformalFactor=ConformalFactor;
+                InterpolateConformalFactor=false;
+                AKVGuess=0.0, 0.0, 0.0;
+                Radius=1.0;
+                Verbose=true;
+                AKVSolution=TestAKV;
+                Solver=Broyden;
+                DivNorm=false;
+                VortNorm=false;
+                SS=false;
+                fLNorm=false;
+                fLambdaNorm=false;
+                XiDivLNorm=false;
+                PrintSurfaceNormalization=true;
+              );
+    );
+
+
+Observers=DumpTensors(Input=TestAKV;);
+                      #OnlyTheseSubdomains=ApplyObserver/Sphere0);

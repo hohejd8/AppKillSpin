@@ -9,6 +9,7 @@
 #include <gsl/gsl_roots.h>
 #include <stdlib.h>
 
+//prints the RMS deviation from a perfectly scaled surface
 void PrintSurfaceNormalization(const SurfaceBasis& sb,
                       const DataMesh& rotated_Psi,
                       const DataMesh& theta,
@@ -18,9 +19,10 @@ void PrintSurfaceNormalization(const SurfaceBasis& sb,
                       const double& rad)
 {
   const double scaleOverSurface =
-                normalizeKVAtAllPoints(sb, rotated_Psi, theta, phi, rotated_v*scaleFactor, rad);
-
-  std::cout << std::setprecision(15) << scaleFactor << " " << scaleOverSurface << std::endl;
+                NormalizeAKVAtAllPoints(sb, rotated_Psi, theta, phi, rotated_v*scaleFactor, rad);
+  std::cout << std::setprecision(15) 
+            << "Scale Factor: " << scaleFactor 
+            << " RMS deviation: " << scaleOverSurface << std::endl;
 }
 
 //this function determines which AKVsolver to run based on initial guess
@@ -43,7 +45,7 @@ void RunAKVsolvers(double& THETA,
   if(thetapGuessIsZero){
     const double phip_saved = phip;
     const double THETA_saved = THETA;
-    oneDSolutionFound = findTHETA(p,THETA,residualSize,verbose);
+    oneDSolutionFound = FindTHETA(p,THETA,residualSize,verbose);
     std::cout << "oneDSolutionFound = " << oneDSolutionFound << std::endl;
     std::cout << POSITION << std::endl;
     if(oneDSolutionFound){
@@ -58,11 +60,11 @@ void RunAKVsolvers(double& THETA,
   if(thetapGuessIsPi){
     const double phip_saved = phip;
     const double THETA_saved = THETA;
-    oneDSolutionFound = findTHETA(p,THETA,residualSize,verbose);
+    oneDSolutionFound = FindTHETA(p,THETA,residualSize,verbose);
     if(oneDSolutionFound){
       thetap = M_PI;
       phip = 0.0;
-      //findTHETA tests for thetap=0.  If thetap=Pi, v and L can be
+      //FindTHETA tests for thetap=0.  If thetap=Pi, v and L can be
       //corrected by multiplying by -1
       p->v *= -1.; p->L *= -1.;
     } else { //thetap initial guess is bad and too close to Pi
@@ -78,7 +80,7 @@ void RunAKVsolvers(double& THETA,
   if(!oneDSolutionFound){
     std::cout << "oneDSolutionFound = " << oneDSolutionFound << std::endl;
     std::cout << POSITION << std::endl;
-    findTtp(p, THETA, thetap, phip, solver,residualSize, verbose);
+    FindTtp(p, THETA, thetap, phip, solver,residualSize, verbose);
 
     //if thetap solution is close to zero,
     //and we didn't already try thetap=0,
@@ -87,7 +89,7 @@ void RunAKVsolvers(double& THETA,
       const double THETA_saved = THETA;
       const DataMesh v_saved = p->v;
       const DataMesh L_saved = p->L;
-      oneDSolutionFound = findTHETA(p,THETA,residualSize,verbose);
+      oneDSolutionFound = FindTHETA(p,THETA,residualSize,verbose);
       if(oneDSolutionFound){
         thetap = 0.0;
         phip = 0.0;
@@ -104,7 +106,7 @@ void RunAKVsolvers(double& THETA,
       const double THETA_saved = THETA;
       const DataMesh v_saved = p->v;
       const DataMesh L_saved = p->L;
-      oneDSolutionFound = findTHETA(p,THETA,residualSize,verbose);
+      oneDSolutionFound = FindTHETA(p,THETA,residualSize,verbose);
       if(oneDSolutionFound){
         thetap = M_PI;
         phip = 0.0;
@@ -135,9 +137,10 @@ void RunAKVsolvers(double& THETA,
 
 }
 
-
-//this function attempts to find THETA assuming thetap=0
-bool findTHETA(struct rparams * p,
+//performs a 1D root finder for THETA at thetap=0 (phip=0)
+//returns true if THETA root is found such that
+//(l,m)=(1,m) residuals are within tolerance
+bool FindTHETA(struct rparams * p,
                double& THETA_root,
                const double& residual_size,
                const bool verbose)
@@ -199,8 +202,10 @@ bool findTHETA(struct rparams * p,
   return goodSolution;
 }
 
-//this function attempts to find THETA, thetap and phip
-void findTtp(struct rparams * p,
+//uses the gsl multidimensional root finder to find
+//values for THETA, thetap, phip such that
+//(l,m)=(1,m) residuals are within tolerance
+void FindTtp(struct rparams * p,
              double& THETA,
              double& thetap,
              double& phip,
@@ -263,6 +268,8 @@ void findTtp(struct rparams * p,
   return;
 }
 
+//function header for use with gsl 1D root finder
+//runs AKVsolver at thetap, phip = 0
 double AKVsolver1D(double THETA, void *params)
 {
   gsl_vector * x = gsl_vector_alloc(3);
@@ -280,7 +287,8 @@ double AKVsolver1D(double THETA, void *params)
   return gsl_vector_get(f,0);
 }
 
-//This function will run AKVsolver exactly once with the solution thetap, phip
+//similar to AKVsolver1D, this function runs AKVsolver once
+//at thetap, phip != 0
 void EvaluateAKV(double THETA, double thetap, double phip, void *params)
 {
   gsl_vector * x = gsl_vector_alloc(3);
@@ -296,7 +304,7 @@ void EvaluateAKV(double THETA, double thetap, double phip, void *params)
   AKVsolver(x, params, f);
 }
 
-//function header required for use with gsl multidimensional root finders
+//function header for use with gsl multidimensional root finder
 int AKVsolver(const gsl_vector * x,
               void *params,
               gsl_vector * f)
@@ -317,6 +325,7 @@ int AKVsolver(const gsl_vector * x,
   const double& L_resid_tol = static_cast<struct rparams*>(params)->L_resid_tol;
   const double& v_resid_tol = static_cast<struct rparams*>(params)->v_resid_tol;
   const bool& printResiduals = static_cast<struct rparams*>(params)->printResiduals;
+  const bool& ricciScaling = static_cast<struct rparams*>(params)->ricciScaling;
 
   SpherePackIterator sit(theta.Extents()[0],theta.Extents()[1]);
   // index for l=0
@@ -326,12 +335,18 @@ int AKVsolver(const gsl_vector * x,
   const int l11a = sit(1,1,SpherePackIterator::a);
   const int l11b = sit(1,1,SpherePackIterator::b);
 
-  //eq. 78, 93
-  L = cos(thetap)*cos(theta)
+  if(ricciScaling){
+    //eq. 78, 93
+    L = cos(thetap)*cos(theta)
         + sin(thetap)*sin(theta)*(cos(phip)*cos(phi) + sin(phip)*sin(phi) );
-
-  //eq. 95
-  v = L;
+    //eq. 95
+    v = L;
+  } else {
+/*
+    L = ;
+    v = ;
+*/
+  }
 
   //eq. 94, make sure only l=1 mode exists by setting all l!=1 modes to zero
   DataMesh L_ha = sb.ComputeCoefficients(L);
@@ -361,16 +376,21 @@ int AKVsolver(const gsl_vector * x,
   Tensor<DataMesh> Gradv(2,"1",DataMesh::Empty); //Gradient of v, eq. 97
 
   while(unsolved){
-
     //eq. 97, first term: compute Laplacian of L
     RHS = sb.ScalarLaplacian(L_ha);
 
     //eq. 97, component of third term: compute gradient of v
     Gradv = sb.Gradient(v_ha);
 
-    //compute eq. 97
-    RHS = -RHS 
+    if(ricciScaling){
+      //compute eq. 97
+      RHS = -RHS 
           + (4.0*llncf*L + 0.5*GradRicci(0)*Gradv(0) + 0.5*GradRicci(1)*Gradv(1) -2.0*L)*(1.0-THETA);
+    } else {
+/*
+      RHS = ;
+*/
+    }
 
     //perform harmonic analysis on RHS
     RHS_ha = sb.ComputeCoefficients(RHS);
@@ -402,6 +422,7 @@ int AKVsolver(const gsl_vector * x,
     const double norm_RHS_L = sqrt(sqrt(2.0)*sb.ComputeCoefficients(RHS)[l00a]/4.0);
 
     //invert (Laplacian + 2)
+//inversions are probably also different for non-Ricci scaling
     for(sit.Reset(); sit; ++sit){
       if(sit.l()!=1){ // l=1 modes are zero
         RHS_ha[sit()] /= 2.0 - sit.l()*(sit.l()+1.0);
@@ -420,7 +441,13 @@ int AKVsolver(const gsl_vector * x,
     //NOTE: RHS changes definitions here
     RHS = sb.ScalarLaplacian(v_ha);
 
-    RHS = -RHS - 2.0*rp2*rp2*L;
+    if(ricciScaling){
+      RHS = -RHS - 2.0*rp2*rp2*L;
+    } else {
+/*
+      RHS = ;
+*/
+    }
 
     //remove the l=0 mode from RHS
     RHS_ha = sb.ComputeCoefficients(RHS);
@@ -467,7 +494,7 @@ int AKVsolver(const gsl_vector * x,
   return GSL_SUCCESS;
 } //end AKVsolver
 
-
+//prints the state of the multidimensional root finder
 void print_state (size_t iter, gsl_multiroot_fsolver * s)
 {
   std::cout << "iter = " << iter
@@ -536,7 +563,9 @@ Tensor<DataMesh> ComputeXi(const DataMesh& v, const SurfaceBasis& sb)
   return xi;
 }
 
-double normalizeKVAtAllPoints(const SurfaceBasis& sb,
+//calls NormalizeAKVAtOnePoint for every point in the mesh,
+//then returns the average of all the scale factors
+double NormalizeAKVAtAllPoints(const SurfaceBasis& sb,
                               const DataMesh& Psi,
                               const DataMesh& theta,
                               const DataMesh& phi,
@@ -553,7 +582,7 @@ double normalizeKVAtAllPoints(const SurfaceBasis& sb,
   DataMesh scaleFactor(Mesh(theta.Extents()));
 
   for(int i=0; i<scaleFactor.Size(); i++)
-      scaleFactor[i] = normalizeKVAtOnePoint(sb,Psi,xi,rad,theta[i],phi[i])-1.;
+      scaleFactor[i] = NormalizeAKVAtOnePoint(sb,Psi,xi,rad,theta[i],phi[i])-1.;
 
   scaleFactor *= scaleFactor;
   const DataMesh r2p4 = rad*rad*Psi*Psi*Psi*Psi;
@@ -562,7 +591,11 @@ double normalizeKVAtAllPoints(const SurfaceBasis& sb,
   return sqrt(sb.ComputeCoefficients(scaleFactor*r2p4)[0])/area;
 }
 
-double normalizeKVAtOnePoint(const SurfaceBasis& sb,
+//determines the path length of following the approximate
+//Killing vector around the sphere starting at (theta, phi)
+//and returns the ratio of that path to the expected
+//value of 2*Pi (the normalization scale factor)
+double NormalizeAKVAtOnePoint(const SurfaceBasis& sb,
                               const DataMesh& rotated_Psi,
                               const DataMesh& rotated_v,
                               const double& rad,
@@ -575,10 +608,10 @@ double normalizeKVAtOnePoint(const SurfaceBasis& sb,
   xi(0) = tmp_xi(1);
   xi(1) = -tmp_xi(0);
 
-  return normalizeKVAtOnePoint(sb, rotated_Psi, xi, rad, thetap, phip);
+  return NormalizeAKVAtOnePoint(sb, rotated_Psi, xi, rad, thetap, phip);
 }
 
-double normalizeKVAtOnePoint(const SurfaceBasis& sb,
+double NormalizeAKVAtOnePoint(const SurfaceBasis& sb,
                               const DataMesh& rotated_Psi,
                               const Tensor<DataMesh>& xi,
                               const double& rad,
@@ -594,63 +627,15 @@ double normalizeKVAtOnePoint(const SurfaceBasis& sb,
   bool goodtheta = KillingPath(sb, rotated_Psi, xi, rad, t, thetap, phip, false);
   REQUIRE(goodtheta, "Killing trajectory did not close " << POSITION);
   const double scale = t/(2.0*M_PI);
-/*
-  std::cout << "theta = " << std::setprecision(8) << std::setw(10)
-            << 0.5*M_PI << " : affine path = "
-            << std::setprecision(10) << t //<< std::endl;
-            << " Scale factor = " << scale << std::endl;
 
-  KillingPath(sb, rotated_Psi, xi, rad, t, 0.5*M_PI/2.0);
-  std::cout << "Theta = " << std::setprecision(8) << std::setw(10)
-            << 0.5*M_PI/2.0 << " : affine path = "
-            << std::setprecision(10) << t //<< std::endl;
-            << "Scale factor = " << t/(2.0*M_PI*scale) << std::endl;
-
-  KillingPath(sb, rotated_Psi, xi, rad, t, 0.25*M_PI);
-  std::cout << "Theta = " << std::setprecision(8) << std::setw(10)
-            << 0.25*M_PI << " : affine path = "
-            << std::setprecision(10) << t //<< std::endl;
-            << " Scale factor = " << t/(2.0*M_PI*scale) << std::endl;
-
-  KillingPath(sb, rotated_Psi, xi, rad, t, 0.75*M_PI);
-  std::cout << "Theta = " << std::setprecision(8) << std::setw(10)
-            << 0.75*M_PI << " : affine path = "
-            << std::setprecision(10) << t //<< std::endl;
-            << " Scale factor = " << t/(2.0*M_PI*scale) << std::endl;
-*/
   return scale;
 } //end normalizeKillingVector
 
-
-//This routine will print the value of normalizeKVAtAllPoints for 
-//a range of scale factors in the neighborhood of scaleFactor1, scaleFactor2
-/*
-void TestScaleFactors(const DataMesh& rotated_v,
-                      const DataMesh& rotated_Psi,
-                      const double& rad,
-                      const SurfaceBasis& sb,
-                      const DataMesh& theta,
-                      const DataMesh& phi,
-                      const double& scaleFactor1,
-                      const double& scaleFactor2)
-{
-  const double difference = fabs(scaleFactor1-scaleFactor2);
-  std::cout << "scale factors " << scaleFactor1 << " " << scaleFactor2 << std::endl;
-  for(int i=0; i<=400; i++){
-    const double deviation = (1.-2.*difference)+(difference/100.)*i;
-    double scaleFactor = scaleFactor1*deviation;
-
-    const double scaleOverSurface =
-                normalizeKVAtAllPoints(sb, rotated_Psi, theta, phi, rotated_v*scaleFactor, rad);
-    std::cout << std::setprecision(15) << scaleFactor << " " << scaleOverSurface << std::endl;
-  }
-}
-*/
-//This routine will print the value of normalizeKVAtAllPoints for 
+//This routine will print the value of NormalizeAKVAtAllPoints for 
 //a range of scale factors in the neighborhood of scaleFactor1-4.  This function
 //assumes that there is an optimal (minimal) scale factor value in this range,
 //and uses a modified bisection method to find it within a given tolerance
-void OptimizeScaleFactor(const DataMesh& rotated_v,
+double OptimizeScaleFactor(const DataMesh& rotated_v,
                       const DataMesh& rotated_Psi,
                       const double& rad,
                       const SurfaceBasis& sb,
@@ -677,10 +662,10 @@ void OptimizeScaleFactor(const DataMesh& rotated_v,
 
   //evaluate the function at these two scale factors
   double lowSurfaceValue = 
-           normalizeKVAtAllPoints(sb, rotated_Psi, theta, phi, rotated_v*min, rad);
+           NormalizeAKVAtAllPoints(sb, rotated_Psi, theta, phi, rotated_v*min, rad);
   //std::cout << std::setprecision(15) << min << " " << lowSurfaceValue << std::endl;
   double highSurfaceValue = 
-           normalizeKVAtAllPoints(sb, rotated_Psi, theta, phi, rotated_v*max, rad);
+           NormalizeAKVAtAllPoints(sb, rotated_Psi, theta, phi, rotated_v*max, rad);
   //std::cout << std::setprecision(15) << max << " " << highSurfaceValue << std::endl;
 
   //do a bisection to find the minimum surface value
@@ -690,18 +675,19 @@ void OptimizeScaleFactor(const DataMesh& rotated_v,
     const double difference = max-min;
     if(lowSurfaceValue < highSurfaceValue){
       max -= difference/4.;
-      highSurfaceValue = normalizeKVAtAllPoints(sb,rotated_Psi,theta,phi,rotated_v*max,rad);
+      highSurfaceValue = NormalizeAKVAtAllPoints(sb,rotated_Psi,theta,phi,rotated_v*max,rad);
       std::cout << std::setprecision(15) << max << " " << highSurfaceValue << std::endl;
     } else {
       min += difference/4.;
-      lowSurfaceValue = normalizeKVAtAllPoints(sb,rotated_Psi,theta,phi,rotated_v*min,rad);
+      lowSurfaceValue = NormalizeAKVAtAllPoints(sb,rotated_Psi,theta,phi,rotated_v*min,rad);
       std::cout << std::setprecision(15) << min << " " << lowSurfaceValue << std::endl;
     }
   }
 
-  return;
+  return (highSurfaceValue < lowSurfaceValue ? max : min);
 }
 
+//integrates along a particular Killing path on the surface
 bool KillingPath(const SurfaceBasis& sb,
                  const DataMesh& Psi,
                  const Tensor<DataMesh>& xi,
@@ -739,9 +725,9 @@ bool KillingPath(const SurfaceBasis& sb,
 	      << std::endl; 
   }
      
-  int iter = 0;//delete this logic later
+  int iter = 0;
   while (true && iter<1000) {
-    iter++; //delete this logic later
+    iter++;
     const double ysave[2] = {y[0],y[1]}; 
     const double tsave = t;
     const int status = gsl_odeiv2_evolve_apply (e, c, s,
@@ -800,30 +786,28 @@ int PathDerivs(double t_required_by_solver, const double y[], double f[], void *
   return GSL_SUCCESS;
 }
 
+//this function returns the value of
+//   (1./(sqrt(2.)*Pi) Integral ( 0.5 * Ricci * D^i (v_1) * D_i (v_2) ) dA
+// = (1./(sqrt(2.)*Pi) Integral ( 0.5 * Ricci * (1/r2p4) * gradient(v_1)*gradient(v_2) ) * r2p4 dOmega
+// = (1./(sqrt(2.)*Pi) Integral ( 0.5 * Ricci * gradient(v_1)*gradient(v_2) ) dOmega
+double AKVInnerProduct(const DataMesh& v1,
+                       const DataMesh& v2,
+                       const DataMesh& Ricci,
+                       const SurfaceBasis& sb)
+{
+  const Tensor<DataMesh> Gradv1 = sb.Gradient(v1);
+  const Tensor<DataMesh> Gradv2 = sb.Gradient(v2);
+  const DataMesh integrand = 0.5*Ricci*(Gradv1(0)*Gradv2(0)+Gradv1(1)*Gradv2(1));
+  return sb.ComputeCoefficients(integrand)[0];
+}
+
+//returns the scaling factors related to various forms of the AKVInnerProduct
 MyVector<double> InnerProductScaleFactors(const DataMesh& v1,
                        const DataMesh& v2,
                        const DataMesh& Ricci,
                        const DataMesh& r2p4,
                        const SurfaceBasis& sb)
 {
-  //determine s = sqrt(alpha^2 + beta^2 + gamma^2) for alpha, beta, gamma coefficients of Y_1^m
-/*
-  SpherePackIterator sit(v2.Extents()[0], v2.Extents()[1]);
-  const int l10a = sit(1,0,SpherePackIterator::a);
-  const int l11a = sit(1,1,SpherePackIterator::a);
-  const int l11b = sit(1,1,SpherePackIterator::b);
-  const DataMesh v_ha = sb.ComputeCoefficients(v2);
-  std::cout << "l10a = " << v_ha[l10a] << std::endl;
-  std::cout << "l11a = " << v_ha[l11a] << std::endl;
-  std::cout << "l11b = " << v_ha[l11b] << std::endl;
-  //I've include an extra factor of 2 for the l11a and l11b terms that seems to make s come out correctly,
-  //but I can't seem to recover that value from the notes about spherical harmonics
-  const double s = 0.25*sqrt(3.)
-                   *sqrt(2.*v_ha[l10a]*v_ha[l10a] + 4.*(v_ha[l11a]*v_ha[l11a] + v_ha[l11b]*v_ha[l11b]));
-  std::cout << "s = " << s << std::endl;
-*/
-
-  //it seems as though s=1 for all situations, so I have not bothered including it here
   //ip1: Integral ( 0.5 * Ricci * gradient(v_1)*gradient(v_2) ) / r2p4 dOmega = (8.*Pi/3.) s
   //in the Ricci argument, r2p4 compensates for the integrand division by r2p4
   const double s_ip1 = (8./(3.*sqrt(2.))) / AKVInnerProduct(v1,v2,Ricci/r2p4,sb);
@@ -850,19 +834,16 @@ double SurfaceArea(const DataMesh& r2p4,
   return sb.ComputeCoefficients(r2p4)[0];
 }
 
-//this function returns the value of
-//   (1./(sqrt(2.)*Pi) Integral ( 0.5 * Ricci * D^i (v_1) * D_i (v_2) ) dA
-// = (1./(sqrt(2.)*Pi) Integral ( 0.5 * Ricci * (1/r2p4) * gradient(v_1)*gradient(v_2) ) * r2p4 dOmega
-// = (1./(sqrt(2.)*Pi) Integral ( 0.5 * Ricci * gradient(v_1)*gradient(v_2) ) dOmega
-double AKVInnerProduct(const DataMesh& v1,
-                       const DataMesh& v2,
-                       const DataMesh& Ricci,
-                       const SurfaceBasis& sb)
+//Gram Schmidt orthogonalization
+//Takes the DataMesh that should not change (fixedMesh), the inner product of that
+//DataMesh with itself (fixedInnerProduct), the DataMesh that needs to be orthogonalized
+//(flexibleMesh), and the inner product of those two meshes (crossTermInnerProduct)
+void GramSchmidtOrthogonalization(const DataMesh& fixedMesh,
+                                  const double fixedInnerProduct,
+                                  DataMesh& flexibleMesh,
+                                  const double crossTermInnerProduct)
 {
-  const Tensor<DataMesh> Gradv1 = sb.Gradient(v1);
-  const Tensor<DataMesh> Gradv2 = sb.Gradient(v2);
-  const DataMesh integrand = 0.5*Ricci*(Gradv1(0)*Gradv2(0)+Gradv1(1)*Gradv2(1));
-  return sb.ComputeCoefficients(integrand)[0];
+  flexibleMesh -= (crossTermInnerProduct/fixedInnerProduct) * fixedMesh;
 }
 
 //this function will create an initial guess for the next axis of
@@ -898,22 +879,7 @@ void AxisInitialGuess(double theta[], double phi[], const int index)
   }
 }
 
-
-//Gram Schmidt orthogonalization
-//Takes the DataMesh that should not change (fixedMesh), the inner product of that
-//DataMesh with itself (fixedInnerProduct), the DataMesh that needs to be orthogonalized
-//(flexibleMesh), and the inner product of those two meshes (crossTermInnerProduct)
-void GramSchmidtOrthogonalization(const DataMesh& fixedMesh,
-                                  const double fixedInnerProduct,
-                                  DataMesh& flexibleMesh,
-                                  const double crossTermInnerProduct)
-{
-  flexibleMesh -= (crossTermInnerProduct/fixedInnerProduct) * fixedMesh;
-}
-
-
-
-
+//performs diagnostics on the approximate Killing vector solution
 void KillingDiagnostics(const SurfaceBasis& sb,
                         const DataMesh& L,
                         const DataMesh& Psi,
@@ -930,7 +896,7 @@ void KillingDiagnostics(const SurfaceBasis& sb,
 
   //-----Divergence-------
   if(printDiagnostic[0]){
-    DataMesh tmp_div = div/r2p2; //only rp2?
+    DataMesh tmp_div = div/r2p2;
     std::cout << "L2 Norm of Divergence = "
               << std::setprecision(12)
               //<< sb.ComputeCoefficients(div*div)[0])/r2p4_00 << std::endl;
@@ -939,13 +905,12 @@ void KillingDiagnostics(const SurfaceBasis& sb,
 
   if(printDiagnostic[1] || printDiagnostic[2]){
     DataMesh vort = sb.Vorticity(xi);
-    DataMesh vortM2L = vort/r2p2 - 2.0*Psi*Psi*L; //only rp2 and rp2?
+    DataMesh vortM2L = vort/r2p2 - 2.0*Psi*Psi*L;
 
     //-----Vorticity-------
     if(printDiagnostic[1]){
       std::cout << "L2 Norm of Vorticity = "
                 << std::setprecision(12)
-                //<< sb.ComputeCoefficients(vortM2L*vortM2L)[0]/r2p4_00 << std::endl;
                 << sqrt(sqrt(2.)*sb.ComputeCoefficients(vortM2L*vortM2L)[0]/4.) << std::endl;
     }
 
@@ -978,7 +943,6 @@ void KillingDiagnostics(const SurfaceBasis& sb,
     Tensor<DataMesh> GradL = sb.Gradient(L);
     DataMesh xiGradL = xi(0)*GradL(0) + xi(1)*GradL(1);
     const DataMesh& llncf = sb.ScalarLaplacian(log(Psi));
-    //const DataMesh Rm1 = Psi*Psi*Psi*Psi / (1.-2.*llncf);
     const DataMesh Rm1 = (rp2*rp2/2.0)/(1.-2.*llncf);
 
     //-----Norm of f_L-------

@@ -22,9 +22,6 @@
 #include "Utils/MpiWrappers/MpiCommunicator.hpp"
 #include "Utils/IO/CachedOfStream.hpp"
 #include <iomanip>
-//TESTING
-//#include "SurfaceBasisExt.hpp"
-//TESTING
 
 namespace Observers {
 

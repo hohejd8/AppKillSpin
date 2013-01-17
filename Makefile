@@ -10,11 +10,12 @@ SUBDIRECTORIES = Executables Tests
 
 OBJECT_FILES_INTO_LIB    = \
              AdmIntegralS2.o \
-             AddStrahlkorperSurface.o \
-             ComputeSKWM.o \
+             AddStrahlkorperSurfaceAndMesh.o \
+             ComputeStrahlkorperWithMesh.o \
              FlatspaceCKV.o \
              AKVsolver.o \
-             ComputeAKV.o
+             ComputeAKV.o \
+             ComputeS2ConformalFactor.o
 
 
 ##############################################################################

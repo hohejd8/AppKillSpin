@@ -8,6 +8,7 @@
 //#include "gsl/gsl_vector.h"
 #include "gsl/gsl_multiroots.h"
 
+//prints the RMS deviation from a perfectly scaled surface
 void PrintSurfaceNormalization(const SurfaceBasis& sb,
                       const DataMesh& rotated_Psi,
                       const DataMesh& theta,
@@ -26,19 +27,18 @@ void RunAKVsolvers(double& THETA,
                    struct rparams * p,
                    const std::string solver);
 
-
 //performs a 1D root finder for THETA at thetap=0 (phip=0)
 //returns true if THETA root is found such that
-//(l,m)=(1,m) residuals are < 1.e-12
-bool findTHETA(struct rparams * p,
+//(l,m)=(1,m) residuals are within tolerance
+bool FindTHETA(struct rparams * p,
                double& THETA_root,
                const double& residual_size,
                const bool verbose);
 
 //uses the gsl multidimensional root finder to find
 //values for THETA, thetap, phip such that
-//(l,m)=(1,m) residuals are < 1.e-12
-void findTtp(struct rparams * p,
+//(l,m)=(1,m) residuals are within tolerance
+void FindTtp(struct rparams * p,
              double& THETA,
              double& thetap,
              double& phip,
@@ -59,7 +59,7 @@ int AKVsolver(const gsl_vector * x,
                 void *params,
                 gsl_vector * f);
 
-
+//prints the state of the multidimensional root finder
 void print_state (size_t iter, gsl_multiroot_fsolver * s);
 
 //rotates a DataMesh by an amount (Theta,Phi)
@@ -77,7 +77,7 @@ Tensor<DataMesh> ComputeXi(const DataMesh& v, const SurfaceBasis& sb);
 
 //calls normalizeKVAtOnePoint for every point in the mesh,
 //then returns the average of all the scale factors
-double normalizeKVAtAllPoints(const SurfaceBasis& sb,
+double NormalizeAKVAtAllPoints(const SurfaceBasis& sb,
                               const DataMesh& Psi,
                               const DataMesh& theta,
                               const DataMesh& phi,
@@ -88,36 +88,23 @@ double normalizeKVAtAllPoints(const SurfaceBasis& sb,
 //Killing vector around the sphere starting at (theta, phi)
 //and returns the ratio of that path to the expected
 //value of 2*Pi (the normalization scale factor)
-double normalizeKVAtOnePoint(const SurfaceBasis& sb,
+double NormalizeAKVAtOnePoint(const SurfaceBasis& sb,
                               const DataMesh& Psi,
-                              //const DataMesh& theta,
-                              //const DataMesh& phi,
                               const DataMesh& v,
                               const double& rad,
                               const double& thetap=M_PI/2.,
                               const double& phip=0.0);
-double normalizeKVAtOnePoint(const SurfaceBasis& sb,
+double NormalizeAKVAtOnePoint(const SurfaceBasis& sb,
                               const DataMesh& Psi,
-                              //const DataMesh& theta,
-                              //const DataMesh& phi,
                               const Tensor<DataMesh>& xi,
                               const double& rad,
                               const double& thetap=M_PI/2.0,
                               const double& phip=0.0);
 
-//This routine will print the value of normalizeKVAtAllPoints for 
-//a range of scale factors in the neighborhood of scaleFactor1-4
-/*
-void TestScaleFactors(const DataMesh& rotated_v,
-                      const DataMesh& rotated_Psi,
-                      const double& rad,
-                      const SurfaceBasis& sb,
-                      const DataMesh& theta,
-                      const DataMesh& phi,
-                      const double& scaleFactor1,
-                      const double& scaleFactor2);
-*/
-void OptimizeScaleFactor(const DataMesh& rotated_v,
+//determines the optimal scale factor using a modified bisection
+//routine.  "Optimal" means the chosen scale factor returns the
+//closest value to 2*pi for all paths along the surface
+double OptimizeScaleFactor(const DataMesh& rotated_v,
                       const DataMesh& rotated_Psi,
                       const double& rad,
                       const SurfaceBasis& sb,
@@ -128,7 +115,7 @@ void OptimizeScaleFactor(const DataMesh& rotated_v,
                       const double& scaleFactor3,
                       const double& scaleFactor4);
 
-
+//integrates along a particular Killing path on the surface
 bool KillingPath(const SurfaceBasis& sb,
                     const DataMesh& Psi_r,
                     const Tensor<DataMesh>& xi,
@@ -137,7 +124,6 @@ bool KillingPath(const SurfaceBasis& sb,
                     const double& theta,
                     const double& phi=0.0,
                     const bool printSteps=false);
-
 int PathDerivs(double t_required_by_solver, 
                const double y[],
                double f[],
@@ -150,19 +136,12 @@ double AKVInnerProduct(const DataMesh& v1,
                        const DataMesh& Ricci,
                        const SurfaceBasis& sb);
 
-//this function will create an initial guess for the next axis of
-//symmetry based on previous solutions.  It requires theta, phi for
-//prior axes solutions, and an index which indicates whether this is
-//the first, second, or third guess
-void AxisInitialGuess(double theta[], double phi[], const int index);
-
-void GramSchmidtOrthogonalization(const DataMesh& fixedMesh,
-                                  const double fixedInnerProduct,
-                                  DataMesh& flexibleMesh,
-                                  const double crossTermInnerProduct);
-
-
-
+//returns the scaling factors related to various forms of the AKVInnerProduct
+MyVector<double> InnerProductScaleFactors(const DataMesh& v1,
+                       const DataMesh& v2,
+                       const DataMesh& Ricci,
+                       const DataMesh& r2p4,
+                       const SurfaceBasis& sb);
 
 //returns the proper area integral
 //   \frac{1}{\sqrt{2} \pi} \oint 1 dA
@@ -170,12 +149,18 @@ void GramSchmidtOrthogonalization(const DataMesh& fixedMesh,
 double SurfaceArea(const DataMesh& r2p4,
                    const SurfaceBasis& sb);
 
-//returns the scaling factors related to various forms of the AKVInnerProduct
-MyVector<double> InnerProductScaleFactors(const DataMesh& v1,
-                       const DataMesh& v2,
-                       const DataMesh& Ricci,
-                       const DataMesh& r2p4,
-                       const SurfaceBasis& sb);
+//function to perform G-S orthogonalization on a (flexible) DataMesh
+//based on its inner product with a (fixed) DataMesh
+void GramSchmidtOrthogonalization(const DataMesh& fixedMesh,
+                                  const double fixedInnerProduct,
+                                  DataMesh& flexibleMesh,
+                                  const double crossTermInnerProduct);
+
+//this function will create an initial guess for the next axis of
+//symmetry based on previous solutions.  It requires theta, phi for
+//prior axes solutions, and an index which indicates whether this is
+//the first, second, or third guess
+void AxisInitialGuess(double theta[], double phi[], const int index);
 
 //performs diagnostics on the approximate Killing vector solution
 void KillingDiagnostics(const SurfaceBasis& sb,
@@ -198,6 +183,7 @@ struct rparams{
   const double & L_resid_tol;
   const double & v_resid_tol;
   const bool & printResiduals;
+  const bool & ricciScaling;
 };
 
 //a structure required to follow the Killing path around the surface

@@ -14,8 +14,11 @@ namespace ComputeItems {
     : mResult(0)
   {
     OptionParser p(opts, Help());
+    mAKVSolution     = p.Get<std::string>("AKVSolution");
+    mWithRicciScaling = p.Get<bool>("WithRicciScaling",true);
     mSkwm       = p.Get<std::string>("StrahlkorperWithMesh");
     mConformalFactor = p.Get<std::string>("ConformalFactor","ConformalFactor");
+    mInterpolateConformalFactor = p.Get<bool>("InterpolateConformalFactor",true);
     mAKVGuess   = p.Get<MyVector<double> >("AKVGuess");//must be three-dimensional
       REQUIRE(mAKVGuess.Size()==3,"AKVGuess has Size " << mAKVGuess.Size() 
                                   << ", should be 3.");
@@ -23,11 +26,15 @@ namespace ComputeItems {
     mSolver     = p.Get<std::string>("Solver","Newton");
     mVerbose    = p.Get<bool>("Verbose",false);
     mPrintResiduals = p.Get<bool>("PrintResiduals",false);
+    mResidualSize = p.Get<double>("ResidualSize",1.e-10);
     mL_resid_tol = p.Get<double>("L_resid_tol",1.e-12);
     mv_resid_tol = p.Get<double>("v_resid_tol",1.e-12);
     mMin_thetap = p.Get<double>("Min_thetap",1.e-5);
-    mResidualSize = p.Get<double>("ResidualSize",1.e-10);
-    mOutput     = p.Get<std::string>("Output");
+    mPrintTtpSolution = p.Get<bool>("PrintTtpSolution",true);
+    mPrintInnerProducts = p.Get<bool>("PrintInnerProducts",false);
+    mScaleFactor = p.Get<std::string>("ScaleFactor","Equator");
+    mPrintScaleFactor = p.Get<bool>("PrintScaleFactor",false);
+    mPrintSurfaceNormalization = p.Get<bool>("PrintSurfaceNormalization",false);
 
     printDiagnostic = MyVector<bool>(MV::Size(6), true);
     if(p.OptionIsDefined("DivNorm")) printDiagnostic[0]=p.Get<bool>("DivNorm");
@@ -40,31 +47,40 @@ namespace ComputeItems {
 
   //==========================================================================
   
-  void ComputeAKV::RecomputeData(const DataBoxAccess& box) const {
+  void ComputeAKV::RecomputeData(const DataBoxAccess& boxa) const {
     delete mResult;
+    const StrahlkorperWithMesh& skwm = boxa.Get<StrahlkorperWithMesh>(mSkwm);
+    const SurfaceBasis sb(skwm.Grid().Basis());
+    const DataMesh theta = boxa.Get<StrahlkorperWithMesh>(mSkwm).Grid().SurfaceCoords()(0);
+    const DataMesh phi = boxa.Get<StrahlkorperWithMesh>(mSkwm).Grid().SurfaceCoords()(1);
 
-    const StrahlkorperWithMesh& skwm = box.Get<StrahlkorperWithMesh>(mSkwm);
-    const SurfaceBasis sb(skwm.Grid());
-    const DataMesh theta = box.Get<StrahlkorperWithMesh>(mSkwm).Grid().SurfaceCoords()(0);
-    const DataMesh phi = box.Get<StrahlkorperWithMesh>(mSkwm).Grid().SurfaceCoords()(1);
-    //DataMesh L(DataMesh::Empty);
-    //DataMesh v(DataMesh::Empty);
 
-    //Psi needs to be interpolated onto the surface
-    const Domain& D=box.Get<Domain>("Domain");
-    MyVector<std::string> TensorsToInterp(MV::fill, mConformalFactor);
-    std::string mSpatialCoordMap="";
-    StrahlkorperDataSuppliers::StrahlkorperParallelInterpolation
-          supplier(D, box, box.Get<Domain>("Domain").Communicator(),
+      DataBox localBox("ComputeAKV DataBox");
+      DataBoxInserter localBoxInserter(localBox, POSITION);
+      DataBoxAccess lba(localBox, "ComputeAKV");
+    //if Psi needs to be interpolated onto the surface
+    if(mInterpolateConformalFactor){
+      const DataBoxAccess& rootDBA = boxa.Root();
+      const Domain& D=rootDBA.Get<Domain>("Domain");
+      MyVector<std::string> TensorsToInterp(MV::fill, mConformalFactor);
+      std::string mSpatialCoordMap="";
+      StrahlkorperDataSuppliers::StrahlkorperParallelInterpolation
+          supplier(D, rootDBA, D.Communicator(),
                    TensorsToInterp, mSpatialCoordMap,"Spectral");
-    DataBox localBox("ComputeAKV DataBox");
-    DataBoxInserter localBoxInserter(localBox, POSITION);
-    for(int i=0; i<TensorsToInterp.Size(); i++){
-      localBoxInserter.AddVolatileItem(TensorsToInterp[i],
-                           supplier.Supply(skwm, TensorsToInterp[i]));
+      //DataBox localBox("ComputeAKV DataBox");
+      //DataBoxInserter localBoxInserter(localBox, POSITION);
+      for(int i=0; i<TensorsToInterp.Size(); i++){
+        localBoxInserter.AddVolatileItem(TensorsToInterp[i],
+                             supplier.Supply(skwm, TensorsToInterp[i]));
+      }
+      //DataBoxAccess lba(localBox, "ComputeAKV");
+      //const DataMesh& Psi(lba.Get<Tensor<DataMesh> >(mConformalFactor)());
+    } else {
+      localBoxInserter.AddVolatileItem(mConformalFactor,
+                  Tensor<DataMesh>(1,"1",boxa.Get<DataMesh>(mConformalFactor)));
     }
-    DataBoxAccess lba(localBox, "AKV Recompute");
     const DataMesh& Psi(lba.Get<Tensor<DataMesh> >(mConformalFactor)());
+
 
     //compute some useful quantities
     const DataMesh rp2 = mRad * Psi * Psi;
@@ -78,12 +94,9 @@ namespace ComputeItems {
     //if the initial guess for thetap is close to zero or pi,
     //try solving at thetap = zero
     //set the initial guesses
-    double THETA[3] = {mAKVGuess[0],0.,0.};
-    double thetap[3] = {mAKVGuess[1],0.,0.};
-    double phip[3] = {mAKVGuess[2],0.,0.};
-    //double THETA = mAKVGuess[0];
-    //double thetap = mAKVGuess[1];
-    //double phip = mAKVGuess[2];
+    double THETA[3] = {mAKVGuess[0],mAKVGuess[1],mAKVGuess[2]};
+    double thetap[3] = {0.,0.,0.};
+    double phip[3] = {0.,0.,0.};
 
     //save the v, xi solutions along particular axes
     MyVector<DataMesh> v(MV::Size(3),DataMesh::Empty);
@@ -102,7 +115,7 @@ namespace ComputeItems {
     const double symmetry_tol = 1.e-11;
     const double min_thetap = 1.e-5;
 
-    for(int a=0; a<axes; a++){//index over perpendicular axes to find AKV solutions
+    for(int a=0; a<axes; a++){//index over orthonormal directions to find AKV solutions
 
       //if the diagnostics below decide that there is a bad solution for v[a]
       //(usually a repeated solution), this flag will indicate that the
@@ -116,25 +129,18 @@ namespace ComputeItems {
       DataMesh L(DataMesh::Empty);
 
       //setup struct with all necessary data
-      rparams p = {theta,
-                 phi,
-                 rp2,
-                 sb,
-                 llncf,
-                 GradRicci,
-                 L,
-                 v[a],
-                 mL_resid_tol,
-                 mv_resid_tol,
-                 mPrintResiduals};
+      rparams p = {theta,phi,rp2,sb,llncf,GradRicci,L,
+                 v[a],mL_resid_tol,mv_resid_tol,mPrintResiduals,mWithRicciScaling};
 
       RunAKVsolvers(THETA[a], thetap[a], phip[a], min_thetap,
                     mResidualSize, mVerbose, &p, mSolver);
 
-      std::cout << "Solution found with : THETA[" << a << "] = " << THETA[a] << "\n"
-  	        << "                     thetap[" << a << "] = " << (180.0/M_PI)*thetap[a] << "\n"
-	        << "                       phip[" << a << "] = " << (180.0/M_PI)*phip[a] 
-	        << std::endl;
+      if(mPrintTtpSolution){
+        std::cout << "Solution found with : THETA[" << a << "] = " << THETA[a] << "\n"
+  	<< "                     thetap[" << a << "] = " << (180.0/M_PI)*thetap[a] << "\n"
+	<< "                       phip[" << a << "] = " << (180.0/M_PI)*phip[a] 
+	<< std::endl;
+      }
 
       //check inner products
       // <v_i|v_j> = Integral 0.5 * Ricci * Grad(v_i) \cdot Grad(v_j) dA
@@ -142,18 +148,11 @@ namespace ComputeItems {
         case 0:
           //compute inner product <v_0|v_0>
           v0v0 = AKVInnerProduct(v[0],v[0],Ricci,sb)*sqrt(2.)*M_PI;
-          //if(v0v0<symmetry_tol) //symmetries++;
-          std::cout << "<v_0|v_0> = " << v0v0 << std::endl;
-          std::cout << "-THETA <v_0|v_0> = " << -THETA[a]*v0v0 << std::endl;
           break;
         case 1:
           //compute inner products <v_1|v_1>, <v_0|v_1>
           v1v1 = AKVInnerProduct(v[1],v[1],Ricci,sb)*sqrt(2.)*M_PI;
           v0v1 = AKVInnerProduct(v[0],v[1],Ricci,sb)*sqrt(2.)*M_PI;
-          //if(v1v1<symmetry_tol) //symmetries++;
-          std::cout << "<v_1|v_1> = " << v1v1 << std::endl;
-          std::cout << "<v_0|v_1> = " << v0v1 << std::endl;
-          std::cout << "-THETA <v_1|v_1> = " << -THETA[a]*v1v1 << std::endl;
           if(fabs(v0v0) == fabs(v1v2)) badAKVSolution = true;
           break;
         case 2:
@@ -161,14 +160,21 @@ namespace ComputeItems {
           v2v2 = AKVInnerProduct(v[2],v[2],Ricci,sb)*sqrt(2.)*M_PI;
           v0v2 = AKVInnerProduct(v[0],v[2],Ricci,sb)*sqrt(2.)*M_PI;
           v1v2 = AKVInnerProduct(v[1],v[2],Ricci,sb)*sqrt(2.)*M_PI;
-          //if(v2v2<symmetry_tol) //symmetries++;
+          if(fabs(v0v0) == fabs(v0v2)) badAKVSolution = true;
+          if(fabs(v1v1) == fabs(v1v2)) badAKVSolution = true;
+          break;
+      }
+
+      if(mPrintInnerProducts && a==2){
+          std::cout << "<v_0|v_0> = " << v0v0 << std::endl;
+          std::cout << "-THETA <v_0|v_0> = " << -THETA[a]*v0v0 << std::endl;
+          std::cout << "<v_1|v_1> = " << v1v1 << std::endl;
+          std::cout << "<v_0|v_1> = " << v0v1 << std::endl;
+          std::cout << "-THETA <v_1|v_1> = " << -THETA[a]*v1v1 << std::endl;
           std::cout << "<v_2|v_2> = " << v2v2 << std::endl;
           std::cout << "<v_0|v_2> = " << v0v2 << std::endl;
           std::cout << "<v_1|v_2> = " << v1v2 << std::endl;
           std::cout << "-THETA <v_2|v_2> = " << -THETA[a]*v2v2 << std::endl;
-          if(fabs(v0v0) == fabs(v0v2)) badAKVSolution = true;
-          if(fabs(v1v1) == fabs(v1v2)) badAKVSolution = true;
-          break;
       }
 
       //Gram Schmidt orthogonalization
@@ -215,23 +221,37 @@ namespace ComputeItems {
       DataMesh rotated_Psi = RotateOnSphere(Psi,theta,phi,
                                             sb,thetap[a],phip[a]);
 
-      //compare scale factors
-//remove this later
-//std::cout << "L coefficients" << std::endl;
-//std::cout << sb.ComputeCoefficients(L) << std::endl;
-//remove this later
-      const double scaleAtEquator =
-                normalizeKVAtOnePoint(sb, rotated_Psi, rotated_v[a], mRad, M_PI/2., 0.0);
-      PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleAtEquator,mRad);
-      MyVector<double> scaleInnerProduct = InnerProductScaleFactors(v[a], v[a], Ricci, r2p4, sb);
-      PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleInnerProduct[0],mRad);
-      PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleInnerProduct[1],mRad);
-      PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleInnerProduct[2],mRad);
-      OptimizeScaleFactor(rotated_v[a], rotated_Psi, mRad, sb, theta,
-         phi, scaleAtEquator, scaleInnerProduct[0], scaleInnerProduct[1], scaleInnerProduct[2]);
+      //determine scale factors
+      double scale = 0.0;
+      //probably easiest to code cases and make the user pick a corresponding number, not string
+      if(mScaleFactor=="Equator"){
+        scale = NormalizeAKVAtOnePoint(sb, rotated_Psi, rotated_v[a], mRad, M_PI/2., 0.0);
+      } else if(mScaleFactor=="InnerProduct1"){
+        scale = InnerProductScaleFactors(v[a], v[a], Ricci, r2p4, sb)[0];
+      } else if(mScaleFactor=="InnerProduct2"){
+        scale = InnerProductScaleFactors(v[a], v[a], Ricci, r2p4, sb)[1];
+      } else if(mScaleFactor=="InnerProduct3"){
+        scale = InnerProductScaleFactors(v[a], v[a], Ricci, r2p4, sb)[2];
+      } else if(mScaleFactor=="Optimize"){
+        double scaleAtEquator
+              = NormalizeAKVAtOnePoint(sb, rotated_Psi, rotated_v[a], mRad, M_PI/2., 0.0);
+        MyVector<double> scaleIP = InnerProductScaleFactors(v[a], v[a], Ricci, r2p4, sb);
+        scale = OptimizeScaleFactor(rotated_v[a], rotated_Psi, mRad, sb, theta,
+         phi, scaleAtEquator, scaleIP[0], scaleIP[1], scaleIP[2]);
+        if(mPrintSurfaceNormalization){
+          PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleAtEquator,mRad);
+          PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleIP[0],mRad);
+          PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleIP[1],mRad);
+          PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleIP[2],mRad);
+        }
+      }
+
+      if(mPrintSurfaceNormalization){
+        PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scale,mRad);
+      }
 
       //scale v
-      v[a] *= scaleAtEquator;
+      v[a] *= scale;
 
       //recompute scaled xi (1-form)
       xi[a] = ComputeXi(v[a], sb);
