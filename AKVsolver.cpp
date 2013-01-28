@@ -21,8 +21,8 @@ void PrintSurfaceNormalization(const SurfaceBasis& sb,
   const double scaleOverSurface =
                 NormalizeAKVAtAllPoints(sb, rotated_Psi, theta, phi, rotated_v*scaleFactor, rad);
   std::cout << std::setprecision(15) 
-            << "Scale Factor: " << scaleFactor 
-            << " RMS deviation: " << scaleOverSurface << std::endl;
+            << scaleFactor 
+            << " " << scaleOverSurface << std::endl;
 }
 
 //this function determines which AKVsolver to run based on initial guess
@@ -328,27 +328,18 @@ int AKVsolver(const gsl_vector * x,
   const bool& ricciScaling = static_cast<struct rparams*>(params)->ricciScaling;
 
   SpherePackIterator sit(theta.Extents()[0],theta.Extents()[1]);
-  // index for l=0
+  // index for l=0, 1
   const int l00a = sit(0,0,SpherePackIterator::a);
-  // indices for l=1
   const int l10a = sit(1,0,SpherePackIterator::a);
   const int l11a = sit(1,1,SpherePackIterator::a);
   const int l11b = sit(1,1,SpherePackIterator::b);
 
-  if(ricciScaling){
-    //eq. 78, 93
-    L = cos(thetap)*cos(theta)
+  //valid solution for both ricciScaling = true, false
+  L = cos(thetap)*cos(theta)
         + sin(thetap)*sin(theta)*(cos(phip)*cos(phi) + sin(phip)*sin(phi) );
-    //eq. 95
-    v = L;
-  } else {
-/*
-    L = ;
-    v = ;
-*/
-  }
+  v = L;
 
-  //eq. 94, make sure only l=1 mode exists by setting all l!=1 modes to zero
+  //make sure only l=1 mode exists by setting all l!=1 modes to zero
   DataMesh L_ha = sb.ComputeCoefficients(L);
   DataMesh v_ha = sb.ComputeCoefficients(v);
 
@@ -371,25 +362,23 @@ int AKVsolver(const gsl_vector * x,
   bool refining = false;
   int refine_count = 0; int iter_count = 0; const int iter_max = 50;
   double ic10 = 0.0; double ic1p = 0.0; double ic1m = 0.0;
-  DataMesh RHS(DataMesh::Empty);//RHS=right hand side of eq. 97
+  DataMesh RHS(DataMesh::Empty);
   DataMesh RHS_ha(sb.CoefficientMesh());
-  Tensor<DataMesh> Gradv(2,"1",DataMesh::Empty); //Gradient of v, eq. 97
+  Tensor<DataMesh> Gradv(2,"1",DataMesh::Empty); //Gradient of v
 
   while(unsolved){
-    //eq. 97, first term: compute Laplacian of L
+    //compute Laplacian of L
     RHS = sb.ScalarLaplacian(L_ha);
 
-    //eq. 97, component of third term: compute gradient of v
+    //component of third term: compute gradient of v
     Gradv = sb.Gradient(v_ha);
 
     if(ricciScaling){
-      //compute eq. 97
       RHS = -RHS 
           + (4.0*llncf*L + 0.5*GradRicci(0)*Gradv(0) + 0.5*GradRicci(1)*Gradv(1) -2.0*L)*(1.0-THETA);
     } else {
-/*
-      RHS = ;
-*/
+      RHS = -RHS
+          + 4.0*llncf*L + 0.5*GradRicci(0)*Gradv(0) + 0.5*GradRicci(1)*Gradv(1) + THETA*rp2*rp2*L;
     }
 
     //perform harmonic analysis on RHS
@@ -422,7 +411,6 @@ int AKVsolver(const gsl_vector * x,
     const double norm_RHS_L = sqrt(sqrt(2.0)*sb.ComputeCoefficients(RHS)[l00a]/4.0);
 
     //invert (Laplacian + 2)
-//inversions are probably also different for non-Ricci scaling
     for(sit.Reset(); sit; ++sit){
       if(sit.l()!=1){ // l=1 modes are zero
         RHS_ha[sit()] /= 2.0 - sit.l()*(sit.l()+1.0);
@@ -441,13 +429,7 @@ int AKVsolver(const gsl_vector * x,
     //NOTE: RHS changes definitions here
     RHS = sb.ScalarLaplacian(v_ha);
 
-    if(ricciScaling){
-      RHS = -RHS - 2.0*rp2*rp2*L;
-    } else {
-/*
-      RHS = ;
-*/
-    }
+    RHS = -RHS - 2.0*rp2*rp2*L;
 
     //remove the l=0 mode from RHS
     RHS_ha = sb.ComputeCoefficients(RHS);

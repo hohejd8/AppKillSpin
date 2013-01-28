@@ -35,7 +35,7 @@ namespace ComputeItems {
     mScaleFactor = p.Get<std::string>("ScaleFactor","Equator");
     mPrintScaleFactor = p.Get<bool>("PrintScaleFactor",false);
     mPrintSurfaceNormalization = p.Get<bool>("PrintSurfaceNormalization",false);
-
+std::cout << POSITION << std::flush << std::endl;
     printDiagnostic = MyVector<bool>(MV::Size(6), true);
     if(p.OptionIsDefined("DivNorm")) printDiagnostic[0]=p.Get<bool>("DivNorm");
     if(p.OptionIsDefined("VortNorm")) printDiagnostic[1]=p.Get<bool>("VortNorm");
@@ -81,7 +81,7 @@ namespace ComputeItems {
     }
     const DataMesh& Psi(lba.Get<Tensor<DataMesh> >(mConformalFactor)());
 
-
+std::cout << POSITION << std::flush << std::endl;
     //compute some useful quantities
     const DataMesh rp2 = mRad * Psi * Psi;
     const DataMesh r2p4 = rp2*rp2;
@@ -110,7 +110,7 @@ namespace ComputeItems {
     double v0v1 = 0.;
     double v0v2 = 0.;
     double v1v2 = 0.;
-
+std::cout << POSITION << std::flush << std::endl;
     //tolerances; add as input later
     const double symmetry_tol = 1.e-11;
     const double min_thetap = 1.e-5;
@@ -223,7 +223,8 @@ namespace ComputeItems {
 
       //determine scale factors
       double scale = 0.0;
-      //probably easiest to code cases and make the user pick a corresponding number, not string
+      if(mPrintSurfaceNormalization)
+        std::cout << "Scale factor:       RMS deviation:" << std::endl;
       if(mScaleFactor=="Equator"){
         scale = NormalizeAKVAtOnePoint(sb, rotated_Psi, rotated_v[a], mRad, M_PI/2., 0.0);
       } else if(mScaleFactor=="InnerProduct1"){
@@ -233,15 +234,19 @@ namespace ComputeItems {
       } else if(mScaleFactor=="InnerProduct3"){
         scale = InnerProductScaleFactors(v[a], v[a], Ricci, r2p4, sb)[2];
       } else if(mScaleFactor=="Optimize"){
-        double scaleAtEquator
+        const double scaleAtEquator
               = NormalizeAKVAtOnePoint(sb, rotated_Psi, rotated_v[a], mRad, M_PI/2., 0.0);
-        MyVector<double> scaleIP = InnerProductScaleFactors(v[a], v[a], Ricci, r2p4, sb);
+        const MyVector<double> scaleIP = InnerProductScaleFactors(v[a], v[a], Ricci, r2p4, sb);
         scale = OptimizeScaleFactor(rotated_v[a], rotated_Psi, mRad, sb, theta,
          phi, scaleAtEquator, scaleIP[0], scaleIP[1], scaleIP[2]);
         if(mPrintSurfaceNormalization){
+          std::cout << "Equator " << std::endl;
           PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleAtEquator,mRad);
+          std::cout << "IP1 " << std::endl;
           PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleIP[0],mRad);
+          std::cout << "IP2 " << std::endl;
           PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleIP[1],mRad);
+          std::cout << "IP3 " << std::endl;
           PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleIP[2],mRad);
         }
       }
