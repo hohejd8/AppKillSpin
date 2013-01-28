@@ -109,6 +109,8 @@ Observers=
                              ComputeAKV(
                                 StrahlkorperWithMesh=hohejd8SkWM;
                                 ConformalFactor=ConformalFactor;
+                                WithRicciScaling=false;
+                                ScaleFactor=Optimize;
                                 AKVGuess=-3.0e-06, 6.0e-09, -0.50;
                                 Radius=__R1__;
                                 Verbose=true;

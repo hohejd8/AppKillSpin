@@ -1,15 +1,15 @@
 #!/usr/bin/perl
 
-@Symmetry(Spherical,Z,X,Y,OffAxis,None);
+@Symmetry=("Spherical","Z","X","Y","OffAxis","None");
 for($k=0; $k<6; ++$k) {
     $dir="Symmetry".$k;
 
 
-    &RunInDirectory($DIR,
+    &RunInDirectory($dir,
 		    {
 			"ApplyObservers.input"      => {
                             "__Symmetry__"           => $Symmetry[$k],
- 		            "__DIR__"   => $DIR,
+ 		            #"__DIR__"   => $DIR,
 			},
 		    }
 	); ## &RunInDirectory

@@ -28,11 +28,17 @@ DataBoxItems=
               ),
               ComputeS2ConformalFactor(
                 StrahlkorperWithMesh=TestSkWM;
-                Symmetry=OffAxis;
+                Symmetry=Spherical;
+                #Symmetry=Z;
+                #Symmetry=None;
+                #Symmetry=OffAxis;
+                #Symmetry=__Symmetry__;
               ),
               ComputeAKV(
                 StrahlkorperWithMesh=TestSkWM;
                 ConformalFactor=ConformalFactor;
+                ScaleFactor=Optimize;
+                WithRicciScaling=false;
                 InterpolateConformalFactor=false;
                 AKVGuess=0.0, 0.0, 0.0;
                 Radius=1.0;

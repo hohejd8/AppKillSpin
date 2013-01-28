@@ -46,8 +46,6 @@ void RunAKVsolvers(double& THETA,
     const double phip_saved = phip;
     const double THETA_saved = THETA;
     oneDSolutionFound = FindTHETA(p,THETA,residualSize,verbose);
-    std::cout << "oneDSolutionFound = " << oneDSolutionFound << std::endl;
-    std::cout << POSITION << std::endl;
     if(oneDSolutionFound){
       thetap = 0.0;
       phip = 0.0;
@@ -78,8 +76,6 @@ void RunAKVsolvers(double& THETA,
   //or initial guess was not close to zero
   //try the multidimensional root finder
   if(!oneDSolutionFound){
-    std::cout << "oneDSolutionFound = " << oneDSolutionFound << std::endl;
-    std::cout << POSITION << std::endl;
     FindTtp(p, THETA, thetap, phip, solver,residualSize, verbose);
 
     //if thetap solution is close to zero,

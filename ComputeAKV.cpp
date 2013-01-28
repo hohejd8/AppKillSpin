@@ -35,7 +35,6 @@ namespace ComputeItems {
     mScaleFactor = p.Get<std::string>("ScaleFactor","Equator");
     mPrintScaleFactor = p.Get<bool>("PrintScaleFactor",false);
     mPrintSurfaceNormalization = p.Get<bool>("PrintSurfaceNormalization",false);
-std::cout << POSITION << std::flush << std::endl;
     printDiagnostic = MyVector<bool>(MV::Size(6), true);
     if(p.OptionIsDefined("DivNorm")) printDiagnostic[0]=p.Get<bool>("DivNorm");
     if(p.OptionIsDefined("VortNorm")) printDiagnostic[1]=p.Get<bool>("VortNorm");
@@ -81,7 +80,6 @@ std::cout << POSITION << std::flush << std::endl;
     }
     const DataMesh& Psi(lba.Get<Tensor<DataMesh> >(mConformalFactor)());
 
-std::cout << POSITION << std::flush << std::endl;
     //compute some useful quantities
     const DataMesh rp2 = mRad * Psi * Psi;
     const DataMesh r2p4 = rp2*rp2;
@@ -110,7 +108,7 @@ std::cout << POSITION << std::flush << std::endl;
     double v0v1 = 0.;
     double v0v2 = 0.;
     double v1v2 = 0.;
-std::cout << POSITION << std::flush << std::endl;
+
     //tolerances; add as input later
     const double symmetry_tol = 1.e-11;
     const double min_thetap = 1.e-5;
