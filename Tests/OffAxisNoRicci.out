@@ -1,0 +1,84 @@
+MPI starting on 1 processors at Tue Jan 29 10:03:14 2013
+Processor Names = Watson
+RunDirectory is /home/hohejd8/SpEC/AppKillSpin/Tests
+Compiled at Watson:/home/hohejd8/SpEC
+Code Revision a74c5e629474ee1320f04c29605b64fcb979cc61 (InitialCommit-20769-ga74c5e6)
+Linked on Tue Jan 29 10:00:48 EST 2013
+Executed ApplyObservers: /home/hohejd8/SpEC/Support/ApplyObservers/Executables/ApplyObservers -UseTimes=0 ApplyObservers.input
+
+symmetry axis guess : 0 0
+Starting the gsl 1D root finder at thetap = 0.0.
+Converged
+f0 = -1.78224e-16 fp = -0.0124436 fm = 0.0124436
+Starting the gsl multidimensional root finder.
+iter = 1 x = -0.74316152 0.0053921015  538.18847 f(x) = 2.382059e-05 -0.012430837 0.012456167
+iter = 2 x = -1.5107398   133.1534 -4202.7348 f(x) = -1.2491753 -1.6891081  1.4741449
+iter = 3 x = -0.73726768 -1.4235101  575.91027 f(x) = -0.020084987 0.0053691458 -0.015947647
+iter = 4 x = -0.74407323 0.39421016  558.81762 f(x) = -0.0075225343 -0.0081305638 0.015491218
+iter = 5 x = -0.74285452  0.2488883  561.31145 f(x) = -0.00030238434 -0.01513636 0.0088997043
+iter = 6 x = -0.69491382 0.17707975   526.8894 f(x) =  0.2091145 0.0070259896 0.034152539
+iter = 7 x = -0.72955384   11.60376  453.73098 f(x) = 0.051146165 -0.0095574972 0.046017924
+iter = 8 x = -0.73887314 -2.3339244    572.362 f(x) = 0.0045961579 -0.0011121549 -0.004923892
+iter = 9 x = -0.73748688 -2.3700054  572.57817 f(x) = -0.00058404956 0.00059175411 0.00019927573
+iter = 10 x = -0.73751799 -2.3535826  572.55766 f(x) = 9.282213e-05 -2.6997408e-06 8.6844024e-05
+iter = 11 x = -0.73751738 -2.3565198  572.55464 f(x) = -1.1641506e-05 -5.369661e-06 -1.6461132e-05
+iter = 12 x = -0.73751747 -2.3561946  572.55525 f(x) = 2.4772506e-09 -1.1448148e-07 -1.2258756e-07
+iter = 13 x = -0.73751747 -2.3561945  572.55526 f(x) = -3.3255482e-10 -5.757063e-10 -9.3125272e-10
+iter = 14 x = -0.73751747 -2.3561945  572.55526 f(x) = 7.9566076e-13 1.7477995e-12 2.6111897e-12
+Solution found with : THETA[0] = -0.73751747
+                     thetap[0] = 135
+                       phip[0] = -135
+L2 Norm of Divergence = 6.25169246334e-15
+L2 Norm of Vorticity = 4.81589535209e-14
+Integral S_{ij}S^{ij} dA 7.18431026386e-05
+L2 Norm of f_L= 3.08779573584e-05
+L2 Norm of f_lam= 3.28729013583e-24
+L2 Norm of xi*Grad(L) = 1.15180726143e-24
+Scale factor:       RMS deviation:
+0.985725147495562 0.000601017580055597
+
+symmetry axis guess : 90 -45.0000000071506
+Starting the gsl multidimensional root finder.
+iter = 1 x = -0.74886464  1.5707963 -0.78539816 f(x) = -4.0825679e-12 -4.972621e-05 -4.9726206e-05
+iter = 2 x = -0.74884184  1.5707963 -0.78539816 f(x) = -4.1287403e-12 1.8188061e-09 1.8229357e-09
+iter = 3 x = -0.74884184  1.5707963 -0.78539816 f(x) = -4.1921609e-12 -2.0962631e-12 2.0963649e-12
+Solution found with : THETA[1] = -0.74884184
+                     thetap[1] = 90
+                       phip[1] = -45
+L2 Norm of Divergence = 6.89000693471e-15
+L2 Norm of Vorticity = 6.7739954793e-14
+Integral S_{ij}S^{ij} dA 0.00419762582177
+L2 Norm of f_L= 2.37774509442e-05
+L2 Norm of f_lam= 0.000366197610598
+L2 Norm of xi*Grad(L) = 3.57620637604e-05
+Scale factor:       RMS deviation:
+1.007057761453 0.000327131469921904
+
+symmetry axis guess : 44.999999998638 -135.000000009289
+Starting the gsl multidimensional root finder.
+iter = 1 x = -0.74886463 0.78539816 -2.3561945 f(x) = -7.0305444e-05 3.5152722e-05 -3.5152722e-05
+iter = 2 x = -0.74884184 0.78539816 -2.3561945 f(x) = 2.5744415e-09 -1.2872194e-09 1.2872198e-09
+iter = 3 x = -0.74884184 0.78539816 -2.3561945 f(x) = 8.7967201e-16 8.2544496e-16 -4.1778487e-16
+Solution found with : THETA[2] = -0.74884184
+                     thetap[2] = 45
+                       phip[2] = -135
+<v_0|v_0> = 30.804218
+-THETA_0 <v_0|v_0> = 23.067487
+<v_1|v_1> = 29.890492
+<v_0|v_1> = -9.899994e-10
+-THETA_1 <v_1|v_1> = 22.383251
+<v_2|v_2> = 29.890492
+<v_0|v_2> = 7.0041386e-10
+<v_1|v_2> = 3.4508744e-09
+-THETA_2 <v_2|v_2> = 22.383251
+L2 Norm of Divergence = 5.40494861961e-15
+L2 Norm of Vorticity = 4.07421849622e-14
+Integral S_{ij}S^{ij} dA 0.00419762582176
+L2 Norm of f_L= 2.37774509442e-05
+L2 Norm of f_lam= 0.000366197610598
+L2 Norm of xi*Grad(L) = 3.57620637604e-05
+Scale factor:       RMS deviation:
+1.00705776145331 0.000327131469855131
+
+
+

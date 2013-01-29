@@ -134,14 +134,16 @@ int PathDerivs(double t_required_by_solver,
 double AKVInnerProduct(const DataMesh& v1,
                        const DataMesh& v2,
                        const DataMesh& Ricci,
-                       const SurfaceBasis& sb);
+                       const SurfaceBasis& sb,
+                       const bool& withRicciScaling);
 
 //returns the scaling factors related to various forms of the AKVInnerProduct
 MyVector<double> InnerProductScaleFactors(const DataMesh& v1,
                        const DataMesh& v2,
                        const DataMesh& Ricci,
                        const DataMesh& r2p4,
-                       const SurfaceBasis& sb);
+                       const SurfaceBasis& sb,
+                       const bool& withRicciScaling);
 
 //returns the proper area integral
 //   \frac{1}{\sqrt{2} \pi} \oint 1 dA

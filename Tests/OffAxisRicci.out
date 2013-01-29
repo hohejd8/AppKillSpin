@@ -1,0 +1,79 @@
+MPI starting on 1 processors at Tue Jan 29 10:03:27 2013
+Processor Names = Watson
+RunDirectory is /home/hohejd8/SpEC/AppKillSpin/Tests
+Compiled at Watson:/home/hohejd8/SpEC
+Code Revision a74c5e629474ee1320f04c29605b64fcb979cc61 (InitialCommit-20769-ga74c5e6)
+Linked on Tue Jan 29 10:00:48 EST 2013
+Executed ApplyObservers: /home/hohejd8/SpEC/Support/ApplyObservers/Executables/ApplyObservers -UseTimes=0 ApplyObservers.input
+
+symmetry axis guess : 0 0
+Starting the gsl 1D root finder at thetap = 0.0.
+Converged
+f0 = -5.64919e-16 fp = -0.000151338 fm = 0.000151338
+Starting the gsl multidimensional root finder.
+iter = 1 x = 0.00018496031 0.28189782  72257.341 f(x) = 0.00078704237 -6.8254109e-06 3.2274857e-05
+iter = 2 x = -6.2519834e-05 0.27419443  86727.067 f(x) = 2.385301e-05 -0.00010691879 0.0001613787
+iter = 3 x = -6.2484973e-05 0.27237797  85715.884 f(x) = 1.4030033e-05 -0.00012639239 0.00013877696
+iter = 4 x = 2.2748254e-05 0.60989219  81675.764 f(x) = 0.00013750956 1.1253157e-05 4.5745508e-05
+iter = 5 x = -8.2261105e-07 0.76221336  81675.928 f(x) = 8.0070855e-06 -9.3473926e-06 2.4586442e-06
+iter = 6 x = -3.2810774e-08 0.78535546  81675.915 f(x) = -5.610942e-08 -8.2351964e-07 -7.280532e-07
+iter = 7 x = -2.4409705e-09 0.78539464  81675.911 f(x) = -4.1085963e-09 9.1421956e-08 9.8589942e-08
+iter = 8 x = 1.1361991e-10 0.78540391  81675.911 f(x) = -2.1969754e-09 4.6816742e-10 -2.2536993e-09
+iter = 9 x = -3.8220646e-13 0.78539823  81675.911 f(x) = -2.7922317e-11 5.2821126e-11 2.6663792e-11
+iter = 10 x = -2.9985342e-16 0.78539817  81675.911 f(x) = -6.9858895e-13 1.1029864e-12 4.0559782e-13
+Solution found with : THETA[0] = -2.9985342e-16
+                     thetap[0] = 45
+                       phip[0] = 45
+L2 Norm of Divergence = 5.52698061952e-15
+L2 Norm of Vorticity = 5.43892350546e-14
+Integral S_{ij}S^{ij} dA 4.67079392897e-15
+L2 Norm of f_L= 1.25164136242e-24
+L2 Norm of f_lam= 3.24261376502e-21
+L2 Norm of xi*Grad(L) = 1.03362405496e-21
+Scale factor:       RMS deviation:
+0.985013309388326 1.88271112558085e-14
+
+symmetry axis guess : 90 135.000000201814
+Starting the gsl multidimensional root finder.
+iter = 1 x = -0.00018533804  1.5762236  2.3616217 f(x) = 3.2857814e-06 1.6428246e-06 -1.6429568e-06
+iter = 2 x = -0.00018533809  1.5707932  2.3561913 f(x) = -1.9173443e-09 -9.4929287e-10 9.6805094e-10
+iter = 3 x = -0.00018533808  1.5707963  2.3561945 f(x) = 2.3807709e-14 1.268225e-14 -1.1687702e-14
+Solution found with : THETA[1] = -0.00018533808
+                     thetap[1] = 90
+                       phip[1] = 135
+L2 Norm of Divergence = 7.33231546468e-15
+L2 Norm of Vorticity = 7.1636809395e-14
+Integral S_{ij}S^{ij} dA 0.00414727628589
+L2 Norm of f_L= 1.43036333997e-07
+L2 Norm of f_lam= 0.000365099348062
+L2 Norm of xi*Grad(L) = 2.25262331344e-05
+Scale factor:       RMS deviation:
+1.00746309002634 1.20023594533849e-05
+
+symmetry axis guess : 44.9999999064433 -134.999999594545
+Starting the gsl multidimensional root finder.
+iter = 1 x = -0.00018533809 0.78542032 -2.3561945 f(x) = 9.4753676e-09 4.7475187e-09 -4.7475182e-09
+iter = 2 x = -0.00018533809 0.78539817 -2.3564734 f(x) = -7.3757458e-12 -2.6315252e-12 2.6319724e-12
+Solution found with : THETA[2] = -0.00018533809
+                     thetap[2] = 45
+                       phip[2] = -135.01598
+<v_0|v_0> = 22.721641
+-THETA_0 <v_0|v_0> = 0.0042111854
+<v_1|v_1> = 22.376816
+<v_0|v_1> = -5.6189964e-08
+-THETA_1 <v_1|v_1> = 0.0041472763
+<v_2|v_2> = 22.376816
+<v_0|v_2> = 2.944284e-07
+<v_1|v_2> = 0.0044465846
+-THETA_2 <v_2|v_2> = 0.0041472763
+L2 Norm of Divergence = 5.34111509428e-15
+L2 Norm of Vorticity = 4.68584749918e-14
+Integral S_{ij}S^{ij} dA 0.00414727628589
+L2 Norm of f_L= 1.43036334002e-07
+L2 Norm of f_lam= 0.000365099348062
+L2 Norm of xi*Grad(L) = 2.25262331344e-05
+Scale factor:       RMS deviation:
+1.00746309002648 1.20023594021579e-05
+
+
+

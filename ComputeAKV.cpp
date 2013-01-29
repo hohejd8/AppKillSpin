@@ -145,19 +145,19 @@ namespace ComputeItems {
       switch(a){
         case 0:
           //compute inner product <v_0|v_0>
-          v0v0 = AKVInnerProduct(v[0],v[0],Ricci,sb)*sqrt(2.)*M_PI;
+          v0v0 = AKVInnerProduct(v[0],v[0],Ricci,sb,mWithRicciScaling)*sqrt(2.)*M_PI;
           break;
         case 1:
           //compute inner products <v_1|v_1>, <v_0|v_1>
-          v1v1 = AKVInnerProduct(v[1],v[1],Ricci,sb)*sqrt(2.)*M_PI;
-          v0v1 = AKVInnerProduct(v[0],v[1],Ricci,sb)*sqrt(2.)*M_PI;
+          v1v1 = AKVInnerProduct(v[1],v[1],Ricci,sb,mWithRicciScaling)*sqrt(2.)*M_PI;
+          v0v1 = AKVInnerProduct(v[0],v[1],Ricci,sb,mWithRicciScaling)*sqrt(2.)*M_PI;
           if(fabs(v0v0) == fabs(v1v2)) badAKVSolution = true;
           break;
         case 2:
           //compute inner products <v_2|v_2>, <v_0|v_2>, <v_1|v_2>
-          v2v2 = AKVInnerProduct(v[2],v[2],Ricci,sb)*sqrt(2.)*M_PI;
-          v0v2 = AKVInnerProduct(v[0],v[2],Ricci,sb)*sqrt(2.)*M_PI;
-          v1v2 = AKVInnerProduct(v[1],v[2],Ricci,sb)*sqrt(2.)*M_PI;
+          v2v2 = AKVInnerProduct(v[2],v[2],Ricci,sb,mWithRicciScaling)*sqrt(2.)*M_PI;
+          v0v2 = AKVInnerProduct(v[0],v[2],Ricci,sb,mWithRicciScaling)*sqrt(2.)*M_PI;
+          v1v2 = AKVInnerProduct(v[1],v[2],Ricci,sb,mWithRicciScaling)*sqrt(2.)*M_PI;
           if(fabs(v0v0) == fabs(v0v2)) badAKVSolution = true;
           if(fabs(v1v1) == fabs(v1v2)) badAKVSolution = true;
           break;
@@ -165,14 +165,14 @@ namespace ComputeItems {
 
       if(mPrintInnerProducts && a==2){
           std::cout << "<v_0|v_0> = " << v0v0 << std::endl;
-          std::cout << "-THETA <v_0|v_0> = " << -THETA[a]*v0v0 << std::endl;
+          std::cout << "-THETA_0 <v_0|v_0> = " << -THETA[a]*v0v0 << std::endl;
           std::cout << "<v_1|v_1> = " << v1v1 << std::endl;
           std::cout << "<v_0|v_1> = " << v0v1 << std::endl;
-          std::cout << "-THETA <v_1|v_1> = " << -THETA[a]*v1v1 << std::endl;
+          std::cout << "-THETA_1 <v_1|v_1> = " << -THETA[a]*v1v1 << std::endl;
           std::cout << "<v_2|v_2> = " << v2v2 << std::endl;
           std::cout << "<v_0|v_2> = " << v0v2 << std::endl;
           std::cout << "<v_1|v_2> = " << v1v2 << std::endl;
-          std::cout << "-THETA <v_2|v_2> = " << -THETA[a]*v2v2 << std::endl;
+          std::cout << "-THETA_2 <v_2|v_2> = " << -THETA[a]*v2v2 << std::endl;
       }
 
       //Gram Schmidt orthogonalization
@@ -226,15 +226,16 @@ namespace ComputeItems {
       if(mScaleFactor=="Equator"){
         scale = NormalizeAKVAtOnePoint(sb, rotated_Psi, rotated_v[a], mRad, M_PI/2., 0.0);
       } else if(mScaleFactor=="InnerProduct1"){
-        scale = InnerProductScaleFactors(v[a], v[a], Ricci, r2p4, sb)[0];
+        scale = InnerProductScaleFactors(v[a], v[a], Ricci, r2p4, sb, mWithRicciScaling)[0];
       } else if(mScaleFactor=="InnerProduct2"){
-        scale = InnerProductScaleFactors(v[a], v[a], Ricci, r2p4, sb)[1];
+        scale = InnerProductScaleFactors(v[a], v[a], Ricci, r2p4, sb, mWithRicciScaling)[1];
       } else if(mScaleFactor=="InnerProduct3"){
-        scale = InnerProductScaleFactors(v[a], v[a], Ricci, r2p4, sb)[2];
+        scale = InnerProductScaleFactors(v[a], v[a], Ricci, r2p4, sb, mWithRicciScaling)[2];
       } else if(mScaleFactor=="Optimize"){
         const double scaleAtEquator
               = NormalizeAKVAtOnePoint(sb, rotated_Psi, rotated_v[a], mRad, M_PI/2., 0.0);
-        const MyVector<double> scaleIP = InnerProductScaleFactors(v[a], v[a], Ricci, r2p4, sb);
+        const MyVector<double> scaleIP 
+              = InnerProductScaleFactors(v[a], v[a], Ricci, r2p4, sb, mWithRicciScaling);
         scale = OptimizeScaleFactor(rotated_v[a], rotated_Psi, mRad, sb, theta,
          phi, scaleAtEquator, scaleIP[0], scaleIP[1], scaleIP[2]);
         if(mPrintSurfaceNormalization){

@@ -1,0 +1,65 @@
+MPI starting on 1 processors at Tue Jan 29 10:02:25 2013
+Processor Names = Watson
+RunDirectory is /home/hohejd8/SpEC/AppKillSpin/Tests
+Compiled at Watson:/home/hohejd8/SpEC
+Code Revision a74c5e629474ee1320f04c29605b64fcb979cc61 (InitialCommit-20769-ga74c5e6)
+Linked on Tue Jan 29 10:00:48 EST 2013
+Executed ApplyObservers: /home/hohejd8/SpEC/Support/ApplyObservers/Executables/ApplyObservers -UseTimes=0 ApplyObservers.input
+
+symmetry axis guess : 0 0
+Starting the gsl 1D root finder at thetap = 0.0.
+Converged
+f0 = -6.33456e-16 fp = 1.92294e-19 fm = -6.72866e-20
+Solution found with : THETA[0] = -5.55561e-16
+                     thetap[0] = 0
+                       phip[0] = 0
+L2 Norm of Divergence = 1.77294320262e-15
+L2 Norm of Vorticity = 2.03274340501e-14
+Integral S_{ij}S^{ij} dA 1.17654843357e-14
+L2 Norm of f_L= 1.32994134772e-29
+L2 Norm of f_lam= 2.9966346968e-28
+L2 Norm of xi*Grad(L) = 1.15534135759e-32
+Scale factor:       RMS deviation:
+0.999999999999948 1.88275530375865e-14
+
+symmetry axis guess : 90 180
+Starting the gsl multidimensional root finder.
+iter = 1 x = 5.0694232e-16  1.5707964   3.141593 f(x) = -2.306732e-17 -9.6109416e-17 -4.1361985e-16
+Solution found with : THETA[1] = 5.0694232e-16
+                     thetap[1] = 90.000004
+                       phip[1] = -179.99998
+L2 Norm of Divergence = 6.61311341193e-15
+L2 Norm of Vorticity = 7.34822646083e-14
+Integral S_{ij}S^{ij} dA 6.7760270414e-15
+L2 Norm of f_L= 5.15705638223e-28
+L2 Norm of f_lam= 1.39095971943e-26
+L2 Norm of xi*Grad(L) = 2.33064892341e-29
+Scale factor:       RMS deviation:
+0.999999999999948 1.88275530375865e-14
+
+symmetry axis guess : 90 -89.9999806090494
+Starting the gsl multidimensional root finder.
+iter = 1 x = 7.1752407e-16  1.5707967  -1.570796 f(x) = 1.0716018e-17 4.6981282e-16 1.7382423e-15
+Solution found with : THETA[2] = 7.1752407e-16
+                     thetap[2] = 90.00002
+                       phip[2] = -89.999979
+<v_0|v_0> = 22.488396
+-THETA_0 <v_0|v_0> = -1.6135965e-14
+<v_1|v_1> = 22.488396
+<v_0|v_1> = -1.3759739e-06
+-THETA_1 <v_1|v_1> = -1.6135965e-14
+<v_2|v_2> = 22.488396
+<v_0|v_2> = -7.9298279e-06
+<v_1|v_2> = -8.274379e-07
+-THETA_2 <v_2|v_2> = -1.6135965e-14
+L2 Norm of Divergence = 5.76101068387e-15
+L2 Norm of Vorticity = 7.70955243839e-14
+Integral S_{ij}S^{ij} dA 9.86853618707e-15
+L2 Norm of f_L= 3.89014176928e-28
+L2 Norm of f_lam= 1.43960907469e-26
+L2 Norm of xi*Grad(L) = 2.08498350105e-29
+Scale factor:       RMS deviation:
+0.999999999999948 1.88275530375865e-14
+
+
+

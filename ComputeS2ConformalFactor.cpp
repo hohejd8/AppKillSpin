@@ -13,7 +13,6 @@ namespace ComputeItems {
     mConformalFactor = p.Get<std::string>("ConformalFactor","ConformalFactor");
     mSkWM = p.Get<std::string>("StrahlkorperWithMesh");
     mSymmetry = p.Get<std::string>("Symmetry");
-std::cout << POSITION << std::flush << std::endl;
   }
 
   void ComputeS2ConformalFactor::RecomputeData(const DataBoxAccess& boxa) const {
@@ -22,11 +21,11 @@ std::cout << POSITION << std::flush << std::endl;
     const SurfaceBasis sb(skwm.Grid().Basis());
     const DataMesh theta = boxa.Get<StrahlkorperWithMesh>(mSkWM).Grid().SurfaceCoords()(0);
     const DataMesh phi = boxa.Get<StrahlkorperWithMesh>(mSkWM).Grid().SurfaceCoords()(1);
-std::cout << POSITION << std::flush << std::endl;
+
     DataMesh Psi(theta); //copy constructor to get the right size
 
     Psi = 1.28;
-std::cout << POSITION << std::flush << std::endl;
+
     if(mSymmetry=="Spherical"){
       //Do nothing.  Psi is already spherically symmetric.
     } else if(mSymmetry=="Z"){
@@ -52,7 +51,7 @@ std::cout << POSITION << std::flush << std::endl;
     } else {
       REQUIRE(false,"Symmetry type not recognized.");
     }
-std::cout << POSITION << std::flush << std::endl;
+
     mResult = new DataMesh(Psi);    
   }
 }

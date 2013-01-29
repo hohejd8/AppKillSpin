@@ -1,0 +1,67 @@
+MPI starting on 1 processors at Tue Jan 29 10:02:56 2013
+Processor Names = Watson
+RunDirectory is /home/hohejd8/SpEC/AppKillSpin/Tests
+Compiled at Watson:/home/hohejd8/SpEC
+Code Revision a74c5e629474ee1320f04c29605b64fcb979cc61 (InitialCommit-20769-ga74c5e6)
+Linked on Tue Jan 29 10:00:48 EST 2013
+Executed ApplyObservers: /home/hohejd8/SpEC/Support/ApplyObservers/Executables/ApplyObservers -UseTimes=0 ApplyObservers.input
+
+symmetry axis guess : 0 0
+Starting the gsl 1D root finder at thetap = 0.0.
+Converged
+f0 = -2.28725e-16 fp = 9.07873e-18 fm = -3.17678e-18
+Solution found with : THETA[0] = -0.743662
+                     thetap[0] = 0
+                       phip[0] = 0
+L2 Norm of Divergence = 1.03204441156e-15
+L2 Norm of Vorticity = 1.62286869217e-14
+Integral S_{ij}S^{ij} dA 5.02002424684e-07
+L2 Norm of f_L= 2.22318941249e-07
+L2 Norm of f_lam= 1.82844813311e-28
+L2 Norm of xi*Grad(L) = 2.26052092432e-31
+Scale factor:       RMS deviation:
+0.99881263560523 5.06283041807326e-05
+
+symmetry axis guess : 90 180
+Starting the gsl multidimensional root finder.
+iter = 1 x = -0.74459307  1.5707963  3.1415927 f(x) = -1.2308303e-12 4.8571418e-07 -2.5374769e-16
+iter = 2 x = -0.74459291  1.5707963  3.1415927 f(x) = -1.2321891e-12 -1.2190432e-13 -3.4187407e-16
+Solution found with : THETA[1] = -0.74459291
+                     thetap[1] = 90
+                       phip[1] = 180
+L2 Norm of Divergence = 7.14152710257e-15
+L2 Norm of Vorticity = 6.4224511323e-14
+Integral S_{ij}S^{ij} dA 2.95921092414e-05
+L2 Norm of f_L= 1.50139937836e-07
+L2 Norm of f_lam= 2.59618853793e-06
+L2 Norm of xi*Grad(L) = 2.57352310631e-07
+Scale factor:       RMS deviation:
+1.00059313393645 2.54950627313426e-05
+
+symmetry axis guess : 90 -90.0000000082768
+Starting the gsl multidimensional root finder.
+iter = 1 x = -0.74459307  1.5707963 -1.5707963 f(x) = -1.7957638e-13 1.3637145e-16 -4.8571418e-07
+iter = 2 x = -0.74459291  1.5707963 -1.5707963 f(x) = -1.7978749e-13 3.3991441e-16 1.220488e-13
+Solution found with : THETA[2] = -0.74459291
+                     thetap[2] = 90
+                       phip[2] = -90
+<v_0|v_0> = 30.296868
+-THETA_0 <v_0|v_0> = 22.558834
+<v_1|v_1> = 30.221218
+<v_0|v_1> = 9.1178607e-09
+-THETA_1 <v_1|v_1> = 22.502505
+<v_2|v_2> = 30.221218
+<v_0|v_2> = 1.3302424e-09
+<v_1|v_2> = -1.616594e-08
+-THETA_2 <v_2|v_2> = 22.502505
+L2 Norm of Divergence = 6.82529211852e-15
+L2 Norm of Vorticity = 6.20831156151e-14
+Integral S_{ij}S^{ij} dA 2.95921092314e-05
+L2 Norm of f_L= 1.50139937836e-07
+L2 Norm of f_lam= 2.59618853793e-06
+L2 Norm of xi*Grad(L) = 2.57352310631e-07
+Scale factor:       RMS deviation:
+1.00059313393653 2.54950627103894e-05
+
+
+

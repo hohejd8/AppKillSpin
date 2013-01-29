@@ -771,12 +771,17 @@ int PathDerivs(double t_required_by_solver, const double y[], double f[], void *
 double AKVInnerProduct(const DataMesh& v1,
                        const DataMesh& v2,
                        const DataMesh& Ricci,
-                       const SurfaceBasis& sb)
+                       const SurfaceBasis& sb,
+                       const bool& withRicciScaling)
 {
   const Tensor<DataMesh> Gradv1 = sb.Gradient(v1);
   const Tensor<DataMesh> Gradv2 = sb.Gradient(v2);
-  const DataMesh integrand = 0.5*Ricci*(Gradv1(0)*Gradv2(0)+Gradv1(1)*Gradv2(1));
-  return sb.ComputeCoefficients(integrand)[0];
+  const DataMesh integrand = 0.5*(Gradv1(0)*Gradv2(0)+Gradv1(1)*Gradv2(1));
+  if(withRicciScaling){
+    return sb.ComputeCoefficients(integrand*Ricci)[0];
+  } else {
+    return sb.ComputeCoefficients(integrand)[0];
+  }
 }
 
 //returns the scaling factors related to various forms of the AKVInnerProduct
@@ -784,13 +789,14 @@ MyVector<double> InnerProductScaleFactors(const DataMesh& v1,
                        const DataMesh& v2,
                        const DataMesh& Ricci,
                        const DataMesh& r2p4,
-                       const SurfaceBasis& sb)
+                       const SurfaceBasis& sb,
+                       const bool& withRicciScaling)
 {
   //ip1: Integral ( 0.5 * Ricci * gradient(v_1)*gradient(v_2) ) / r2p4 dOmega = (8.*Pi/3.) s
   //in the Ricci argument, r2p4 compensates for the integrand division by r2p4
-  const double s_ip1 = (8./(3.*sqrt(2.))) / AKVInnerProduct(v1,v2,Ricci/r2p4,sb);
+  const double s_ip1 = (8./(3.*sqrt(2.))) / AKVInnerProduct(v1,v2,Ricci/r2p4,sb,withRicciScaling);
 
-  const double tmp_ip = AKVInnerProduct(v1,v2,Ricci,sb);
+  const double tmp_ip = AKVInnerProduct(v1,v2,Ricci,sb,withRicciScaling);
   const double area = SurfaceArea(r2p4,sb);
 
   //ip3: Integral ( 0.5 * Ricci * gradient(v_1)*gradient(v_2) ) dOmega = (2/3)A s

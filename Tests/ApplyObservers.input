@@ -2,24 +2,13 @@
 
 DataBoxItems=
     Subdomain(Items=
-    #Domain(Items=
-	      #EvaluateScalarFormula(Output=ConformalFactor;
-				    #Formula=1.28+0.0; #spherical symmetry
-				    #Formula=1.28+0.0; #z-axis symmetry
-				    #Formula=1.28+0.0; #x-axis symmetry
-				    #Formula=1.28+0.0; #y-axis symmetry
-				    #Formula=1.28+0.0; #
-				    #Formula=1.28+0.0; #
-	      #),#;
-    #),
-    #Subdomain(Items=
               AddStrahlkorperSurfaceAndMesh(
                 SurfaceName=TestSkS;
                 MeshName=TestSkM;
                 Nth=14;
                 Nph=28;
                 Center=0.,0.,0.;
-                Radius=0.85;
+                Radius=1.0;
               ),
               ComputeStrahlkorperWithMesh(
                 Surface=TestSkS;
@@ -28,33 +17,35 @@ DataBoxItems=
               ),
               ComputeS2ConformalFactor(
                 StrahlkorperWithMesh=TestSkWM;
-                Symmetry=Spherical;
+                #Symmetry=Spherical;
                 #Symmetry=Z;
                 #Symmetry=None;
-                #Symmetry=OffAxis;
+                Symmetry=OffAxis;
                 #Symmetry=__Symmetry__;
               ),
               ComputeAKV(
                 StrahlkorperWithMesh=TestSkWM;
                 ConformalFactor=ConformalFactor;
-                ScaleFactor=Optimize;
-                WithRicciScaling=false;
+                ScaleFactor=Equator;
+                PrintInnerProducts=true;
+                WithRicciScaling=true;
                 InterpolateConformalFactor=false;
                 AKVGuess=0.0, 0.0, 0.0;
                 Radius=1.0;
                 Verbose=true;
                 AKVSolution=TestAKV;
                 Solver=Broyden;
-                DivNorm=false;
-                VortNorm=false;
-                SS=false;
-                fLNorm=false;
-                fLambdaNorm=false;
-                XiDivLNorm=false;
+                DivNorm=true;
+                VortNorm=true;
+                SS=true;
+                fLNorm=true;
+                fLambdaNorm=true;
+                XiDivLNorm=true;
                 PrintSurfaceNormalization=true;
               );
     );
 
 
 Observers=DumpTensors(Input=TestAKV;);
-                      #OnlyTheseSubdomains=ApplyObserver/Sphere0);
+
+
