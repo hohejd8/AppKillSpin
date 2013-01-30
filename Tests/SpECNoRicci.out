@@ -1,0 +1,31 @@
+MPI starting on 1 processors at Wed Jan 30 08:49:50 2013
+Processor Names = Watson
+RunDirectory is /home/hohejd8/SpEC/AppKillSpin/Executables/8.5.2
+Compiled at Watson:/home/hohejd8/SpEC
+Code Revision a74c5e629474ee1320f04c29605b64fcb979cc61 (InitialCommit-20769-ga74c5e6)
+Linked on Tue Jan 29 15:57:32 EST 2013
+Executed ApplyObservers: /home/hohejd8/SpEC/Support/ApplyObservers/Executables/ApplyObservers -t ConformalFactor,Shift,LapseTimesConformalFactor -r Scalar,1,Scalar -NoDomainHistory ApplyObservers.input
+
+AdmIntegralS2 constructor
+symmetry axis guess : 0 0
+Starting the gsl 1D root finder at thetap = 0.0.
+Converged
+f0 = 2.5255e-16 fp = -1.50841e-12 fm = -1.46911e-11
+Solution found with : THETA[0] = -1.1146e-06
+                     thetap[0] = 0
+                       phip[0] = 0
+AKVInnerProduct w/o Ricci
+L2 Norm of Divergence = 3.12346197872e-15
+L2 Norm of Vorticity = 5.19683445578e-08
+Integral S_{ij}S^{ij} dA 0.000145589788136
+L2 Norm of f_L= 8.4927365176e-11
+L2 Norm of f_lam= 6.44854359988e-06
+L2 Norm of xi*Grad(L) = 4.01891120039e-07
+Scale factor:       RMS deviation:
+AKVInnerProduct w/o Ricci
+AKVInnerProduct w/o Ricci
+AKVsolver.cpp (line 642; OptimizeScaleFactor)temporary edit to get optimization working
+Equator 
+1.00213053218538 1.29333323304373e-07
+IP1 
+##> Theta diff: 0.000253564

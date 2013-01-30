@@ -17,16 +17,16 @@ DataBoxItems=
               ),
               ComputeS2ConformalFactor(
                 StrahlkorperWithMesh=TestSkWM;
-                #Symmetry=Spherical;
+                Symmetry=Spherical;
                 #Symmetry=Z;
                 #Symmetry=None;
-                Symmetry=OffAxis;
+                #Symmetry=OffAxis;
                 #Symmetry=__Symmetry__;
               ),
               ComputeAKV(
                 StrahlkorperWithMesh=TestSkWM;
                 ConformalFactor=ConformalFactor;
-                ScaleFactor=Equator;
+                ScaleFactor=Optimize;
                 PrintInnerProducts=true;
                 WithRicciScaling=true;
                 InterpolateConformalFactor=false;

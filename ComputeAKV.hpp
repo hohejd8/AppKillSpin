@@ -88,6 +88,11 @@ namespace ComputeItems {
         "                   from being properly scaled.  (Best  \n"
         "                   return value is zero.)              \n"
         "                   Default false.                      \n"
+        "  PrintSteps = Prints each step along the Killing path.\n"
+        "               Default false.                          \n"
+        "  PrintBisectionResults = Prints each step of the      \n"
+        "            minimization routine for finding the       \n"
+        "            optimal scaling factor.  Default false.    \n"
         "  DivNorm = print the L2 norm of the divergence of the \n"
         "            approximate Killing vector.  Default false.\n"
         "  VortNorm = print the L2 norm of the vorticity of the \n"
@@ -127,7 +132,8 @@ namespace ComputeItems {
       MyVector<bool> printDiagnostic;
       bool mVerbose, mInterpolateConformalFactor, mPrintResiduals,
            mPrintTtpSolution, mPrintInnerProducts, mWithRicciScaling,
-           mPrintScaleFactor, mPrintSurfaceNormalization;
+           mPrintScaleFactor, mPrintSurfaceNormalization, mPrintSteps,
+           mPrintBisectionResults;
 
       mutable result_type* mResult;
   }; //class ComputeAKV

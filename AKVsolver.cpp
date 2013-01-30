@@ -16,10 +16,11 @@ void PrintSurfaceNormalization(const SurfaceBasis& sb,
                       const DataMesh& phi,
                       const DataMesh& rotated_v,
                       const double& scaleFactor,
-                      const double& rad)
+                      const double& rad,
+                      const bool& printSteps)
 {
   const double scaleOverSurface =
-                NormalizeAKVAtAllPoints(sb, rotated_Psi, theta, phi, rotated_v*scaleFactor, rad);
+     NormalizeAKVAtAllPoints(sb, rotated_Psi, theta, phi, rotated_v*scaleFactor, rad, printSteps);
   std::cout << std::setprecision(15) 
             << scaleFactor 
             << " " << scaleOverSurface << std::endl;
@@ -374,7 +375,7 @@ int AKVsolver(const gsl_vector * x,
           + (4.0*llncf*L + 0.5*GradRicci(0)*Gradv(0) + 0.5*GradRicci(1)*Gradv(1) -2.0*L)*(1.0-THETA);
     } else {
       RHS = -RHS
-          + 4.0*llncf*L + 0.5*GradRicci(0)*Gradv(0) + 0.5*GradRicci(1)*Gradv(1) + THETA*rp2*rp2*L;
+          + 4.0*llncf*L + 0.5*GradRicci(0)*Gradv(0) + 0.5*GradRicci(1)*Gradv(1) -2.0*L +THETA*rp2*rp2*L;
     }
 
     //perform harmonic analysis on RHS
@@ -548,7 +549,8 @@ double NormalizeAKVAtAllPoints(const SurfaceBasis& sb,
                               const DataMesh& theta,
                               const DataMesh& phi,
                               const DataMesh& v,
-                              const double& rad)
+                              const double& rad,
+                              const bool& printSteps)
 {
   //create xi
   Tensor<DataMesh> tmp_xi = sb.Gradient(v);
@@ -560,7 +562,7 @@ double NormalizeAKVAtAllPoints(const SurfaceBasis& sb,
   DataMesh scaleFactor(Mesh(theta.Extents()));
 
   for(int i=0; i<scaleFactor.Size(); i++)
-      scaleFactor[i] = NormalizeAKVAtOnePoint(sb,Psi,xi,rad,theta[i],phi[i])-1.;
+      scaleFactor[i] = NormalizeAKVAtOnePoint(sb,Psi,xi,rad,theta[i],phi[i],printSteps)-1.;
 
   scaleFactor *= scaleFactor;
   const DataMesh r2p4 = rad*rad*Psi*Psi*Psi*Psi;
@@ -578,7 +580,8 @@ double NormalizeAKVAtOnePoint(const SurfaceBasis& sb,
                               const DataMesh& rotated_v,
                               const double& rad,
                               const double& thetap, /*=M_PI/2.0*/
-                              const double& phip /*=0.0*/)
+                              const double& phip, /*=0.0*/
+                              const bool& printSteps)
 {
   //create xi
   Tensor<DataMesh> tmp_xi = sb.Gradient(rotated_v);
@@ -586,7 +589,7 @@ double NormalizeAKVAtOnePoint(const SurfaceBasis& sb,
   xi(0) = tmp_xi(1);
   xi(1) = -tmp_xi(0);
 
-  return NormalizeAKVAtOnePoint(sb, rotated_Psi, xi, rad, thetap, phip);
+  return NormalizeAKVAtOnePoint(sb, rotated_Psi, xi, rad, thetap, phip, printSteps);
 }
 
 double NormalizeAKVAtOnePoint(const SurfaceBasis& sb,
@@ -594,7 +597,8 @@ double NormalizeAKVAtOnePoint(const SurfaceBasis& sb,
                               const Tensor<DataMesh>& xi,
                               const double& rad,
                               const double& thetap, /*=M_PI/2.0*/
-                              const double& phip /*=0.0*/)
+                              const double& phip, /*=0.0*/
+                              const bool& printSteps)
 {
   //Rescale the Killing vector. For a rotational Killing vector,
   //the affine path length should be 2*Pi.  Also, test various
@@ -602,7 +606,7 @@ double NormalizeAKVAtOnePoint(const SurfaceBasis& sb,
   double t; //affine path length
 
 
-  bool goodtheta = KillingPath(sb, rotated_Psi, xi, rad, t, thetap, phip, false);
+  bool goodtheta = KillingPath(sb, rotated_Psi, xi, rad, t, thetap, phip, printSteps);
   REQUIRE(goodtheta, "Killing trajectory did not close " << POSITION);
   const double scale = t/(2.0*M_PI);
 
@@ -622,7 +626,9 @@ double OptimizeScaleFactor(const DataMesh& rotated_v,
                       const double& scaleFactor1,
                       const double& scaleFactor2,
                       const double& scaleFactor3,
-                      const double& scaleFactor4)
+                      const double& scaleFactor4,
+                      const bool& printSteps,
+                      const bool& printBisectionResults)
 {
   //quick routine to determine the minimum and maximum values of the scale
   //factors that were passed in
@@ -633,6 +639,9 @@ double OptimizeScaleFactor(const DataMesh& rotated_v,
   double max = scaleFactor1 > scaleFactor2 ? scaleFactor1 : scaleFactor2;
          max = scaleFactor3 > min ? scaleFactor3 : min;
          max = scaleFactor4 > min ? scaleFactor4 : min;
+std::cout << POSITION << "temporary edit to get optimization working" << std::endl;
+min = scaleFactor1;
+max = scaleFactor1;
 
   //start just outside these values
   min *= 0.9;
@@ -640,11 +649,13 @@ double OptimizeScaleFactor(const DataMesh& rotated_v,
 
   //evaluate the function at these two scale factors
   double lowSurfaceValue = 
-           NormalizeAKVAtAllPoints(sb, rotated_Psi, theta, phi, rotated_v*min, rad);
-  //std::cout << std::setprecision(15) << min << " " << lowSurfaceValue << std::endl;
+           NormalizeAKVAtAllPoints(sb, rotated_Psi, theta, phi, rotated_v*min, rad, printSteps);
+  if(printBisectionResults)
+    std::cout << std::setprecision(15) << min << " " << lowSurfaceValue << std::endl;
   double highSurfaceValue = 
-           NormalizeAKVAtAllPoints(sb, rotated_Psi, theta, phi, rotated_v*max, rad);
-  //std::cout << std::setprecision(15) << max << " " << highSurfaceValue << std::endl;
+           NormalizeAKVAtAllPoints(sb, rotated_Psi, theta, phi, rotated_v*max, rad, printSteps);
+  if(printBisectionResults)
+    std::cout << std::setprecision(15) << max << " " << highSurfaceValue << std::endl;
 
   //do a bisection to find the minimum surface value
   //this assumes that the function is continuous and symmetric about the minimum
@@ -653,12 +664,14 @@ double OptimizeScaleFactor(const DataMesh& rotated_v,
     const double difference = max-min;
     if(lowSurfaceValue < highSurfaceValue){
       max -= difference/4.;
-      highSurfaceValue = NormalizeAKVAtAllPoints(sb,rotated_Psi,theta,phi,rotated_v*max,rad);
-      std::cout << std::setprecision(15) << max << " " << highSurfaceValue << std::endl;
+      highSurfaceValue = NormalizeAKVAtAllPoints(sb,rotated_Psi,theta,phi,rotated_v*max,rad,printSteps);
+      if(printBisectionResults)
+        std::cout << std::setprecision(15) << max << " " << highSurfaceValue << std::endl;
     } else {
       min += difference/4.;
-      lowSurfaceValue = NormalizeAKVAtAllPoints(sb,rotated_Psi,theta,phi,rotated_v*min,rad);
-      std::cout << std::setprecision(15) << min << " " << lowSurfaceValue << std::endl;
+      lowSurfaceValue = NormalizeAKVAtAllPoints(sb,rotated_Psi,theta,phi,rotated_v*min,rad,printSteps);
+      if(printBisectionResults)
+        std::cout << std::setprecision(15) << min << " " << lowSurfaceValue << std::endl;
     }
   }
 
@@ -765,9 +778,9 @@ int PathDerivs(double t_required_by_solver, const double y[], double f[], void *
 }
 
 //this function returns the value of
-//   (1./(sqrt(2.)*Pi) Integral ( 0.5 * Ricci * D^i (v_1) * D_i (v_2) ) dA
-// = (1./(sqrt(2.)*Pi) Integral ( 0.5 * Ricci * (1/r2p4) * gradient(v_1)*gradient(v_2) ) * r2p4 dOmega
-// = (1./(sqrt(2.)*Pi) Integral ( 0.5 * Ricci * gradient(v_1)*gradient(v_2) ) dOmega
+//   (1./(sqrt(2.)*Pi) Integral ( 0.5 * (Ricci) * D^i (v_1) * D_i (v_2) ) dA
+// = (1./(sqrt(2.)*Pi) Integral ( 0.5 * (Ricci) * (1/r2p4) * gradient(v_1)*gradient(v_2) ) * r2p4 dOmega
+// = (1./(sqrt(2.)*Pi) Integral ( 0.5 * (Ricci) * gradient(v_1)*gradient(v_2) ) dOmega
 double AKVInnerProduct(const DataMesh& v1,
                        const DataMesh& v2,
                        const DataMesh& Ricci,
@@ -780,6 +793,7 @@ double AKVInnerProduct(const DataMesh& v1,
   if(withRicciScaling){
     return sb.ComputeCoefficients(integrand*Ricci)[0];
   } else {
+    std::cout << "AKVInnerProduct w/o Ricci" << std::endl;
     return sb.ComputeCoefficients(integrand)[0];
   }
 }

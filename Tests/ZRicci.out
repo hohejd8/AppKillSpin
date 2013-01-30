@@ -1,9 +1,9 @@
-MPI starting on 1 processors at Tue Jan 29 10:02:41 2013
+MPI starting on 1 processors at Tue Jan 29 16:19:00 2013
 Processor Names = Watson
 RunDirectory is /home/hohejd8/SpEC/AppKillSpin/Tests
 Compiled at Watson:/home/hohejd8/SpEC
 Code Revision a74c5e629474ee1320f04c29605b64fcb979cc61 (InitialCommit-20769-ga74c5e6)
-Linked on Tue Jan 29 10:00:48 EST 2013
+Linked on Tue Jan 29 15:57:32 EST 2013
 Executed ApplyObservers: /home/hohejd8/SpEC/Support/ApplyObservers/Executables/ApplyObservers -UseTimes=0 ApplyObservers.input
 
 symmetry axis guess : 0 0
@@ -20,7 +20,16 @@ L2 Norm of f_L= 2.38908215328e-29
 L2 Norm of f_lam= 1.828699975e-28
 L2 Norm of xi*Grad(L) = 1.9862665254e-31
 Scale factor:       RMS deviation:
+AKVsolver.cpp (line 642; OptimizeScaleFactor)temporary edit to get optimization working
+Equator 
 0.998750418345247 1.8817747788032e-14
+IP1 
+0.998750418345224 1.8817747788032e-14
+IP2 
+0.999582604031622 0.000301983267492363
+IP3 
+0.999165382282639 0.000150644855402255
+0.998750418345163 1.8817747788032e-14
 
 symmetry axis guess : 90 180
 Starting the gsl multidimensional root finder.
@@ -35,7 +44,16 @@ L2 Norm of f_L= 7.58845305513e-12
 L2 Norm of f_lam= 2.59545479543e-06
 L2 Norm of xi*Grad(L) = 1.64482241653e-07
 Scale factor:       RMS deviation:
+AKVsolver.cpp (line 642; OptimizeScaleFactor)temporary edit to get optimization working
+Equator 
 1.00062458445568 7.95085957048332e-08
+IP1 
+1.00062674162499 7.24678653344671e-07
+IP2 
+1.00020837220491 0.000150999745556121
+IP3 
+1.0004167878288 7.5401567274759e-05
+1.00062474757163 5.30301783005573e-08
 
 symmetry axis guess : 90 -90.0000000107607
 Starting the gsl multidimensional root finder.
@@ -50,7 +68,7 @@ Solution found with : THETA[2] = -1.3001299e-06
 -THETA_1 <v_1|v_1> = 2.9256121e-05
 <v_2|v_2> = 22.502459
 <v_0|v_2> = 3.5875953e-05
-<v_1|v_2> = 6.4744236e-09
+<v_1|v_2> = 6.4744249e-09
 -THETA_2 <v_2|v_2> = 2.9256121e-05
 L2 Norm of Divergence = 6.72494453743e-15
 L2 Norm of Vorticity = 6.80379106815e-14
@@ -59,7 +77,16 @@ L2 Norm of f_L= 7.58845305617e-12
 L2 Norm of f_lam= 2.59545479543e-06
 L2 Norm of xi*Grad(L) = 1.64482241653e-07
 Scale factor:       RMS deviation:
+AKVsolver.cpp (line 642; OptimizeScaleFactor)temporary edit to get optimization working
+Equator 
 1.00062458445573 7.9508583753559e-08
+IP1 
+1.000626741625 7.2467865549343e-07
+IP2 
+1.00020837220492 0.000150999745553992
+IP3 
+1.00041678782881 7.54015672760451e-05
+1.00062474757167 5.3030180126429e-08
 
 
 

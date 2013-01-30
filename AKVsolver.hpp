@@ -15,7 +15,8 @@ void PrintSurfaceNormalization(const SurfaceBasis& sb,
                       const DataMesh& phi,
                       const DataMesh& rotated_v,
                       const double& scaleFactor,
-                      const double& rad);
+                      const double& rad,
+                      const bool& printSteps);
 
 //this function determines which AKVsolver to run based on initial guess
 void RunAKVsolvers(double& THETA,
@@ -82,7 +83,8 @@ double NormalizeAKVAtAllPoints(const SurfaceBasis& sb,
                               const DataMesh& theta,
                               const DataMesh& phi,
                               const DataMesh& v,
-                              const double& rad);
+                              const double& rad,
+                              const bool& printSteps);
 
 //determines the path length of following the approximate
 //Killing vector around the sphere starting at (theta, phi)
@@ -93,13 +95,15 @@ double NormalizeAKVAtOnePoint(const SurfaceBasis& sb,
                               const DataMesh& v,
                               const double& rad,
                               const double& thetap=M_PI/2.,
-                              const double& phip=0.0);
+                              const double& phip=0.0,
+                              const bool& printSteps=false);
 double NormalizeAKVAtOnePoint(const SurfaceBasis& sb,
                               const DataMesh& Psi,
                               const Tensor<DataMesh>& xi,
                               const double& rad,
                               const double& thetap=M_PI/2.0,
-                              const double& phip=0.0);
+                              const double& phip=0.0,
+                              const bool& printSteps=false);
 
 //determines the optimal scale factor using a modified bisection
 //routine.  "Optimal" means the chosen scale factor returns the
@@ -113,7 +117,9 @@ double OptimizeScaleFactor(const DataMesh& rotated_v,
                       const double& scaleFactor1,
                       const double& scaleFactor2,
                       const double& scaleFactor3,
-                      const double& scaleFactor4);
+                      const double& scaleFactor4,
+                      const bool& printSteps,
+                      const bool& printBisectionResults);
 
 //integrates along a particular Killing path on the surface
 bool KillingPath(const SurfaceBasis& sb,

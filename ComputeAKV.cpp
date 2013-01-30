@@ -33,8 +33,17 @@ namespace ComputeItems {
     mPrintTtpSolution = p.Get<bool>("PrintTtpSolution",true);
     mPrintInnerProducts = p.Get<bool>("PrintInnerProducts",false);
     mScaleFactor = p.Get<std::string>("ScaleFactor","Equator");
+      REQUIRE(   mScaleFactor=="Equator"
+              || mScaleFactor=="InnerProduct1"
+              || mScaleFactor=="InnerProduct2"
+              || mScaleFactor=="InnerProduct3"
+              || mScaleFactor=="Optimize",
+              "ScaleFactor is '" << mScaleFactor << "'; must be Equator,"
+              " InnerProduct1, InnerProduct2, InnerProduct3, or Optimize.")
     mPrintScaleFactor = p.Get<bool>("PrintScaleFactor",false);
     mPrintSurfaceNormalization = p.Get<bool>("PrintSurfaceNormalization",false);
+    mPrintSteps = p.Get<bool>("PrintSteps",false);
+    mPrintBisectionResults = p.Get<bool>("PrintBisectionResults",false);
     printDiagnostic = MyVector<bool>(MV::Size(6), true);
     if(p.OptionIsDefined("DivNorm")) printDiagnostic[0]=p.Get<bool>("DivNorm");
     if(p.OptionIsDefined("VortNorm")) printDiagnostic[1]=p.Get<bool>("VortNorm");
@@ -141,7 +150,7 @@ namespace ComputeItems {
       }
 
       //check inner products
-      // <v_i|v_j> = Integral 0.5 * Ricci * Grad(v_i) \cdot Grad(v_j) dA
+      // <v_i|v_j> = Integral 0.5 * (Ricci) * Grad(v_i) \cdot Grad(v_j) dA
       switch(a){
         case 0:
           //compute inner product <v_0|v_0>
@@ -224,34 +233,36 @@ namespace ComputeItems {
       if(mPrintSurfaceNormalization)
         std::cout << "Scale factor:       RMS deviation:" << std::endl;
       if(mScaleFactor=="Equator"){
-        scale = NormalizeAKVAtOnePoint(sb, rotated_Psi, rotated_v[a], mRad, M_PI/2., 0.0);
+        scale = NormalizeAKVAtOnePoint(sb, rotated_Psi, rotated_v[a], mRad, M_PI/2., 0.0, mPrintSteps);
       } else if(mScaleFactor=="InnerProduct1"){
-        scale = InnerProductScaleFactors(v[a], v[a], Ricci, r2p4, sb, mWithRicciScaling)[0];
+        scale = InnerProductScaleFactors(v[a], v[a], Ricci, r2p4, sb,mWithRicciScaling)[0];
       } else if(mScaleFactor=="InnerProduct2"){
-        scale = InnerProductScaleFactors(v[a], v[a], Ricci, r2p4, sb, mWithRicciScaling)[1];
+        scale = InnerProductScaleFactors(v[a], v[a], Ricci, r2p4, sb,mWithRicciScaling)[1];
       } else if(mScaleFactor=="InnerProduct3"){
-        scale = InnerProductScaleFactors(v[a], v[a], Ricci, r2p4, sb, mWithRicciScaling)[2];
+        scale = InnerProductScaleFactors(v[a], v[a], Ricci, r2p4, sb,mWithRicciScaling)[2];
       } else if(mScaleFactor=="Optimize"){
         const double scaleAtEquator
-              = NormalizeAKVAtOnePoint(sb, rotated_Psi, rotated_v[a], mRad, M_PI/2., 0.0);
+              = NormalizeAKVAtOnePoint(sb, rotated_Psi, rotated_v[a], mRad, M_PI/2., 0.0, mPrintSteps);
         const MyVector<double> scaleIP 
-              = InnerProductScaleFactors(v[a], v[a], Ricci, r2p4, sb, mWithRicciScaling);
+              = InnerProductScaleFactors(v[a], v[a], Ricci, r2p4, sb,mWithRicciScaling);
         scale = OptimizeScaleFactor(rotated_v[a], rotated_Psi, mRad, sb, theta,
-         phi, scaleAtEquator, scaleIP[0], scaleIP[1], scaleIP[2]);
+         phi, scaleAtEquator, scaleIP[0], scaleIP[1], scaleIP[2],mPrintSteps,mPrintBisectionResults);
         if(mPrintSurfaceNormalization){
           std::cout << "Equator " << std::endl;
-          PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleAtEquator,mRad);
+          PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,
+                                    rotated_v[a],scaleAtEquator,mRad,mPrintSteps);
           std::cout << "IP1 " << std::endl;
-          PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleIP[0],mRad);
+          PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleIP[0],mRad,mPrintSteps);
           std::cout << "IP2 " << std::endl;
-          PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleIP[1],mRad);
+          PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleIP[1],mRad,mPrintSteps);
           std::cout << "IP3 " << std::endl;
-          PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleIP[2],mRad);
+          PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleIP[2],mRad,mPrintSteps);
         }
       }
 
       if(mPrintSurfaceNormalization){
-        PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scale,mRad);
+        std::cout << mScaleFactor << std::endl;
+        PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scale,mRad,mPrintSteps);
       }
 
       //scale v
