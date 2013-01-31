@@ -700,13 +700,14 @@ bool KillingPath(const SurfaceBasis& sb,
   gsl_odeiv2_evolve *const e = gsl_odeiv2_evolve_alloc (2);
   gsl_odeiv2_system sys = {PathDerivs, NULL, 2, &params};
      
-  t = 0.0;
+  t = 0.0; //path length
   double t1 = 1.e10;
-  double h = 1e-6;
+  double h = 1e-6; //step size
   double y[2] = {theta, phi-2.*M_PI}; //this makes the stopping criteria easier
   bool limit_h = false;
-  double hmax = h;
-  const double hmax2 = 2.0*M_PI/100.0;
+  double hmax = h; //maximum step size
+  //const double hmax2 = 2.0*M_PI/100.0; //hard maximum for h size, original
+  const double hmax2 = 0.1; //hard maximum for h size, new
 
   if(printSteps){
     std::cout << "START: y = ( " 
@@ -717,7 +718,7 @@ bool KillingPath(const SurfaceBasis& sb,
   }
      
   int iter = 0;
-  while (true && iter<1000) {
+  while (true && iter<10000) {
     iter++;
     const double ysave[2] = {y[0],y[1]}; 
     const double tsave = t;
@@ -726,7 +727,7 @@ bool KillingPath(const SurfaceBasis& sb,
 						&t, t1,
 						&h, y);
     if(printSteps){
-      std::cout << "t = " 
+      std::cout << "iter = " << iter << "t = " 
     	        << std::setprecision(8) << std::setw(10) << t 
   	        << " : y = ( " 
   	        << std::setprecision(8) << std::setw(10) << y[0] << " , " 
@@ -793,7 +794,7 @@ double AKVInnerProduct(const DataMesh& v1,
   if(withRicciScaling){
     return sb.ComputeCoefficients(integrand*Ricci)[0];
   } else {
-    std::cout << "AKVInnerProduct w/o Ricci" << std::endl;
+    std::cout << POSITION << " AKVInnerProduct w/o Ricci" << std::endl;
     return sb.ComputeCoefficients(integrand)[0];
   }
 }

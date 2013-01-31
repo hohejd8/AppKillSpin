@@ -37,6 +37,9 @@ namespace ComputeItems {
               || mScaleFactor=="InnerProduct1"
               || mScaleFactor=="InnerProduct2"
               || mScaleFactor=="InnerProduct3"
+              || mScaleFactor=="InnerProduct4"
+              || mScaleFactor=="InnerProduct5"
+              || mScaleFactor=="InnerProduct6"
               || mScaleFactor=="Optimize",
               "ScaleFactor is '" << mScaleFactor << "'; must be Equator,"
               " InnerProduct1, InnerProduct2, InnerProduct3, or Optimize.")
@@ -235,16 +238,25 @@ namespace ComputeItems {
       if(mScaleFactor=="Equator"){
         scale = NormalizeAKVAtOnePoint(sb, rotated_Psi, rotated_v[a], mRad, M_PI/2., 0.0, mPrintSteps);
       } else if(mScaleFactor=="InnerProduct1"){
-        scale = InnerProductScaleFactors(v[a], v[a], Ricci, r2p4, sb,mWithRicciScaling)[0];
+        scale = InnerProductScaleFactors(v[a], v[a], Ricci, r2p4, sb,true)[0];
       } else if(mScaleFactor=="InnerProduct2"){
-        scale = InnerProductScaleFactors(v[a], v[a], Ricci, r2p4, sb,mWithRicciScaling)[1];
+        scale = InnerProductScaleFactors(v[a], v[a], Ricci, r2p4, sb,true)[1];
       } else if(mScaleFactor=="InnerProduct3"){
-        scale = InnerProductScaleFactors(v[a], v[a], Ricci, r2p4, sb,mWithRicciScaling)[2];
+        scale = InnerProductScaleFactors(v[a], v[a], Ricci, r2p4, sb,true)[2];
+      } else if(mScaleFactor=="InnerProduct4"){
+        scale = InnerProductScaleFactors(v[a], v[a], Ricci, r2p4, sb,false)[0];
+      } else if(mScaleFactor=="InnerProduct5"){
+        scale = InnerProductScaleFactors(v[a], v[a], Ricci, r2p4, sb,false)[1];
+      } else if(mScaleFactor=="InnerProduct6"){
+        scale = InnerProductScaleFactors(v[a], v[a], Ricci, r2p4, sb,false)[2];
       } else if(mScaleFactor=="Optimize"){
         const double scaleAtEquator
               = NormalizeAKVAtOnePoint(sb, rotated_Psi, rotated_v[a], mRad, M_PI/2., 0.0, mPrintSteps);
         const MyVector<double> scaleIP 
-              = InnerProductScaleFactors(v[a], v[a], Ricci, r2p4, sb,mWithRicciScaling);
+              = InnerProductScaleFactors(v[a], v[a], Ricci, r2p4, sb,true);
+std::cout << POSITION << " Introduce IP4, IP5, IP6" << std::endl;
+        const MyVector<double> scaleIPNoRicci
+              = InnerProductScaleFactors(v[a], v[a], Ricci, r2p4, sb,false);
         scale = OptimizeScaleFactor(rotated_v[a], rotated_Psi, mRad, sb, theta,
          phi, scaleAtEquator, scaleIP[0], scaleIP[1], scaleIP[2],mPrintSteps,mPrintBisectionResults);
         if(mPrintSurfaceNormalization){
@@ -257,6 +269,15 @@ namespace ComputeItems {
           PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleIP[1],mRad,mPrintSteps);
           std::cout << "IP3 " << std::endl;
           PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleIP[2],mRad,mPrintSteps);
+          std::cout << "IP4 " << std::endl;
+          PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],
+                                    scaleIPNoRicci[0],mRad,mPrintSteps);
+          std::cout << "IP5 " << std::endl;
+          PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],
+                                    scaleIPNoRicci[1],mRad,mPrintSteps);
+          std::cout << "IP6 " << std::endl;
+          PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],
+                                    scaleIPNoRicci[2],mRad,mPrintSteps);
         }
       }
 

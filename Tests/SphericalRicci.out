@@ -1,9 +1,9 @@
-MPI starting on 1 processors at Tue Jan 29 16:19:35 2013
+MPI starting on 1 processors at Wed Jan 30 15:49:27 2013
 Processor Names = Watson
 RunDirectory is /home/hohejd8/SpEC/AppKillSpin/Tests
 Compiled at Watson:/home/hohejd8/SpEC
 Code Revision a74c5e629474ee1320f04c29605b64fcb979cc61 (InitialCommit-20769-ga74c5e6)
-Linked on Tue Jan 29 15:57:32 EST 2013
+Linked on Wed Jan 30 15:43:24 EST 2013
 Executed ApplyObservers: /home/hohejd8/SpEC/Support/ApplyObservers/Executables/ApplyObservers -UseTimes=0 ApplyObservers.input
 
 symmetry axis guess : 0 0
@@ -20,16 +20,26 @@ L2 Norm of f_L= 1.32994134772e-29
 L2 Norm of f_lam= 2.9966346968e-28
 L2 Norm of xi*Grad(L) = 1.15534135759e-32
 Scale factor:       RMS deviation:
+ComputeAKV.cpp (line 257; RecomputeData) Introduce IP4, IP5, IP6
+AKVsolver.cpp (line 797; AKVInnerProduct) AKVInnerProduct w/o Ricci
+AKVsolver.cpp (line 797; AKVInnerProduct) AKVInnerProduct w/o Ricci
 AKVsolver.cpp (line 642; OptimizeScaleFactor)temporary edit to get optimization working
 Equator 
-0.999999999999948 1.88275530375865e-14
+1.00000000000006 2.17517261879382e-14
 IP1 
-1 1.88275530375865e-14
+1 2.17517261879382e-14
 IP2 
-1 1.88275530375865e-14
+1 2.17517261879382e-14
 IP3 
-1 1.88275530375865e-14
-0.999999999999929 1.88275530375865e-14
+1 2.17517261879382e-14
+IP4 
+0.277555756156289 0.944629840390588
+IP5 
+0.86316745750311 0.0575309972378108
+IP6 
+0.745058059692382 0.124182023916109
+Optimize
+0.999999999999847 2.17517261879382e-14
 
 symmetry axis guess : 90 180
 Starting the gsl multidimensional root finder.
@@ -44,16 +54,26 @@ L2 Norm of f_L= 5.15705638223e-28
 L2 Norm of f_lam= 1.39095971943e-26
 L2 Norm of xi*Grad(L) = 2.33064892341e-29
 Scale factor:       RMS deviation:
+ComputeAKV.cpp (line 257; RecomputeData) Introduce IP4, IP5, IP6
+AKVsolver.cpp (line 797; AKVInnerProduct) AKVInnerProduct w/o Ricci
+AKVsolver.cpp (line 797; AKVInnerProduct) AKVInnerProduct w/o Ricci
 AKVsolver.cpp (line 642; OptimizeScaleFactor)temporary edit to get optimization working
 Equator 
-0.999999999999948 1.88275530375865e-14
+1.00000000000006 2.17517261879382e-14
 IP1 
-1 1.88275530375865e-14
+1 2.17517261879382e-14
 IP2 
-1 1.88275530375865e-14
+1 2.17517261879382e-14
 IP3 
-1 1.88275530375865e-14
-0.999999999999929 1.88275530375865e-14
+1 2.17517261879382e-14
+IP4 
+0.277555756156289 0.944629840390588
+IP5 
+0.86316745750311 0.0575309972378108
+IP6 
+0.745058059692383 0.124182023916109
+Optimize
+0.999999999999847 2.17517261879382e-14
 
 symmetry axis guess : 90 -89.9999806090494
 Starting the gsl multidimensional root finder.
@@ -77,16 +97,26 @@ L2 Norm of f_L= 3.89014176928e-28
 L2 Norm of f_lam= 1.43960907469e-26
 L2 Norm of xi*Grad(L) = 2.08498350105e-29
 Scale factor:       RMS deviation:
+ComputeAKV.cpp (line 257; RecomputeData) Introduce IP4, IP5, IP6
+AKVsolver.cpp (line 797; AKVInnerProduct) AKVInnerProduct w/o Ricci
+AKVsolver.cpp (line 797; AKVInnerProduct) AKVInnerProduct w/o Ricci
 AKVsolver.cpp (line 642; OptimizeScaleFactor)temporary edit to get optimization working
 Equator 
-0.999999999999948 1.88275530375865e-14
+1.00000000000006 2.17517261879382e-14
 IP1 
-1 1.88275530375865e-14
+1 2.17517261879382e-14
 IP2 
-1 1.88275530375865e-14
+1 2.17517261879382e-14
 IP3 
-1 1.88275530375865e-14
-0.999999999999929 1.88275530375865e-14
+1 2.17517261879382e-14
+IP4 
+0.277555756156289 0.944629840390588
+IP5 
+0.86316745750311 0.0575309972378108
+IP6 
+0.745058059692383 0.124182023916109
+Optimize
+0.999999999999847 2.17517261879382e-14
 
 
 

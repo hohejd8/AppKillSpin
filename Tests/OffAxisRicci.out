@@ -1,9 +1,9 @@
-MPI starting on 1 processors at Tue Jan 29 16:18:38 2013
+MPI starting on 1 processors at Wed Jan 30 15:50:17 2013
 Processor Names = Watson
 RunDirectory is /home/hohejd8/SpEC/AppKillSpin/Tests
 Compiled at Watson:/home/hohejd8/SpEC
 Code Revision a74c5e629474ee1320f04c29605b64fcb979cc61 (InitialCommit-20769-ga74c5e6)
-Linked on Tue Jan 29 15:57:32 EST 2013
+Linked on Wed Jan 30 15:43:24 EST 2013
 Executed ApplyObservers: /home/hohejd8/SpEC/Support/ApplyObservers/Executables/ApplyObservers -UseTimes=0 ApplyObservers.input
 
 symmetry axis guess : 0 0
@@ -31,16 +31,26 @@ L2 Norm of f_L= 1.25164136242e-24
 L2 Norm of f_lam= 3.24261376502e-21
 L2 Norm of xi*Grad(L) = 1.03362405496e-21
 Scale factor:       RMS deviation:
+ComputeAKV.cpp (line 257; RecomputeData) Introduce IP4, IP5, IP6
+AKVsolver.cpp (line 797; AKVInnerProduct) AKVInnerProduct w/o Ricci
+AKVsolver.cpp (line 797; AKVInnerProduct) AKVInnerProduct w/o Ricci
 AKVsolver.cpp (line 642; OptimizeScaleFactor)temporary edit to get optimization working
 Equator 
-0.985013309388326 1.88271112558085e-14
+0.985013309388521 8.33112760745495e-14
 IP1 
-0.985013309388378 1.88271112558085e-14
+0.985013309388378 2.17512157914862e-14
 IP2 
-0.994877447971027 0.00359821369386833
+0.994877447971027 0.00359821369390522
 IP3 
-0.989781136481343 0.00174815001308089
-0.985013309388308 1.88271112558085e-14
+0.989781136481343 0.00174815001312558
+IP4 
+0.271976181736582 0.951433951285328
+IP5 
+0.854467534208396 0.055445286062011
+IP6 
+0.730114767016177 0.126699118363012
+Optimize
+0.985013309388254 2.17512157914862e-14
 
 symmetry axis guess : 90 135.000000201814
 Starting the gsl multidimensional root finder.
@@ -57,16 +67,26 @@ L2 Norm of f_L= 1.43036333997e-07
 L2 Norm of f_lam= 0.000365099348062
 L2 Norm of xi*Grad(L) = 2.25262331344e-05
 Scale factor:       RMS deviation:
+ComputeAKV.cpp (line 257; RecomputeData) Introduce IP4, IP5, IP6
+AKVsolver.cpp (line 797; AKVInnerProduct) AKVInnerProduct w/o Ricci
+AKVsolver.cpp (line 797; AKVInnerProduct) AKVInnerProduct w/o Ricci
 AKVsolver.cpp (line 642; OptimizeScaleFactor)temporary edit to get optimization working
 Equator 
-1.00746309002634 1.20023594533849e-05
+1.00746309002641 1.20023594346547e-05
 IP1 
-1.00777244227022 0.000102811897009941
+1.00777244227022 0.000102811897002499
 IP2 
-1.00251362435996 0.00180066926319117
+1.00251362435996 0.00180066926319959
 IP3 
-1.00503356702735 0.000886244079660923
-1.00748776064554 8.04518259417797e-06
+1.00503356702735 0.000886244079664206
+IP4 
+0.280285737679467 0.94156755598426
+IP5 
+0.86742239320576 0.0586000092641612
+IP6 
+0.752421608234808 0.123023772487166
+Optimize
+1.00748776064561 8.0451825899822e-06
 
 symmetry axis guess : 44.9999999064433 -134.999999594545
 Starting the gsl multidimensional root finder.
@@ -78,7 +98,7 @@ Solution found with : THETA[2] = -0.00018533809
 <v_0|v_0> = 22.721641
 -THETA_0 <v_0|v_0> = 0.0042111854
 <v_1|v_1> = 22.376816
-<v_0|v_1> = -5.6189962e-08
+<v_0|v_1> = -5.6189963e-08
 -THETA_1 <v_1|v_1> = 0.0041472763
 <v_2|v_2> = 22.376816
 <v_0|v_2> = 2.944284e-07
@@ -91,16 +111,26 @@ L2 Norm of f_L= 1.43036334002e-07
 L2 Norm of f_lam= 0.000365099348062
 L2 Norm of xi*Grad(L) = 2.25262331344e-05
 Scale factor:       RMS deviation:
+ComputeAKV.cpp (line 257; RecomputeData) Introduce IP4, IP5, IP6
+AKVsolver.cpp (line 797; AKVInnerProduct) AKVInnerProduct w/o Ricci
+AKVsolver.cpp (line 797; AKVInnerProduct) AKVInnerProduct w/o Ricci
 AKVsolver.cpp (line 642; OptimizeScaleFactor)temporary edit to get optimization working
 Equator 
-1.00746309002648 1.20023594021579e-05
+1.00746309002682 1.2002359309241e-05
 IP1 
-1.00777244227022 0.000102811897028694
+1.00777244227022 0.000102811897026345
 IP2 
-1.00251362435996 0.00180066926317486
+1.00251362435996 0.00180066926317066
 IP3 
-1.00503356702735 0.000886244079637545
-1.00748776064568 8.04518259809988e-06
+1.00503356702735 0.000886244079638317
+IP4 
+0.280285737679467 0.941567555984262
+IP5 
+0.86742239320576 0.0586000092641324
+IP6 
+0.752421608234808 0.123023772487131
+Optimize
+1.00748776064602 8.04518259468181e-06
 
 
 
