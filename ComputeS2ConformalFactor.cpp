@@ -29,7 +29,8 @@ namespace ComputeItems {
     if(mSymmetry=="Spherical"){
       //Do nothing.  Psi is already spherically symmetric.
     } else if(mSymmetry=="Z"){
-      Psi += 0.001*cos(theta)*cos(theta);
+      //Psi += 0.001*cos(theta)*cos(theta);
+      Psi += -cos(theta)/16. + cos(theta)*cos(theta)/32. + cos(theta)*cos(theta)*cos(theta)/8.;
     } else if(mSymmetry=="X"){
       Psi += 0.001*(1.0-3.0*cos(theta)*cos(theta)+3.0*sin(theta)*sin(theta)*cos(2.0*phi));
     } else if(mSymmetry=="Y"){

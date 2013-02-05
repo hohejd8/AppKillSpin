@@ -104,9 +104,9 @@ namespace ComputeItems {
     //if the initial guess for thetap is close to zero or pi,
     //try solving at thetap = zero
     //set the initial guesses
-    double THETA[3] = {mAKVGuess[0],mAKVGuess[1],mAKVGuess[2]};
-    double thetap[3] = {0.,0.,0.};
-    double phip[3] = {0.,0.,0.};
+    double THETA[3] = {mAKVGuess[0],0.0,0.0};
+    double thetap[3] = {mAKVGuess[1],0.,0.};
+    double phip[3] = {mAKVGuess[2],0.,0.};
 
     //save the v, xi solutions along particular axes
     MyVector<DataMesh> v(MV::Size(3),DataMesh::Empty);
@@ -125,15 +125,19 @@ namespace ComputeItems {
     const double symmetry_tol = 1.e-11;
     const double min_thetap = 1.e-5;
 
+    //if the diagnostics below decide that there is a bad solution for v[a]
+    //(usually a repeated solution), this flag will indicate that the
+    //solver should be run again
+    bool badAKVSolution = false;
+
     for(int a=0; a<axes; a++){//index over orthonormal directions to find AKV solutions
 
-      //if the diagnostics below decide that there is a bad solution for v[a]
-      //(usually a repeated solution), this flag will indicate that the
-      //solver should be run again
-      bool badAKVSolution = false;
-
       //generate a guess for the next axis of symmetry based on prior solutions.
-      AxisInitialGuess(thetap, phip, a);
+      //do not run AxisInitialGuess if the previous solution was bad; a new guess
+      //has already been provided
+      if(!badAKVSolution) AxisInitialGuess(thetap, phip, a);
+
+      badAKVSolution = false;
 
       //create L
       DataMesh L(DataMesh::Empty);
@@ -163,7 +167,8 @@ namespace ComputeItems {
           //compute inner products <v_1|v_1>, <v_0|v_1>
           v1v1 = AKVInnerProduct(v[1],v[1],Ricci,sb,mWithRicciScaling)*sqrt(2.)*M_PI;
           v0v1 = AKVInnerProduct(v[0],v[1],Ricci,sb,mWithRicciScaling)*sqrt(2.)*M_PI;
-          if(fabs(v0v0) == fabs(v1v2)) badAKVSolution = true;
+          if(fabs(v0v0) == fabs(v0v1)) badAKVSolution = true;
+          if(fabs(v0v1) > 1.e-04) badAKVSolution = true;
           break;
         case 2:
           //compute inner products <v_2|v_2>, <v_0|v_2>, <v_1|v_2>
@@ -172,6 +177,7 @@ namespace ComputeItems {
           v1v2 = AKVInnerProduct(v[1],v[2],Ricci,sb,mWithRicciScaling)*sqrt(2.)*M_PI;
           if(fabs(v0v0) == fabs(v0v2)) badAKVSolution = true;
           if(fabs(v1v1) == fabs(v1v2)) badAKVSolution = true;
+          if(fabs(v0v2) > 1.e-04 || fabs(v1v2) > 1.e-04) badAKVSolution = true;
           break;
       }
 
@@ -294,7 +300,7 @@ std::cout << POSITION << " Introduce IP4, IP5, IP6" << std::endl;
 
       if(badAKVSolution){
         v[a] = 0.;
-        thetap[a] += M_PI/4.; 
+        thetap[a] += M_PI/2.; 
         phip[a] += M_PI/4.;
         a--;
         std::cout << "This was a bad / repeated solution, and will be recomputed." << std::endl;

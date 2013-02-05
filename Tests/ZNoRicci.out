@@ -1,128 +1,128 @@
-MPI starting on 1 processors at Thu Jan 31 09:37:49 2013
+MPI starting on 1 processors at Tue Feb  5 12:58:14 2013
 Processor Names = Watson
 RunDirectory is /home/hohejd8/SpEC/AppKillSpin/Tests
 Compiled at Watson:/home/hohejd8/SpEC
 Code Revision a74c5e629474ee1320f04c29605b64fcb979cc61 (InitialCommit-20769-ga74c5e6)
-Linked on Wed Jan 30 15:43:24 EST 2013
+Linked on Tue Feb  5 12:57:48 EST 2013
 Executed ApplyObservers: /home/hohejd8/SpEC/Support/ApplyObservers/Executables/ApplyObservers -UseTimes=0 ApplyObservers.input
 
 symmetry axis guess : 0 0
 Starting the gsl 1D root finder at thetap = 0.0.
 Converged
-f0 = 7.94532e-17 fp = 1.28383e-17 fm = -4.49232e-18
-Solution found with : THETA[0] = -5.07382e-16
+f0 = 6.32243e-31 fp = 1.92294e-19 fm = -6.72866e-20
+Solution found with : THETA[0] = -3.51796e-16
                      thetap[0] = 0
                        phip[0] = 0
 AKVsolver.cpp (line 797; AKVInnerProduct) AKVInnerProduct w/o Ricci
-L2 Norm of Divergence = 1.84077859741e-15
-L2 Norm of Vorticity = 1.28740102333e-14
-Integral S_{ij}S^{ij} dA -1.38586362307e-17
-L2 Norm of f_L= 2.50585501512e-29
-L2 Norm of f_lam= 1.82869700083e-28
-L2 Norm of xi*Grad(L) = 2.03258051971e-31
+L2 Norm of Divergence = 1.77294320262e-15
+L2 Norm of Vorticity = 2.03274340501e-14
+Integral S_{ij}S^{ij} dA 1.17654843357e-14
+L2 Norm of f_L= 1.32994134772e-29
+L2 Norm of f_lam= 2.9966346968e-28
+L2 Norm of xi*Grad(L) = 1.15534135759e-32
 Scale factor:       RMS deviation:
-ComputeAKV.cpp (line 257; RecomputeData) Introduce IP4, IP5, IP6
+ComputeAKV.cpp (line 259; RecomputeData) Introduce IP4, IP5, IP6
 AKVsolver.cpp (line 797; AKVInnerProduct) AKVInnerProduct w/o Ricci
 AKVsolver.cpp (line 797; AKVInnerProduct) AKVInnerProduct w/o Ricci
 AKVsolver.cpp (line 642; OptimizeScaleFactor)temporary edit to get optimization working
 Equator 
-0.998750418345281 2.17403980507613e-14
+1.00000000000006 2.17517261879382e-14
 IP1 
-0.998750418345224 2.17403980507613e-14
+1 2.17517261879382e-14
 IP2 
-0.999582604031622 0.000301983267522922
+1 2.17517261879382e-14
 IP3 
-0.999165382282639 0.000150644855355287
+1 2.17517261879382e-14
 IP4 
-0.276516481377791 0.947410508129285
+0.277555756156289 0.944629840390588
 IP5 
-0.86199885016167 0.0575449154705795
+0.86316745750311 0.0575309972378108
 IP6 
-0.743042017680041 0.124828269701863
+0.745058059692382 0.124182023916109
 Optimize
-0.998750418345068 2.17403980507613e-14
+0.999999999999847 2.17517261879382e-14
 
 symmetry axis guess : 90 180
 Starting the gsl multidimensional root finder.
-iter = 1 x = -9.6806582e-07  1.5707971  3.1415927 f(x) = 3.2140352e-12 -1.4172911e-15 -3.126318e-16
-Solution found with : THETA[1] = -9.6806582e-07
-                     thetap[1] = 90.000043
-                       phip[1] = -180
+iter = 1 x = 3.4690755e-16  1.5707964   3.141593 f(x) = 5.2409732e-18 1.1278648e-16 -4.1794543e-16
+Solution found with : THETA[1] = 3.4690755e-16
+                     thetap[1] = 90.000003
+                       phip[1] = -179.99998
 AKVsolver.cpp (line 797; AKVInnerProduct) AKVInnerProduct w/o Ricci
 AKVsolver.cpp (line 797; AKVInnerProduct) AKVInnerProduct w/o Ricci
-L2 Norm of Divergence = 7.59190795351e-15
-L2 Norm of Vorticity = 5.27944193346e-14
-Integral S_{ij}S^{ij} dA 2.92561208524e-05
-L2 Norm of f_L= 7.58210006938e-12
-L2 Norm of f_lam= 2.59545479164e-06
-L2 Norm of xi*Grad(L) = 1.64481813938e-07
+L2 Norm of Divergence = 8.3896921529e-15
+L2 Norm of Vorticity = 8.18534290133e-14
+Integral S_{ij}S^{ij} dA -3.48468150076e-15
+L2 Norm of f_L= 4.90069003529e-28
+L2 Norm of f_lam= 1.39095971892e-26
+L2 Norm of xi*Grad(L) = 1.97326878214e-29
 Scale factor:       RMS deviation:
-ComputeAKV.cpp (line 257; RecomputeData) Introduce IP4, IP5, IP6
+ComputeAKV.cpp (line 259; RecomputeData) Introduce IP4, IP5, IP6
 AKVsolver.cpp (line 797; AKVInnerProduct) AKVInnerProduct w/o Ricci
 AKVsolver.cpp (line 797; AKVInnerProduct) AKVInnerProduct w/o Ricci
 AKVsolver.cpp (line 642; OptimizeScaleFactor)temporary edit to get optimization working
 Equator 
-1.00062458461892 7.93767927705292e-08
+1.00000000000006 2.17517261879382e-14
 IP1 
-1.00062674162655 7.24711769641243e-07
+1 2.17517261879382e-14
 IP2 
-1.00020837220584 0.000150999706090603
+1 2.17517261879382e-14
 IP3 
-1.00041678783066 7.54015274467035e-05
+1 2.17517261879382e-14
 IP4 
-0.277208632864247 0.94659183842541
+0.277555756156289 0.944629840390588
 IP5 
-0.863077015356152 0.0578076362862834
+0.86316745750311 0.0575309972378108
 IP6 
-0.744901934436083 0.124523609049372
+0.745058059692383 0.124182023916109
 Optimize
-1.00062474746347 5.29423320257566e-08
+0.999999999999847 2.17517261879382e-14
 
-symmetry axis guess : 90 -89.9999999611508
+symmetry axis guess : 90 -89.9999798677992
 Starting the gsl multidimensional root finder.
-iter = 1 x = -9.6806582e-07   1.570798 -1.5707963 f(x) = 7.0171555e-12 3.4332128e-16 1.525851e-14
-Solution found with : THETA[2] = -9.6806582e-07
-                     thetap[2] = 90.000095
-                       phip[2] = -90
+iter = 1 x = -4.7381817e-18  1.5707963  -1.570796 f(x) = -2.0304818e-17 3.7175558e-16 -2.3232784e-17
+Solution found with : THETA[2] = -4.7381817e-18
+                     thetap[2] = 89.999998
+                       phip[2] = -89.99998
 AKVsolver.cpp (line 797; AKVInnerProduct) AKVInnerProduct w/o Ricci
 AKVsolver.cpp (line 797; AKVInnerProduct) AKVInnerProduct w/o Ricci
 AKVsolver.cpp (line 797; AKVInnerProduct) AKVInnerProduct w/o Ricci
-<v_0|v_0> = 30.296857
--THETA_0 <v_0|v_0> = 2.9329352e-05
-<v_1|v_1> = 30.22121
-<v_0|v_1> = -2.2875001e-05
--THETA_1 <v_1|v_1> = 2.9256121e-05
-<v_2|v_2> = 30.22121
-<v_0|v_2> = -4.994251e-05
-<v_1|v_2> = 5.3151449e-08
--THETA_2 <v_2|v_2> = 2.9256121e-05
-L2 Norm of Divergence = 7.39301881013e-15
-L2 Norm of Vorticity = 5.77129139724e-14
-Integral S_{ij}S^{ij} dA 2.92561208687e-05
-L2 Norm of f_L= 7.58210006888e-12
-L2 Norm of f_lam= 2.59545479163e-06
-L2 Norm of xi*Grad(L) = 1.64481813939e-07
+<v_0|v_0> = 30.183414
+-THETA_0 <v_0|v_0> = 1.430145e-16
+<v_1|v_1> = 30.183414
+<v_0|v_1> = -1.6888839e-06
+-THETA_1 <v_1|v_1> = 1.430145e-16
+<v_2|v_2> = 30.183414
+<v_0|v_2> = 9.5402808e-07
+<v_1|v_2> = 2.449774e-07
+-THETA_2 <v_2|v_2> = 1.430145e-16
+L2 Norm of Divergence = 6.71501608525e-15
+L2 Norm of Vorticity = 6.65402174765e-14
+Integral S_{ij}S^{ij} dA -1.45436800916e-15
+L2 Norm of f_L= 4.20764110335e-28
+L2 Norm of f_lam= 1.43960907345e-26
+L2 Norm of xi*Grad(L) = 1.99261497371e-29
 Scale factor:       RMS deviation:
-ComputeAKV.cpp (line 257; RecomputeData) Introduce IP4, IP5, IP6
+ComputeAKV.cpp (line 259; RecomputeData) Introduce IP4, IP5, IP6
 AKVsolver.cpp (line 797; AKVInnerProduct) AKVInnerProduct w/o Ricci
 AKVsolver.cpp (line 797; AKVInnerProduct) AKVInnerProduct w/o Ricci
 AKVsolver.cpp (line 642; OptimizeScaleFactor)temporary edit to get optimization working
 Equator 
-1.00062458461895 7.93767808458279e-08
+1.00000000000006 2.17517261879382e-14
 IP1 
-1.00062674162654 7.24711770684766e-07
+1 2.17517261879382e-14
 IP2 
-1.00020837220584 0.000150999706087804
+1 2.17517261879382e-14
 IP3 
-1.00041678783066 7.54015274472722e-05
+1 2.17517261879382e-14
 IP4 
-0.277208632864245 0.946591838425407
+0.277555756156289 0.944629840390588
 IP5 
-0.863077015356149 0.0578076362862818
+0.86316745750311 0.0575309972378108
 IP6 
-0.744901934436079 0.124523609049377
+0.745058059692383 0.124182023916109
 Optimize
-1.0006247474635 5.29423278822374e-08
+0.999999999999847 2.17517261879382e-14
 
 
 
