@@ -40,6 +40,7 @@ namespace ComputeItems {
               || mScaleFactor=="InnerProduct4"
               || mScaleFactor=="InnerProduct5"
               || mScaleFactor=="InnerProduct6"
+              || mScaleFactor=="InnerProducts"
               || mScaleFactor=="Optimize",
               "ScaleFactor is '" << mScaleFactor << "'; must be Equator,"
               " InnerProduct1, InnerProduct2, InnerProduct3, or Optimize.")
@@ -168,7 +169,7 @@ namespace ComputeItems {
           v1v1 = AKVInnerProduct(v[1],v[1],Ricci,sb,mWithRicciScaling)*sqrt(2.)*M_PI;
           v0v1 = AKVInnerProduct(v[0],v[1],Ricci,sb,mWithRicciScaling)*sqrt(2.)*M_PI;
           if(fabs(v0v0) == fabs(v0v1)) badAKVSolution = true;
-          if(fabs(v0v1) > 1.e-04) badAKVSolution = true;
+          //if(fabs(v0v1) > 1.e-04) badAKVSolution = true;
           break;
         case 2:
           //compute inner products <v_2|v_2>, <v_0|v_2>, <v_1|v_2>
@@ -177,20 +178,20 @@ namespace ComputeItems {
           v1v2 = AKVInnerProduct(v[1],v[2],Ricci,sb,mWithRicciScaling)*sqrt(2.)*M_PI;
           if(fabs(v0v0) == fabs(v0v2)) badAKVSolution = true;
           if(fabs(v1v1) == fabs(v1v2)) badAKVSolution = true;
-          if(fabs(v0v2) > 1.e-04 || fabs(v1v2) > 1.e-04) badAKVSolution = true;
+          //if(fabs(v0v2) > 1.e-04 || fabs(v1v2) > 1.e-04) badAKVSolution = true;
           break;
       }
 
       if(mPrintInnerProducts && a==2){
           std::cout << "<v_0|v_0> = " << v0v0 << std::endl;
-          std::cout << "-THETA_0 <v_0|v_0> = " << -THETA[a]*v0v0 << std::endl;
+          std::cout << "-THETA_0 <v_0|v_0> = " << -THETA[0]*v0v0 << std::endl;
           std::cout << "<v_1|v_1> = " << v1v1 << std::endl;
           std::cout << "<v_0|v_1> = " << v0v1 << std::endl;
-          std::cout << "-THETA_1 <v_1|v_1> = " << -THETA[a]*v1v1 << std::endl;
+          std::cout << "-THETA_1 <v_1|v_1> = " << -THETA[1]*v1v1 << std::endl;
           std::cout << "<v_2|v_2> = " << v2v2 << std::endl;
           std::cout << "<v_0|v_2> = " << v0v2 << std::endl;
           std::cout << "<v_1|v_2> = " << v1v2 << std::endl;
-          std::cout << "-THETA_2 <v_2|v_2> = " << -THETA[a]*v2v2 << std::endl;
+          std::cout << "-THETA_2 <v_2|v_2> = " << -THETA[2]*v2v2 << std::endl;
       }
 
       //Gram Schmidt orthogonalization
@@ -255,6 +256,26 @@ namespace ComputeItems {
         scale = InnerProductScaleFactors(v[a], v[a], Ricci, r2p4, sb,false)[1];
       } else if(mScaleFactor=="InnerProduct6"){
         scale = InnerProductScaleFactors(v[a], v[a], Ricci, r2p4, sb,false)[2];
+      } else if(mScaleFactor=="InnerProducts"){
+        std::cout << POSITION << " this is a test bed that can be deleted later" << std::endl;
+        const MyVector<double> scaleIP 
+              = InnerProductScaleFactors(v[a], v[a], Ricci, r2p4, sb,true);
+        const double artificialScale = 0.9;
+        std::cout << POSITION << " artificial scaling of rotated_v by " 
+                  << artificialScale << std::endl;
+        const MyVector<double> artificialScaleIP 
+              = InnerProductScaleFactors(v[a]*artificialScale, v[a]*artificialScale,
+                                         Ricci, r2p4, sb,true);
+        scale = scaleIP[0];
+          std::cout << "IP1 " << std::endl;
+          PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleIP[0],mRad,mPrintSteps);
+          std::cout << "IP1 artificial scale" << std::endl;
+          PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],
+                                    artificialScaleIP[0],mRad,mPrintSteps);
+          std::cout << "IP2 " << std::endl;
+          PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleIP[1],mRad,mPrintSteps);
+          std::cout << "IP3 " << std::endl;
+          PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleIP[2],mRad,mPrintSteps);
       } else if(mScaleFactor=="Optimize"){
         const double scaleAtEquator
               = NormalizeAKVAtOnePoint(sb, rotated_Psi, rotated_v[a], mRad, M_PI/2., 0.0, mPrintSteps);
@@ -300,7 +321,7 @@ std::cout << POSITION << " Introduce IP4, IP5, IP6" << std::endl;
 
       if(badAKVSolution){
         v[a] = 0.;
-        thetap[a] += M_PI/2.; 
+        thetap[a] += M_PI/4.; 
         phip[a] += M_PI/4.;
         a--;
         std::cout << "This was a bad / repeated solution, and will be recomputed." << std::endl;

@@ -604,8 +604,15 @@ double NormalizeAKVAtOnePoint(const SurfaceBasis& sb,
   //the affine path length should be 2*Pi.  Also, test various
   //paths to ensure we have an actual Killing field
   double t; //affine path length
-
-
+//extra stuff to be deleted later
+int m = sb.M();
+int l = sb.L();
+std::cout << POSITION << " {xi[0]}_{1,0} mode = " << sb.ComputeCoefficients(xi(0))[m+1] << std::endl;
+std::cout << POSITION << " {xi[0]}_{1,1} mode = " << sb.ComputeCoefficients(xi(0))[m+2] << std::endl;
+std::cout << POSITION << " {xi[0]}_{1,-1} mode = " << sb.ComputeCoefficients(xi(0))[l*m+m+1] << std::endl;
+std::cout << POSITION << " {xi[1]}_{1,0} mode = " << sb.ComputeCoefficients(xi(1))[m+1] << std::endl;
+std::cout << POSITION << " {xi[1]}_{1,1} mode = " << sb.ComputeCoefficients(xi(1))[m+2] << std::endl;
+std::cout << POSITION << " {xi[1]}_{1,-1} mode = " << sb.ComputeCoefficients(xi(1))[l*m+m+1] << std::endl;
   bool goodtheta = KillingPath(sb, rotated_Psi, xi, rad, t, thetap, phip, printSteps);
   REQUIRE(goodtheta, "Killing trajectory did not close " << POSITION);
   const double scale = t/(2.0*M_PI);
@@ -718,7 +725,9 @@ bool KillingPath(const SurfaceBasis& sb,
   }
      
   int iter = 0;
-  while (true && iter<10000) {
+  //while (true && iter<10000) {
+//std::cout << POSITION << " Large iter in use" << std::endl;
+  while (true && iter<1000000) {
     iter++;
     const double ysave[2] = {y[0],y[1]}; 
     const double tsave = t;
@@ -756,6 +765,7 @@ bool KillingPath(const SurfaceBasis& sb,
   const bool closedPath = (fabs(y[0] - theta) < 1.e-6);
   if(!closedPath){
     std::cout << "##> Theta diff: " << std::setprecision(6) << y[0] - theta << std::endl;
+    std::cout << "Iterations: " << iter << std::endl;
   }
   return closedPath;
 }
