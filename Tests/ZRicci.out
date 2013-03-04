@@ -1,103 +1,56 @@
-MPI starting on 1 processors at Wed Feb 13 09:25:56 2013
+MPI starting on 1 processors at Wed Feb 13 09:32:07 2013
 Processor Names = Watson
 RunDirectory is /home/hohejd8/SpEC/AppKillSpin/Tests
 Compiled at Watson:/home/hohejd8/SpEC
 Code Revision a74c5e629474ee1320f04c29605b64fcb979cc61 (InitialCommit-20769-ga74c5e6)
-Linked on Wed Feb 13 09:25:24 EST 2013
+Linked on Wed Feb 13 09:29:45 EST 2013
 Executed ApplyObservers: /home/hohejd8/SpEC/Support/ApplyObservers/Executables/ApplyObservers -UseTimes=0 ApplyObservers.input
 
 symmetry axis guess : 0 0
 Starting the gsl 1D root finder at thetap = 0.0.
 Converged
-f0 = -1.73203e-16 fp = 3.37012e-17 fm = -1.17926e-17
-Solution found with : THETA[0] = 1.17456e-11
+f0 = 8.80246e-16 fp = -1.13687e-17 fm = 3.97808e-18
+Solution found with : THETA[0] = -1.69725e-11
                      thetap[0] = 0
                        phip[0] = 0
-L2 Norm of Divergence = 1.87428984239e-15
-L2 Norm of Vorticity = 7.5351786094e-07
-Integral S_{ij}S^{ij} dA 5.03597666713e-12
-L2 Norm of f_L= 4.62854855012e-10
-L2 Norm of f_lam= 4.07169714423e-28
-L2 Norm of xi*Grad(L) = 2.43609613921e-31
+L2 Norm of Divergence = 1.60879016764e-15
+L2 Norm of Vorticity = 8.69842750458e-07
+Integral S_{ij}S^{ij} dA -2.19253909351e-12
+L2 Norm of f_L= 7.90863883712e-11
+L2 Norm of f_lam= 4.22972322347e-28
+L2 Norm of xi*Grad(L) = 1.26338535976e-31
 Scale factor:       RMS deviation:
 ComputeAKV.cpp (line 260; RecomputeData) this is a test bed that can be deleted later
 ComputeAKV.cpp (line 264; RecomputeData) artificial scaling of rotated_v by 0.9
 IP1 
-0.96212057022531 5.3824011091705e-08
+0.961328204041023 1.98458449085836e-08
 IP1 artificial scale
-1.18780317311767 0.0677840438339408
+1.18682494326052 0.0676898705519827
 IP2 
-0.980959740132565 0.00685148076110891
+0.968979946033727 0.00281329556074318
 IP3 
-0.96228201176095 5.98529682831746e-05
+0.938922135815524 0.00850170939748538
 InnerProducts
-0.96212057022531 5.3824011091705e-08
+0.961328204041023 1.98458449085836e-08
 
 symmetry axis guess : 90 180
 Starting the gsl multidimensional root finder.
-iter = 1 x = -0.013675224  1.5722176  3.1415927 f(x) = 6.4369064e-05 5.2775561e-06 -2.4078836e-15
-iter = 2 x = -0.01367293  1.5707966  3.1415928 f(x) = 1.0753762e-08 -1.2902111e-11 -3.5666313e-16
-iter = 3 x = -0.01367293  1.5707963  3.1415928 f(x) = -3.0106596e-14 -3.4640669e-16 -3.1022076e-16
-Solution found with : THETA[1] = -0.01367293
+iter = 1 x = -0.014307298  1.5965632  3.1415927 f(x) = 0.0012496919 2.5421974e-06 1.1465283e-15
+iter = 2 x = -0.014307298  1.5628521  3.1415927 f(x) = -0.00038533351 2.5429615e-06 1.7688915e-15
+iter = 3 x = -0.014306188  1.5707974  3.1415927 f(x) = 5.2358594e-08 -8.7943546e-11 -3.9251507e-16
+iter = 4 x = -0.014306188  1.5707963  3.1415927 f(x) = 5.832757e-12 -2.4655733e-14 -3.705055e-16
+Solution found with : THETA[1] = -0.014306188
                      thetap[1] = 90
-                       phip[1] = -179.99999
-L2 Norm of Divergence = 8.39238081468e-15
-L2 Norm of Vorticity = 1.06845691596e-07
-Integral S_{ij}S^{ij} dA 0.313239245829
-L2 Norm of f_L= 0.0309243323736
-L2 Norm of f_lam= 0.30505574194
-L2 Norm of xi*Grad(L) = 0.00410238406012
+                       phip[1] = 180
+L2 Norm of Divergence = 9.40822584516e-15
+L2 Norm of Vorticity = 4.83131333555e-08
+Integral S_{ij}S^{ij} dA 0.326901523621
+L2 Norm of f_L= 0.00974702699026
+L2 Norm of f_lam= 0.315522362642
+L2 Norm of xi*Grad(L) = 0.00480160095497
 Scale factor:       RMS deviation:
 ComputeAKV.cpp (line 260; RecomputeData) this is a test bed that can be deleted later
 ComputeAKV.cpp (line 264; RecomputeData) artificial scaling of rotated_v by 0.9
 IP1 
-1.04326899011037 0.00857524381432588
-IP1 artificial scale
-1.28798640754367 0.074726978607196
-IP2 
-1.00787259658295 0.00366743731421365
-IP3 
-1.01580717094287 0.000884860734085121
-InnerProducts
-1.04326899011037 0.00857524381432588
-
-symmetry axis guess : 90 -89.9999906280497
-Starting the gsl multidimensional root finder.
-iter = 1 x = -0.013675224  1.5907587 -1.5707962 f(x) = 0.00090405341 -8.6047606e-13 -5.2769107e-06
-iter = 2 x = -0.013675224  1.5614281 -1.5707962 f(x) = -0.00042428654 -8.6489956e-13 -5.2773042e-06
-iter = 3 x = -0.013672929  1.5707977 -1.5707962 f(x) = 6.3388412e-08 5.154526e-16 9.9813383e-10
-iter = 4 x = -0.01367293  1.5707963 -1.5707962 f(x) = 7.7839708e-12 3.5354388e-16 -9.4203245e-14
-Solution found with : THETA[2] = -0.01367293
-                     thetap[2] = 90
-                       phip[2] = -89.999991
-<v_0|v_0> = 24.183742
--THETA_0 <v_0|v_0> = -2.8405144e-10
-<v_1|v_1> = 22.909446
-<v_0|v_1> = 1.5503771e-11
--THETA_1 <v_1|v_1> = 0.31323925
-<v_2|v_2> = 22.909446
-<v_0|v_2> = -4.0004786e-09
-<v_1|v_2> = -2.6745282e-09
--THETA_2 <v_2|v_2> = 0.31323925
-L2 Norm of Divergence = 8.71021694972e-15
-L2 Norm of Vorticity = 1.06845692142e-07
-Integral S_{ij}S^{ij} dA 0.313239245829
-L2 Norm of f_L= 0.0309243323736
-L2 Norm of f_lam= 0.30505574194
-L2 Norm of xi*Grad(L) = 0.00410238406012
-Scale factor:       RMS deviation:
-ComputeAKV.cpp (line 260; RecomputeData) this is a test bed that can be deleted later
-ComputeAKV.cpp (line 264; RecomputeData) artificial scaling of rotated_v by 0.9
-IP1 
-1.04326899011037 0.00857524381432421
-IP1 artificial scale
-1.28798640754367 0.0747269786071955
-IP2 
-1.00787259658295 0.00366743731421277
-IP3 
-1.01580717094286 0.000884860734088786
-InnerProducts
-1.04326899011037 0.00857524381432421
-
-
-
+##> Theta diff: -0.00482634
+Iterations: 1000000

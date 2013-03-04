@@ -4,10 +4,10 @@ Items=
 	   #ConstVectorOfDouble(Output=OmegaOrbit; Components=0,0,0.038037431), #d=9.5
 	   #ConstVectorOfDouble(Output=OmegaOrbit; Components=0,0,0.03356387179), #d=10.5
 	   #ConstVectorOfDouble(Output=OmegaOrbit; Components=0,0,0.02987703978), #d=11.5
-	   #ConstVectorOfDouble(Output=OmegaOrbit; Components=0,0,0.02680407367), #d=12.5
+	   ConstVectorOfDouble(Output=OmegaOrbit; Components=0,0,0.02680407367), #d=12.5
 	   #ConstVectorOfDouble(Output=OmegaOrbit; Components=0,0,0.02421507216), #d=13.5
 	   #ConstVectorOfDouble(Output=OmegaOrbit; Components=0,0,0.02201202116), #d=14.5
-	   ConstVectorOfDouble(Output=OmegaOrbit; Components=0,0,0.01418267927), #d=20.0
+	   #ConstVectorOfDouble(Output=OmegaOrbit; Components=0,0,0.01418267927), #d=20.0
 	   #ConstVectorOfDouble(Output=OmegaOrbit; Components=0,0,0.010990), #d=24.0
 	   #ConstVectorOfDouble(Output=OmegaOrbit; Components=0,0,0.0080083), #d=30.0
 	   #ConstVectorOfDouble(Output=OmegaOrbit; Components=0,0,0.0052966), #d=40.0

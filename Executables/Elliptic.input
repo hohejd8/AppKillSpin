@@ -107,7 +107,7 @@ Observers=
                              );
                        ),   
 		Domain(Items=
-                             AddStrahlkorperSurface(
+                             AddStrahlkorperSurfaceAndMesh(
                                 SurfaceName=hohejd8SkS;
                                 MeshName=hohejd8SkM;
                                 Nth=__LA__;
@@ -115,7 +115,7 @@ Observers=
                                 Center=__d__/2.,0.,0.;
                                 Radius=__R1__;
                              ),
-                             ComputeSKWM(
+                             ComputeStrahlkorperWithMesh(
                                 Surface=hohejd8SkS;
                                 Mesh=hohejd8SkM;
                                 SKWMName=hohejd8SkWM;
@@ -140,9 +140,10 @@ Observers=
                                 ConformalFactor=ConformalFactor;
                                 AKVGuess=0.0, 0.0, 0.0;
                                 Solver=Broyden;
-                                Verbose=true;
+                                Verbose=false;
                                 PrintResiduals=false;
-                                Output=hohejd8AKV;
+                                Radius=__R1__;
+                                AKVSolution=hohejd8AKV;
                                 DivNorm=true;
                                 VortNorm=true;
                                 SS=true;
@@ -168,8 +169,8 @@ Observers=
                    Center=__d__/2,0,0;
                    Radius=__R1__;
                    ConformalFactor=ConformalFactor;
-                   #KillingVector=S_x, S_y, S_z;
-                   KillingVector=hohejd8AKV, S_z;
+                   KillingVector=S_x, S_y, S_z;
+                   #KillingVector=hohejd8AKV, S_z;
                    InertialXi=FlatSpace),
 
                 AdmIntegrals(Sphere=SphereC1;

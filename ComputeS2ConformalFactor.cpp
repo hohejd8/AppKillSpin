@@ -29,8 +29,31 @@ namespace ComputeItems {
     if(mSymmetry=="Spherical"){
       //Do nothing.  Psi is already spherically symmetric.
     } else if(mSymmetry=="Z"){
-      //Psi += 0.001*cos(theta)*cos(theta);
+      Psi += 0.001*cos(theta)*cos(theta);
+    } else if(mSymmetry=="Z1"){
       Psi += -cos(theta)/16. + cos(theta)*cos(theta)/32. + cos(theta)*cos(theta)*cos(theta)/8.-0.;
+    } else if(mSymmetry=="Z2"){
+      Psi += -cos(theta)/8. + cos(theta)*cos(theta)/32. + cos(theta)*cos(theta)*cos(theta)/8.-0.;
+    } else if(mSymmetry=="Z3"){
+      Psi += -cos(theta)/4. + cos(theta)*cos(theta)/32. + cos(theta)*cos(theta)*cos(theta)/8.-0.;
+    } else if(mSymmetry=="Z4"){
+      Psi += -cos(theta)/2. + cos(theta)*cos(theta)/32. + cos(theta)*cos(theta)*cos(theta)/8.-0.;
+    } else if(mSymmetry=="Z5"){
+      Psi += -cos(theta)/16. + cos(theta)*cos(theta)/16. + cos(theta)*cos(theta)*cos(theta)/8.-0.;
+    } else if(mSymmetry=="Z6"){
+      Psi += -cos(theta)/16. + cos(theta)*cos(theta)/8. + cos(theta)*cos(theta)*cos(theta)/8.-0.;
+    } else if(mSymmetry=="Z7"){
+      Psi += -cos(theta)/16. + cos(theta)*cos(theta)/4. + cos(theta)*cos(theta)*cos(theta)/8.-0.;
+    } else if(mSymmetry=="Z8"){
+      Psi += -cos(theta)/16. + cos(theta)*cos(theta)/2. + cos(theta)*cos(theta)*cos(theta)/8.-0.;
+    } else if(mSymmetry=="Z9"){
+      Psi += -cos(theta)/16. + cos(theta)*cos(theta)/32. + cos(theta)*cos(theta)*cos(theta)/32.-0.;
+    } else if(mSymmetry=="Z10"){
+      Psi += -cos(theta)/16. + cos(theta)*cos(theta)/32. + cos(theta)*cos(theta)*cos(theta)/16.-0.;
+    } else if(mSymmetry=="Z11"){
+      Psi += -cos(theta)/16. + cos(theta)*cos(theta)/32. + cos(theta)*cos(theta)*cos(theta)/4.-0.;
+    } else if(mSymmetry=="Z12"){
+      Psi += -cos(theta)/16. + cos(theta)*cos(theta)/32. + cos(theta)*cos(theta)*cos(theta)/2.-0.;
     } else if(mSymmetry=="X"){
       Psi += 0.001*(1.0-3.0*cos(theta)*cos(theta)+3.0*sin(theta)*sin(theta)*cos(2.0*phi));
     } else if(mSymmetry=="Y"){

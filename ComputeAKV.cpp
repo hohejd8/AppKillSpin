@@ -61,6 +61,7 @@ namespace ComputeItems {
   
   void ComputeAKV::RecomputeData(const DataBoxAccess& boxa) const {
     delete mResult;
+    std::cout << "With Ricci scaling = " << mWithRicciScaling << std::endl;
     const StrahlkorperWithMesh& skwm = boxa.Get<StrahlkorperWithMesh>(mSkwm);
     const SurfaceBasis sb(skwm.Grid().Basis());
     const DataMesh theta = boxa.Get<StrahlkorperWithMesh>(mSkwm).Grid().SurfaceCoords()(0);
@@ -105,7 +106,7 @@ namespace ComputeItems {
     //if the initial guess for thetap is close to zero or pi,
     //try solving at thetap = zero
     //set the initial guesses
-    double THETA[3] = {mAKVGuess[0],0.0,0.0};
+    double THETA[3] = {mAKVGuess[0],0.,0.};
     double thetap[3] = {mAKVGuess[1],0.,0.};
     double phip[3] = {mAKVGuess[2],0.,0.};
 
@@ -131,6 +132,10 @@ namespace ComputeItems {
     //solver should be run again
     bool badAKVSolution = false;
 
+    //temporary: test for rotation and inverse mapping
+    //CoordinateRotationMapping(theta, phi, 0., M_PI);
+    //CoordinateRotationMapping(theta, phi, M_PI/4., 0.);
+
     for(int a=0; a<axes; a++){//index over orthonormal directions to find AKV solutions
 
       //generate a guess for the next axis of symmetry based on prior solutions.
@@ -140,12 +145,15 @@ namespace ComputeItems {
 
       badAKVSolution = false;
 
+      std::cout << "Beginning of loop.  Axis initial guess: " << thetap[a]*(180./M_PI)
+                << ", " << phip[a]*(180./M_PI) << std::endl;
+
       //create L
       DataMesh L(DataMesh::Empty);
 
       //setup struct with all necessary data
       rparams p = {theta,phi,rp2,sb,llncf,GradRicci,L,
-                 v[a],mL_resid_tol,mv_resid_tol,mPrintResiduals,mWithRicciScaling};
+                   v[a],mL_resid_tol,mv_resid_tol,mPrintResiduals,mWithRicciScaling};
 
       RunAKVsolvers(THETA[a], thetap[a], phip[a], min_thetap,
                     mResidualSize, mVerbose, &p, mSolver);
@@ -238,6 +246,58 @@ namespace ComputeItems {
       DataMesh rotated_Psi = RotateOnSphere(Psi,theta,phi,
                                             sb,thetap[a],phip[a]);
 
+      //A secondary test to make sure that the solution is valid and Killing paths
+      //are centered on a valid axis
+      double thetaOffAxis = 0.; double phiOffAxis = 0.;
+      bool isKillingCentered
+            = IsKillingPathCentered(sb, thetaOffAxis, phiOffAxis, theta, phi, rotated_Psi,
+                                    rotated_v[a], mRad, false);
+      std::cout << "(thetaOffAxis, phiOffAxis) = (" << thetaOffAxis*(180./M_PI)
+                << ", " << phiOffAxis*(180./M_PI) << ")" << std::endl; // remove this output later
+      REQUIRE(isKillingCentered, "A Killing path near the north pole is not centered on the pole. \n"
+                  << "With respect to the rotation (thetap, phip) = (" << thetap[a]*(180./M_PI) 
+                  << ", " << phip[a]*(180./M_PI) << "), the Killing path is centered on ("
+                  << thetaOffAxis*(180./M_PI) << ", " << phiOffAxis*(180./M_PI) << ").\n"
+                  << "The program is exiting.");
+/*
+      if(!isKillingCentered){
+        //I have learned that this does not work.  This is just a bad solution, and I
+        //cannot seem to fix it.
+        //Turn this into a REQUIRE
+        std::cout << "A Killing path near the north pole is not centered on the pole. \n"
+                  << "With respect to the rotation (thetap, phip) = (" << thetap[a]*(180./M_PI) 
+                  << ", " << phip[a]*(180./M_PI) << "), the Killing path is centered on ("
+                  << thetaOffAxis*(180./M_PI) << ", " << phiOffAxis*(180./M_PI) << ").\n"
+                  << "The program is exiting." << std::endl;
+        return;
+        
+        std::cout << "This solution seems to be inconsistent.  Try theta = " 
+                  << (thetap[a]+thetaOffAxis)*(180./M_PI)
+                  << ", phi = " 
+                  << (phip[a]+phiOffAxis)*(180./M_PI) << std::endl;
+        badAKVSolution = true;
+        std::cout << "thetap[a] before = " << thetap[a]*(180./M_PI) << std::endl;
+        std::cout << "phip[a] before = " << phip[a]*(180./M_PI) << std::endl;
+        THETA[a] = 0.;
+        thetap[a] += thetaOffAxis; 
+        phip[a] += phiOffAxis;
+        std::cout << "thetap[a] after = " << thetap[a]*(180./M_PI) << std::endl;
+        std::cout << "phip[a] after = " << phip[a]*(180./M_PI) << std::endl;
+        v[a] = 0.;
+        //struct rparam1D p1D = {p, thetap[a], phip[a]};
+        //test a 1D solver for THETA since we now "know" thetap, phip
+        if(FindTHETA(&p,THETA[a],mResidualSize,mVerbose,thetap[a],phip[a])){
+          std::cout << "Alternative solution: THETA[" << a << "] = " << THETA[a] << "\n"
+  	  << "                     thetap[" << a << "] = " << (180.0/M_PI)*thetap[a] << "\n"
+	  << "                       phip[" << a << "] = " << (180.0/M_PI)*phip[a] 
+	  << std::endl;
+        } else {
+          std::cout << POSITION << " Alternative solution not found." << std::endl;
+        }
+        a--;
+        continue; 
+      }
+*/
       //determine scale factors
       double scale = 0.0;
       if(mPrintSurfaceNormalization)
@@ -257,25 +317,40 @@ namespace ComputeItems {
       } else if(mScaleFactor=="InnerProduct6"){
         scale = InnerProductScaleFactors(v[a], v[a], Ricci, r2p4, sb,false)[2];
       } else if(mScaleFactor=="InnerProducts"){
-        std::cout << POSITION << " this is a test bed that can be deleted later" << std::endl;
-        const MyVector<double> scaleIP 
-              = InnerProductScaleFactors(v[a], v[a], Ricci, r2p4, sb,true);
-        const double artificialScale = 0.9;
-        std::cout << POSITION << " artificial scaling of rotated_v by " 
-                  << artificialScale << std::endl;
-        const MyVector<double> artificialScaleIP 
-              = InnerProductScaleFactors(v[a]*artificialScale, v[a]*artificialScale,
-                                         Ricci, r2p4, sb,true);
-        scale = scaleIP[0];
-          std::cout << "IP1 " << std::endl;
-          PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleIP[0],mRad,mPrintSteps);
+        //std::cout << POSITION << " this is a test bed that can be deleted later" << std::endl;
+        std::cout << POSITION << " cheat to force mPrintSteps=true" << std::endl;
+        bool print = mPrintSteps;
+        if(a==1) print=true;
+        //const MyVector<double> scaleIP 
+        //      = InnerProductScaleFactors(v[a], v[a], Ricci, r2p4, sb,true);
+        const MyVector<double> scaleIPNoRicci 
+              = InnerProductScaleFactors(v[a], v[a], Ricci, r2p4, sb,false);
+        //const double artificialScale = 0.9;
+        //std::cout << POSITION << " artificial scaling of rotated_v by " 
+        //          << artificialScale << std::endl;
+        //const MyVector<double> artificialScaleIP 
+        //      = InnerProductScaleFactors(v[a]*artificialScale, v[a]*artificialScale,
+        //                                 Ricci, r2p4, sb,true);
+        //scale = scaleIP[0];
+        scale = scaleIPNoRicci[0];
+/*          std::cout << "IP1 " << std::endl;
+          PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleIP[0],mRad,print);
           std::cout << "IP1 artificial scale" << std::endl;
           PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],
                                     artificialScaleIP[0],mRad,mPrintSteps);
           std::cout << "IP2 " << std::endl;
-          PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleIP[1],mRad,mPrintSteps);
+          PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleIP[1],mRad,print);
           std::cout << "IP3 " << std::endl;
-          PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleIP[2],mRad,mPrintSteps);
+          PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleIP[2],mRad,print);
+*/          std::cout << "IP4 " << std::endl;
+          PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],
+                                    scaleIPNoRicci[0],mRad,print);
+/*          std::cout << "IP5 " << std::endl;
+          PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],
+                                    scaleIPNoRicci[1],mRad,print);
+          std::cout << "IP6 " << std::endl;
+          PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],
+                                    scaleIPNoRicci[2],mRad,print); */
       } else if(mScaleFactor=="Optimize"){
         const double scaleAtEquator
               = NormalizeAKVAtOnePoint(sb, rotated_Psi, rotated_v[a], mRad, M_PI/2., 0.0, mPrintSteps);

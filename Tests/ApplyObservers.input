@@ -5,8 +5,8 @@ DataBoxItems=
               AddStrahlkorperSurfaceAndMesh(
                 SurfaceName=TestSkS;
                 MeshName=TestSkM;
-                Nth=14;
-                Nph=28;
+                Nth=18;
+                Nph=36;
                 Center=0.,0.,0.;
                 Radius=1.0;
               ),
@@ -17,8 +17,8 @@ DataBoxItems=
               ),
               ComputeS2ConformalFactor(
                 StrahlkorperWithMesh=TestSkWM;
-                Symmetry=Spherical;
-                #Symmetry=Z;
+                #Symmetry=Spherical;
+                Symmetry=Z12;
                 #Symmetry=None;
                 #Symmetry=OffAxis;
                 #Symmetry=__Symmetry__;
@@ -26,12 +26,15 @@ DataBoxItems=
               ComputeAKV(
                 StrahlkorperWithMesh=TestSkWM;
                 ConformalFactor=ConformalFactor;
-                ScaleFactor=Optimize;
+                ScaleFactor=InnerProduct4;
                 PrintInnerProducts=true;
+                PrintResiduals=false;
+                #PrintSteps=true;
+                #WithRicciScaling=true;
                 WithRicciScaling=false;
                 InterpolateConformalFactor=false;
-                AKVGuess=0.0, 0.0, 0.0;
-                #AKVGuess=0.0, 3.14159/4.0, 3.14159/4.0;#better guess for off-axis symmetry
+                #AKVGuess=0.0, 0.0, 0.0;
+                AKVGuess=0.0, 3.14159/4.0, 3.14159/4.0;#better guess for off-axis symmetry
                 Radius=1.0;
                 Verbose=true;
                 AKVSolution=TestAKV;

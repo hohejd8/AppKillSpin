@@ -9,6 +9,37 @@
 #include <gsl/gsl_roots.h>
 #include <stdlib.h>
 
+//Is the Killing path centered on the axis after the appropriate (theta, phi) rotation?
+//If not, return false *and* return the relative position of the axis
+//that the Killing path seems to be centered on.
+bool IsKillingPathCentered(const SurfaceBasis& sb,
+                           double& thetaOffAxis,
+                           double& phiOffAxis,
+                           const DataMesh& theta,
+                           const DataMesh& phi,
+                           const DataMesh& rotated_Psi,
+                           const DataMesh& rotated_v,
+                           const double& rad,
+                           const bool& printSteps /*false*/)
+{
+  double t;
+  double thetap = theta[0];
+  double phip = phi[0];
+
+  //create xi
+  Tensor<DataMesh> tmp_xi = sb.Gradient(rotated_v);
+  Tensor<DataMesh> xi(2,"1",DataMesh::Empty);
+  xi(0) = tmp_xi(1);
+  xi(1) = -tmp_xi(0);
+
+  KillingPath(sb, rotated_Psi, xi, rad, t, thetap, phip,
+              thetaOffAxis, phiOffAxis, printSteps);
+
+  if(fabs(thetaOffAxis*180./M_PI)>1.) return false;
+
+  return true;
+}
+
 //prints the RMS deviation from a perfectly scaled surface
 void PrintSurfaceNormalization(const SurfaceBasis& sb,
                       const DataMesh& rotated_Psi,
@@ -140,9 +171,14 @@ void RunAKVsolvers(double& THETA,
 bool FindTHETA(struct rparams * p,
                double& THETA_root,
                const double& residual_size,
-               const bool verbose)
+               //const bool verbose)
+               const bool verbose,
+               const double thetap /*=0.*/,
+               const double phip /*=0.*/)
 {
-  std::cout << "Starting the gsl 1D root finder at thetap = 0.0." << std::endl;
+  //std::cout << "Starting the gsl 1D root finder at thetap = 0.0." << std::endl;
+  std::cout << "Starting the gsl 1D root finder at (thetap, phip) = (" 
+            << thetap << ", " << phip << ")." << std::endl;
   bool goodSolution = false;
   int status;
   int iter = 0, max_iter = 100;
@@ -151,8 +187,12 @@ bool FindTHETA(struct rparams * p,
   double THETA_lo = -1.0, THETA_hi = 1.0;
   gsl_function F;
 
+  //test structure for thetap, phip != 0
+  rparam1D p1D = {*p, thetap, phip};
+
   F.function = &AKVsolver1D;
-  F.params = p;
+  //F.params = p;
+  F.params = &p1D;
 
   T = gsl_root_fsolver_brent; //bisection, falsepos; should probably just keep brent
   s = gsl_root_fsolver_alloc (T);
@@ -177,8 +217,8 @@ bool FindTHETA(struct rparams * p,
   //run AKVsolver one more time to get residual (f) output
   gsl_vector * x = gsl_vector_alloc(3);
   gsl_vector_set(x,0,THETA_root);
-  gsl_vector_set(x,1,0.0);
-  gsl_vector_set(x,2,0.0);
+  gsl_vector_set(x,1,thetap);
+  gsl_vector_set(x,2,phip);
   gsl_vector * f = gsl_vector_alloc(3);
   gsl_vector_set(f,0,0.0);
   gsl_vector_set(f,1,0.0);
@@ -237,7 +277,7 @@ void FindTtp(struct rparams * p,
   s = gsl_multiroot_fsolver_alloc(T, n);
 
   gsl_multiroot_fsolver_set(s, &f, x);
-  //if(verbose) print_state(iter, s); //uncomment this later
+  if(verbose) print_state(iter, s); //uncomment this later
 
   do {
     iter++;
@@ -267,19 +307,28 @@ void FindTtp(struct rparams * p,
 
 //function header for use with gsl 1D root finder
 //runs AKVsolver at thetap, phip = 0
-double AKVsolver1D(double THETA, void *params)
+double AKVsolver1D(double THETA,
+                   void *params)
+                   //void *params,
+                   //const double thetap, /*=0.*/
+                   //const double phip /*=0.*/)
 {
+  const double& thetap = static_cast<struct rparam1D*>(params)->thetap;
+  const double& phip = static_cast<struct rparam1D*>(params)->phip;
+  rparams& p = static_cast<struct rparam1D*>(params)->p;
+
   gsl_vector * x = gsl_vector_alloc(3);
   gsl_vector_set(x,0,THETA);
-  gsl_vector_set(x,1,0.0);
-  gsl_vector_set(x,2,0.0);
+  gsl_vector_set(x,1,thetap);
+  gsl_vector_set(x,2,phip);
 
   gsl_vector * f = gsl_vector_alloc(3);
   gsl_vector_set(f,0,0.0);
   gsl_vector_set(f,1,0.0);
   gsl_vector_set(f,2,0.0);
 
-  AKVsolver(x, params, f);
+  //AKVsolver(x, params, f);
+  AKVsolver(x, &p, f);
 
   return gsl_vector_get(f,0);
 }
@@ -388,9 +437,12 @@ int AKVsolver(const gsl_vector * x,
 
     //print residuals
     if(printResiduals){
-      std::cout << "ic10 = " << ic10
-                << " ic1p = " << ic1p
-                << " ic1m = " << ic1m << std::endl;
+      std::cout << "THETA: " << THETA
+                << "thetap: " << thetap
+                << "phip: " << phip << std::endl;
+      std::cout << "ic10: " << ic10
+                << " ic1p: " << ic1p
+                << " ic1m: " << ic1m << std::endl;
     }
 
     //remove the l=1 modes
@@ -487,6 +539,7 @@ void print_state (size_t iter, gsl_multiroot_fsolver * s)
 }
 
 //takes a DataMesh on the sphere and rotates it by some amount Theta, Phi
+//update variable names Theta->thetap, Phi->phip
 DataMesh RotateOnSphere
          (const DataMesh& collocationvalues,
           const DataMesh& thetaGrid,
@@ -531,6 +584,103 @@ DataMesh RotateOnSphere
   return result;
 }
 
+//provides a simple mapping between (theta, phi) and (thetapp, phipp) coordinates
+//through axis rotation of (thetap, phip).  Similar to RotateOnSphere
+void CoordinateRotationMapping(const DataMesh& thetaGrid,
+                               const DataMesh& phiGrid,
+                               const double& thetap,
+                               const double& phip)
+{
+  //copy constructor, which can be fixed later for better coding practice
+  DataMesh thetaGridNew = thetaGrid;
+  DataMesh thetaGridNewNew = thetaGrid;
+  DataMesh phiGridNew = phiGrid;
+  DataMesh phiGridNewNew = phiGrid;
+
+  {
+  const double Cb = cos(thetap);
+  const double Sb = sin(thetap);
+  const double Ca = cos(phip);
+  const double Sa = sin(phip);
+  for(int i=0; i<thetaGrid.Size(); i++){
+    const double Cpp = cos(phiGrid[i]);
+    const double Spp = sin(phiGrid[i]);
+    const double Ctp = cos(thetaGrid[i]);
+    const double Stp = sin(thetaGrid[i]);
+
+    double CTheta = Cb*Ctp - Sb*Stp*Cpp;
+
+    if(CTheta > 1.0) CTheta = 1.0;  // don't let roundoff error cause problems
+    const double STheta = sqrt(1.0 - CTheta*CTheta);
+    //double newTheta;
+    //double newPhi;
+    if(STheta > 1.e-12) {
+      thetaGridNew[i] = acos(CTheta);
+      const double SP = (Sb*Sa*Ctp + Ca*Stp*Spp + Cb*Sa*Stp*Cpp)/STheta;
+      const double CP = (Sb*Ca*Ctp - Sa*Stp*Spp + Cb*Ca*Stp*Cpp)/STheta;
+      phiGridNew[i] = atan2(SP,CP);
+    } else if(CTheta > 0.0) { // evaluate at north pole
+      thetaGridNew[i] = 0.0;
+      phiGridNew[i] = 0.0;
+    } else { // evaluate at south pole
+      thetaGridNew[i] = M_PI;
+      phiGridNew[i] = 0.0;
+    }
+  }
+  }
+
+  //now perform the inverse mapping
+  {
+  const double Cb = cos(thetap);
+  const double Sb = sin(thetap);
+  const double Ca = cos(-phip);
+  const double Sa = sin(-phip);
+  for(int i=0; i<thetaGridNew.Size(); i++){
+    const double Cpp = cos(phiGridNew[i]);
+    const double Spp = sin(phiGridNew[i]);
+    const double Ctp = cos(thetaGridNew[i]);
+    const double Stp = sin(thetaGridNew[i]);
+
+    double CTheta = Cb*Ctp - Sb*Stp*Cpp;
+
+    if(CTheta > 1.0) CTheta = 1.0;  // don't let roundoff error cause problems
+    const double STheta = sqrt(1.0 - CTheta*CTheta);
+    //double newTheta;
+    //double newPhi;
+    if(STheta > 1.e-12) {
+      thetaGridNewNew[i] = acos(CTheta);
+      //const double SP = (Sb*Sa*Ctp + Ca*Stp*Spp + Cb*Sa*Stp*Cpp)/STheta;
+      //const double CP = (Sb*Ca*Ctp - Sa*Stp*Spp + Cb*Ca*Stp*Cpp)/STheta;
+      //const double CP = ( 0.*Ctp + Ca*Stp*Spp + Sa*Stp*Cpp)/STheta;
+      //const double SP = ( -Sb*Ctp + Cb*Sa*Stp*Spp + Cb*Ca*Stp*Cpp)/STheta;
+      const double SP = (Sb*Sa*Ctp + Ca*Stp*Spp + Cb*Sa*Stp*Cpp)/STheta;
+      const double CP = (Sb*Ca*Ctp - Sa*Stp*Spp + Cb*Ca*Stp*Cpp)/STheta;
+
+      phiGridNewNew[i] = atan2(SP,CP);
+    } else if(CTheta > 0.0) { // evaluate at north pole
+      thetaGridNewNew[i] = 0.0;
+      phiGridNewNew[i] = 0.0;
+    } else { // evaluate at south pole
+      thetaGridNewNew[i] = M_PI;
+      phiGridNewNew[i] = 0.0;
+    }
+  }
+  }
+
+  std::cout << "Theta Grid" << std::endl;
+  std::cout << thetaGrid << std::endl;
+    std::cout << "ThetaNew Grid" << std::endl;
+  std::cout << thetaGridNew << std::endl;
+    std::cout << "ThetaNewNew Grid" << std::endl;
+  std::cout << thetaGridNewNew << std::endl;
+  std::cout << "Phi Grid" << std::endl;
+  std::cout << phiGrid << std::endl;
+  std::cout << "PhiNew Grid" << std::endl;
+  std::cout << phiGridNew << std::endl;
+  std::cout << "PhiNewNew Grid" << std::endl;
+  std::cout << phiGridNewNew << std::endl;
+}
+
 //This function computes the approximate Killing vector xi (1-form) given
 //the scalar quantity v on the surface
 Tensor<DataMesh> ComputeXi(const DataMesh& v, const SurfaceBasis& sb)
@@ -561,8 +711,11 @@ double NormalizeAKVAtAllPoints(const SurfaceBasis& sb,
   //create storage
   DataMesh scaleFactor(Mesh(theta.Extents()));
 
-  for(int i=0; i<scaleFactor.Size(); i++)
-      scaleFactor[i] = NormalizeAKVAtOnePoint(sb,Psi,xi,rad,theta[i],phi[i],printSteps)-1.;
+  for(int i=0; i<scaleFactor.Size(); i++){
+    //std::cout << POSITION << " Testing " << i 
+    //          << " of " << scaleFactor.Size() << std::endl; //can be deleted
+    scaleFactor[i] = NormalizeAKVAtOnePoint(sb,Psi,xi,rad,theta[i],phi[i],printSteps)-1.;
+  }
 
   scaleFactor *= scaleFactor;
   const DataMesh r2p4 = rad*rad*Psi*Psi*Psi*Psi;
@@ -604,17 +757,13 @@ double NormalizeAKVAtOnePoint(const SurfaceBasis& sb,
   //the affine path length should be 2*Pi.  Also, test various
   //paths to ensure we have an actual Killing field
   double t; //affine path length
-//extra stuff to be deleted later
-int m = sb.M();
-int l = sb.L();
-std::cout << POSITION << " {xi[0]}_{1,0} mode = " << sb.ComputeCoefficients(xi(0))[m+1] << std::endl;
-std::cout << POSITION << " {xi[0]}_{1,1} mode = " << sb.ComputeCoefficients(xi(0))[m+2] << std::endl;
-std::cout << POSITION << " {xi[0]}_{1,-1} mode = " << sb.ComputeCoefficients(xi(0))[l*m+m+1] << std::endl;
-std::cout << POSITION << " {xi[1]}_{1,0} mode = " << sb.ComputeCoefficients(xi(1))[m+1] << std::endl;
-std::cout << POSITION << " {xi[1]}_{1,1} mode = " << sb.ComputeCoefficients(xi(1))[m+2] << std::endl;
-std::cout << POSITION << " {xi[1]}_{1,-1} mode = " << sb.ComputeCoefficients(xi(1))[l*m+m+1] << std::endl;
-  bool goodtheta = KillingPath(sb, rotated_Psi, xi, rad, t, thetap, phip, printSteps);
+
+  //bool goodtheta = KillingPath(sb, rotated_Psi, xi, rad, t, thetap, phip, printSteps);
+  double thetaOffAxis = 0.; double phiOffAxis = 0.;
+  bool goodtheta = KillingPath(sb, rotated_Psi, xi, rad, t, thetap, phip,
+                               thetaOffAxis, phiOffAxis, printSteps);
   REQUIRE(goodtheta, "Killing trajectory did not close " << POSITION);
+
   const double scale = t/(2.0*M_PI);
 
   return scale;
@@ -692,7 +841,9 @@ bool KillingPath(const SurfaceBasis& sb,
                  const double& rad,
                  double& t,
                  const double& theta,
-                 const double& phi, /*=0.0*/
+                 const double& phi,
+                 double& thetaOffAxis,
+                 double& phiOffAxis,
                  const bool printSteps /*=false*/)
 {
   //perform harmonic analysis on Psi, xi
@@ -709,13 +860,20 @@ bool KillingPath(const SurfaceBasis& sb,
      
   t = 0.0; //path length
   double t1 = 1.e10;
-  double h = 1e-6; //step size
+  double h = 1.e-6; //step size
   double y[2] = {theta, phi-2.*M_PI}; //this makes the stopping criteria easier
   bool limit_h = false;
   double hmax = h; //maximum step size
   //const double hmax2 = 2.0*M_PI/100.0; //hard maximum for h size, original
   const double hmax2 = 0.1; //hard maximum for h size, new
 
+  //useful for calculating the "center point" of the path taken
+  double pathTotal[2] = {0.,0.};
+  double pathAvg[2] = {0.,0.};
+
+
+/*
+//keep this following segment for final production
   if(printSteps){
     std::cout << "START: y = ( " 
 	      << std::setprecision(8) << std::setw(10) << y[0] << " , " 
@@ -723,20 +881,32 @@ bool KillingPath(const SurfaceBasis& sb,
 	      << std::setprecision(8) << std::setw(10) << h 
 	      << std::endl; 
   }
-     
+*/     
   int iter = 0;
-  //while (true && iter<10000) {
-//std::cout << POSITION << " Large iter in use" << std::endl;
-  while (true && iter<1000000) {
+  const int iterMax = 1000;
+  while (true && iter<iterMax) {
     iter++;
-    const double ysave[2] = {y[0],y[1]}; 
+    const double ysave[2] = {y[0],y[1]};
+
     const double tsave = t;
     const int status = gsl_odeiv2_evolve_apply (e, c, s,
 						&sys, 
 						&t, t1,
 						&h, y);
-    if(printSteps){
-      std::cout << "iter = " << iter << "t = " 
+/*
+    if(iter == 1){
+      std::cout << "y = ( "
+  	        << std::setprecision(8) << std::setw(10) << y[0] << " , " 
+  	        << std::setprecision(8) << std::setw(10) << y[1]+2.*M_PI << " )" 
+                << std::endl;
+    }
+*/
+/*
+    //if(printSteps){
+    //if(printSteps && y[1]+2.*M_PI<.0){
+    //if(iter > 0.9*iterMax){
+    if(h < 1.e-7){
+      std::cout << "iter = " << iter << " t = " 
     	        << std::setprecision(8) << std::setw(10) << t 
   	        << " : y = ( " 
   	        << std::setprecision(8) << std::setw(10) << y[0] << " , " 
@@ -744,10 +914,37 @@ bool KillingPath(const SurfaceBasis& sb,
   	        << std::setprecision(8) << std::setw(10) << h 
   	        << std::endl;
     }
-
+*/
+    if(printSteps){
+      //note that this gives output appropriate for gnuplot's splot function
+      std::cout << std::setprecision(8) << std::setw(10) <<  y[1]+2.*M_PI
+      << " " << std::setprecision(8) << std::setw(10) << -(y[0]-M_PI/2.) << std::endl;
+    }
+/*
+    if(y[1]>0 && iter%100==0){
+      std::cout << "iter = " << iter << " t = " 
+    	        << std::setprecision(8) << std::setw(10) << t 
+  	        << " : y = ( " 
+  	        << std::setprecision(8) << std::setw(10) << y[0] << " , " 
+  	        << std::setprecision(8) << std::setw(10) << y[1]+2.*M_PI << " ); h = " 
+  	        << std::setprecision(8) << std::setw(10) << h 
+  	        << std::endl;
+    }
+*/
     ASSERT(status==GSL_SUCCESS,"Path Integration failed");
+
     if(limit_h && h > hmax) h = hmax;
-    if(fabs(y[1] - phi) < 1.e-12) break;
+    if(fabs(y[1] - phi) < 1.e-12) break; //original condition assuming navigation about the pole
+    //if a path brings you back to the original point,
+    //you have closure, and that's what we're interested in
+    if(   fabs(y[1]+2.*M_PI - phi) < 1.e-6      //close to original phi
+       && t > 1.e-2 ){
+       //&& printSteps){
+      std::cout << POSITION << " Off-axis closure rules have been triggered." << std::endl;
+      std::cout << "Path average (theta, phi) = (" << pathTotal[0]
+                << ", " << pathTotal[1]/(2.*M_PI)-M_PI << ")" << std::endl;
+      break;
+    }
     else if(y[1] > phi) { //if solver went too far...
       if(!limit_h) hmax = h;
       limit_h = true;
@@ -755,7 +952,23 @@ bool KillingPath(const SurfaceBasis& sb,
       y[0] = ysave[0]; y[1] = ysave[1]; t = tsave; //return variables to previous state
       gsl_odeiv2_evolve_reset(e); //return solver to previous state
     } //end ifs
+    //alternative else if
+    else if(ysave[1] < phi-2.*M_PI && y[1]>phi-2.*M_PI){ //Killing path has been followed too far
+      //std::cout << POSITION << " Off-axis overstepping rules have been triggered." << std::endl;
+      if(!limit_h) hmax = h;
+      limit_h = true;
+      h = hmax *= 0.5; //...reset h, hmax
+      y[0] = ysave[0]; y[1] = ysave[1]; t = tsave; iter--; //return variables to previous state
+      gsl_odeiv2_evolve_reset(e); //return solver to previous state
+    }
     if(h > hmax2) h = hmax2;
+
+    //diagnostics on average (theta, phi) position.
+    //if average theta != input theta, then the axis must be off
+    //if average phi != M_PI, then the axis must be off
+    pathTotal[0] += (y[0]-theta) * fabs(y[0]-ysave[0]);
+    pathTotal[1] += (y[1]+2.*M_PI-phi) * fabs(y[1]-ysave[1]);
+
   } //end while
 
   gsl_odeiv2_evolve_free (e);
@@ -767,6 +980,14 @@ bool KillingPath(const SurfaceBasis& sb,
     std::cout << "##> Theta diff: " << std::setprecision(6) << y[0] - theta << std::endl;
     std::cout << "Iterations: " << iter << std::endl;
   }
+
+    //pathAvg[0] = pathTotal[0]/1.; pathAvg[1] = pathTotal[1]/1.;
+    //std::cout << "Path average 2 (th,ph) = (" << pathAvg[0] << ", " << pathAvg[1] << ")" << std::endl;
+    pathAvg[0] = pathTotal[0]/1.; pathAvg[1] = pathTotal[1]/(2.*M_PI)-M_PI;
+    //std::cout << "Path average 3 (th,ph) = (" << pathAvg[0] << ", " 
+    //          << pathAvg[1] << ") Starting at = (" << theta << ", " << phi << ")" << std::endl;
+    thetaOffAxis = pathAvg[0];
+    phiOffAxis = pathAvg[1];
   return closedPath;
 }
 

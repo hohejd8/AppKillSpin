@@ -8,6 +8,19 @@
 //#include "gsl/gsl_vector.h"
 #include "gsl/gsl_multiroots.h"
 
+//Is the Killing path centered on the axis after the appropriate (theta, phi) rotation?
+//If not, return false *and* return the relative position of the axis
+//that the Killing path seems to be centered on.
+bool IsKillingPathCentered(const SurfaceBasis& sb,
+                           double& thetaOffAxis,
+                           double& phiOffAxis,
+                           const DataMesh& theta,
+                           const DataMesh& phi,
+                           const DataMesh& rotated_Psi,
+                           const DataMesh& rotated_v,
+                           const double& rad,
+                           const bool& printSteps=false);
+
 //prints the RMS deviation from a perfectly scaled surface
 void PrintSurfaceNormalization(const SurfaceBasis& sb,
                       const DataMesh& rotated_Psi,
@@ -34,7 +47,10 @@ void RunAKVsolvers(double& THETA,
 bool FindTHETA(struct rparams * p,
                double& THETA_root,
                const double& residual_size,
-               const bool verbose);
+               //const bool verbose);
+               const bool verbose,
+               const double thetap=0.,
+               const double phip=0.);
 
 //uses the gsl multidimensional root finder to find
 //values for THETA, thetap, phip such that
@@ -49,7 +65,11 @@ void FindTtp(struct rparams * p,
 
 //function header for use with gsl 1D root finder
 //runs AKVsolver at thetap, phip = 0
-double AKVsolver1D(double THETA, void *params);
+double AKVsolver1D(double THETA,
+                   void *params);
+                   //void *params,
+                   //const double thetap=0.,
+                   //const double phip=0.);
 
 //similar to AKVsolver1D, this function runs AKVsolver once
 //at thetap, phip != 0
@@ -71,6 +91,12 @@ DataMesh RotateOnSphere
           const SurfaceBasis& sb,
           const double Theta,
           const double Phi);
+//provides a simple mapping between (theta, phi) and (thetapp, phipp) coordinates
+//through axis rotation of (thetap, phip).  Similar to RotateOnSphere
+void CoordinateRotationMapping(const DataMesh& thetaGrid,
+                               const DataMesh& phiGrid,
+                               const double& thetap,
+                               const double& phip);
 
 //This function computes the approximate Killing vector xi (1-form) given
 //the scalar quantity v on the surface
@@ -128,7 +154,9 @@ bool KillingPath(const SurfaceBasis& sb,
                     const double& rad,
                     double& t,
                     const double& theta,
-                    const double& phi=0.0,
+                    const double& phi,
+                    double& thetaOffAxis,
+                    double& phiOffAxis,
                     const bool printSteps=false);
 int PathDerivs(double t_required_by_solver, 
                const double y[],
@@ -192,6 +220,13 @@ struct rparams{
   const double & v_resid_tol;
   const bool & printResiduals;
   const bool & ricciScaling;
+};
+
+//a test structure required to do 1D root finding with thetap, phip != 0
+struct rparam1D{
+  struct rparams& p;
+  const double& thetap;
+  const double& phip;
 };
 
 //a structure required to follow the Killing path around the surface
