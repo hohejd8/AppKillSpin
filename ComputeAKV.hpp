@@ -127,6 +127,7 @@ namespace ComputeItems {
 
       MyVector<double> mAKVGuess;
       double mRad, mL_resid_tol, mv_resid_tol, mMin_thetap, mResidualSize;
+      double mTestTheta, mTestPhi;
       std::string mDivNorm, mVortNorm, mSS, mfLNorm, mfLambdaNorm, mXiDivLNorm;
 
       MyVector<bool> printDiagnostic;

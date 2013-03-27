@@ -8,6 +8,7 @@
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_roots.h>
 #include <stdlib.h>
+#include <complex>
 
 //Is the Killing path centered on the axis after the appropriate (theta, phi) rotation?
 //If not, return false *and* return the relative position of the axis
@@ -184,7 +185,7 @@ bool FindTHETA(struct rparams * p,
   int iter = 0, max_iter = 100;
   const gsl_root_fsolver_type *T;
   gsl_root_fsolver *s;
-  double THETA_lo = -1.0, THETA_hi = 1.0;
+  double THETA_lo = -100.0, THETA_hi = 100.0;
   gsl_function F;
 
   //test structure for thetap, phip != 0
@@ -537,6 +538,166 @@ void print_state (size_t iter, gsl_multiroot_fsolver * s)
             << " " << std::setprecision(8) << std::setw(10) << gsl_vector_get(s->f,2)
             << std::endl << std::flush;
 }
+
+//returns the theta, phi components of the extrema for a given DataMesh
+void DataMeshExtrema(const DataMesh& collocationvalues,
+                     const DataMesh& thetaGrid,
+                     const DataMesh& phiGrid,
+                     MyVector<double>& minPoint,
+                     MyVector<double>& maxPoint)
+{
+  double min = collocationvalues[0];
+  int minIndex = 0;
+  double max = collocationvalues[0];
+  int maxIndex = 0;
+  for(int i=0; i<collocationvalues.Size(); i++){
+    if(collocationvalues[i] < min){
+      minIndex = i; min = collocationvalues[i];
+    } else if(collocationvalues[i] > max){
+      maxIndex = i; max = collocationvalues[i];
+    } else if(collocationvalues[i] == min || collocationvalues[i] == max){
+      std::cout << POSITION << "Problem with equivalence in DataMeshExtrema" << std::endl;
+    }
+  }
+}
+
+//create the set of three complex z values that determine the transform
+MyVector<std::complex<double> > MobiusTransformPoints
+(
+const double nPoleTheta,
+const double nPolePhi,
+const double sPoleTheta,
+const double sPolePhi,
+double eqTheta, //default = -1
+double eqPhi //default = -1
+)
+{
+
+  MyVector<std::complex<double> > z(MV::Size(3),std::complex<double>(0.,0.));
+
+  //create z1
+  z[0] = std::complex<double> (tan(nPoleTheta/2.)*cos(nPolePhi), tan(nPoleTheta/2.)*sin(nPolePhi));
+
+  //create z2
+  z[1] = std::complex<double> (tan(sPoleTheta/2.)*cos(sPolePhi), tan(sPoleTheta/2.)*sin(sPolePhi));
+
+  //check to see if eqTheta, eqPhi = -1, which is a flag to make z3 halfway between z1 and z2
+  if(eqTheta==-1. && eqPhi==-1. && fmod(nPoleTheta,M_PI)<1.e-6){
+    eqTheta = (nPoleTheta+sPoleTheta)/2.;
+    double cx = sin(nPoleTheta)*cos(nPolePhi) + sin(sPoleTheta)*cos(sPolePhi);
+    double cy = sin(nPoleTheta)*sin(nPolePhi) + sin(sPoleTheta)*sin(sPolePhi);
+    eqPhi = atan2(cy,cx);
+  } else if(eqTheta==-1. && eqPhi==-1.){
+    double cx = sin(nPoleTheta)*cos(nPolePhi) + sin(sPoleTheta)*cos(sPolePhi);
+    double cy = sin(nPoleTheta)*sin(nPolePhi) + sin(sPoleTheta)*sin(sPolePhi);
+    double cz = cos(nPoleTheta) + cos(sPoleTheta);
+    eqTheta = atan2(sqrt(cx*cx+cy*cy),cz);
+    eqPhi = atan2(cy,cx);
+  }
+
+  //create z3
+  z[2] = std::complex<double> (tan(eqTheta/2.)*cos(eqPhi), tan(eqTheta/2.)*sin(eqPhi));
+  std::cout << "z[0] = " << z[0] << "; z[1] = " << z[1] << "; z[2] = " << z[2] << std::endl;
+  return z;
+}
+
+//perform Mobius transform at one point
+std::complex<double> Mobius(const MyVector<std::complex<double> > z,
+                            const std::complex<double> z4)
+{
+  std::complex<double> w;
+  if(abs(z[1])>1.e10){
+    w = (z4-z[0])/(z[2]-z[0]);
+    //std::cout << POSITION << std::endl;
+  } else if(abs(z[0])>1.e10){
+    w = (z[2]-z[1])/(z4-z[1]);
+    //std::cout << POSITION << std::endl;
+  } else if(abs(z[2])>1.e10){
+    w = (z4-z[0])/(z4-z[1]);
+    //std::cout << POSITION << std::endl;
+  } else {
+    w = (z4-z[0])*(z[2]-z[1]) / ((z4-z[1])*(z[2]-z[0]));
+    //std::cout << POSITION << std::endl;
+  }
+
+  return w;
+}
+
+//compute the Mobius conformal factor
+double MobiusConformalFactor(const MyVector<std::complex<double> > z,
+                             const std::complex<double> z4)
+{
+  double cf;
+  if(abs(z[1])>1.e10){
+    cf = abs(z4-z[0])*abs(z4-z[0]) + abs(z[0]-z[2])*abs(z[0]-z[2]);
+    cf /= (1.+abs(z4)*abs(z4)) * abs(z[0]-z[2]);
+  } else if(abs(z[0])>1.e10){
+    cf = abs(z4-z[1])*abs(z4-z[1]) + abs(z[1]-z[2])*abs(z[1]-z[2]);
+    cf /= (1.+abs(z4)*abs(z4)) * abs(z[1]-z[2]);
+  } else if(abs(z[2])>1.e10){
+    cf = abs(z4-z[0])*abs(z4-z[0]) + abs(z4-z[1])*abs(z4-z[1]);
+    cf /= (1.+abs(z4)*abs(z4)) * abs(z[0]-z[1]);
+  } else {
+    cf = abs(z4-z[0])*abs(z4-z[0])*abs(z[1]-z[2])*abs(z[1]-z[2])
+       + abs(z4-z[1])*abs(z4-z[1])*abs(z[0]-z[2])*abs(z[0]-z[2]);
+    cf /= (1.+abs(z4)*abs(z4)) * abs(z[0]-z[1]) * abs(z[0]-z[2])* abs(z[1]-z[2]);
+  }
+
+  return cf;
+}
+
+//Mobius transformation on a sphere
+DataMesh MobiusTransform(const DataMesh& collocationvalues,//unused right now
+                         const DataMesh& thetaGrid,
+                         const DataMesh& phiGrid,
+                         const SurfaceBasis& sb,
+                         const MyVector<std::complex<double> > z)//,
+                         //DataMesh& thetaMobius,
+                         //DataMesh& phiMobius)
+{
+  //REQUIRE(thetaMobius.Size() == sb.CollocationMesh().Size()
+  //        && phiMobius.Size() == sb.CollocationMesh().Size(),
+  //        "thetaMobius and phiMobius DataMeshes must be the same size as the SurfaceBasis \n"
+  //         "collocation Mesh.");
+
+  //Do I even need DataMeshes?  None of this really needs to be saved, and I'm just performing
+  //the evaluation point-wise anyway...
+  DataMesh thetaMobius(sb.CollocationMesh());
+  DataMesh phiMobius(sb.CollocationMesh());
+  DataMesh MobiusCF(sb.CollocationMesh());
+  DataMesh result(sb.CollocationMesh());
+
+  for(int i=0; i<thetaGrid.Size(); i++){
+    const std::complex<double> 
+          z4(tan(thetaGrid[i]/2.)*cos(phiGrid[i]), tan(thetaGrid[i]/2.)*sin(phiGrid[i]));
+    const std::complex<double> w = Mobius(z, z4);
+    thetaMobius[i] = 2. * atan(abs(w));
+    phiMobius[i] = arg(w);
+    MobiusCF[i] = MobiusConformalFactor(z, z4);
+    //result[i] = MobiusCF[i]*sb.Evaluate(collocationvalues, thetaMobius[i], phiMobius[i]);
+    result[i] = sb.Evaluate(collocationvalues, thetaMobius[i], phiMobius[i]);
+    if(i==0){
+      std::cout << "I think the problem is with the atan(abs(w)) and arg(w)."
+                << "I need to work out a couple scenarious by hand to really figure this out."
+                << std::endl;
+      std::cout << "(theta, phi) = (" << thetaGrid[i] << ", " << phiGrid[i] << ")" << std::endl;
+      //std::cout << "z4(theta) = " << tan(thetaGrid[i]/2.)*cos(phiGrid[i]) << std::endl;
+      //std::cout << "z4(phi) = " << tan(thetaGrid[i]/2.)*sin(phiGrid[i]) << std::endl;
+      std::cout << "z4 = " << z4 << std::endl;
+      std::cout << "w = " << w << std::endl;
+      std::cout << "thetaMobius = " << thetaMobius[i] << std::endl;
+      std::cout << "phiMobius = " << phiMobius[i] << std::endl;
+      std::cout << "MobiusCF = " << MobiusCF[i] << std::endl;
+    }
+  }
+
+  //std::cout << "Before CF: " << result << std::endl;
+  //result = result*MobiusCF;
+  //std::cout << "Mobius Result: " << result << std::endl;
+  //std::cout << "MobiusCF: " << MobiusCF << std::endl;
+  return result;
+}
+
 
 //takes a DataMesh on the sphere and rotates it by some amount Theta, Phi
 //update variable names Theta->thetap, Phi->phip

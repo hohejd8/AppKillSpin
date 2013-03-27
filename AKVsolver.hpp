@@ -4,6 +4,7 @@
 #include "SurfaceFinder/Strahlkorper/SurfaceBasis.hpp"
 #include "SurfaceFinder/Strahlkorper/StrahlkorperWithMesh.hpp"
 #include "Utils/DataMesh/DataMesh.hpp"
+#include "Utils/DataMesh/ComplexDataMesh.hpp"
 #include "Utils/DataBox/DataBoxAccess.hpp"
 //#include "gsl/gsl_vector.h"
 #include "gsl/gsl_multiroots.h"
@@ -83,6 +84,41 @@ int AKVsolver(const gsl_vector * x,
 //prints the state of the multidimensional root finder
 void print_state (size_t iter, gsl_multiroot_fsolver * s);
 
+//returns the theta, phi components of the extrema for a given DataMesh
+void DataMeshExtrema(const DataMesh& collocationvalues,
+                     const DataMesh& thetaGrid,
+                     const DataMesh& phiGrid,
+                     MyVector<double>& minPoint,
+                     MyVector<double>& maxPoint);
+
+//create the set of three complex z values that determine the transform
+MyVector<std::complex<double> > MobiusTransformPoints
+(
+const double nPoleTheta,
+const double nPolePhi,
+const double sPoleTheta,
+const double sPolePhi,
+double eqTheta=-1., 
+double eqPhi=-1.
+);
+
+//perform Mobius transform at one point
+std::complex<double> Mobius(const MyVector<std::complex<double> > z,
+                            const std::complex<double> z4);
+
+//compute the Mobius conformal factor
+double MobiusConformalFactor(const MyVector<std::complex<double> > z,
+                             const std::complex<double> z4);
+
+//Mobius transformation on a sphere
+DataMesh MobiusTransform(const DataMesh& collocationvalues,//unused right now
+                         const DataMesh& thetaGrid,
+                         const DataMesh& phiGrid,
+                         const SurfaceBasis& sb,
+                         const MyVector<std::complex<double> > z);//,
+                         //DataMesh& thetaMobius,
+                         //DataMesh& phiMobius);
+
 //rotates a DataMesh by an amount (Theta,Phi)
 DataMesh RotateOnSphere
          (const DataMesh& collocationvalues,
@@ -91,6 +127,7 @@ DataMesh RotateOnSphere
           const SurfaceBasis& sb,
           const double Theta,
           const double Phi);
+
 //provides a simple mapping between (theta, phi) and (thetapp, phipp) coordinates
 //through axis rotation of (thetap, phip).  Similar to RotateOnSphere
 void CoordinateRotationMapping(const DataMesh& thetaGrid,
