@@ -106,6 +106,11 @@ namespace ComputeItems {
         "              Default false.                           \n"
         "  XiDivLNorm = print the norm of the approximate       \n"
         "             Killing vector time div(L). Default false.\n"
+        "  FindPoles = find the maximum and minimum values of   \n"
+        "             the v DataMesh. Necessary for computing   \n"
+        "             the Mobius transform. When false, the     \n"
+        "             corresponding rotation uses (theta', phi')\n"
+        "             and its antipode. Default false.          \n"
         "                                                       \n"
         "Requires in the DataBox:                               \n"
         "  StrahlkorperWithMesh surface                         \n"
@@ -127,14 +132,14 @@ namespace ComputeItems {
 
       MyVector<double> mAKVGuess;
       double mRad, mL_resid_tol, mv_resid_tol, mMin_thetap, mResidualSize;
-      double mTestTheta, mTestPhi;
+      double mTestTheta, mTestPhi, mTestEqTheta, mTestEqPhi;
       std::string mDivNorm, mVortNorm, mSS, mfLNorm, mfLambdaNorm, mXiDivLNorm;
 
       MyVector<bool> printDiagnostic;
       bool mVerbose, mInterpolateConformalFactor, mPrintResiduals,
            mPrintTtpSolution, mPrintInnerProducts, mWithRicciScaling,
            mPrintScaleFactor, mPrintSurfaceNormalization, mPrintSteps,
-           mPrintBisectionResults;
+           mPrintBisectionResults, mFindPoles;
 
       mutable result_type* mResult;
   }; //class ComputeAKV

@@ -49,9 +49,12 @@ namespace ComputeItems {
     mPrintSurfaceNormalization = p.Get<bool>("PrintSurfaceNormalization",false);
     mPrintSteps = p.Get<bool>("PrintSteps",false);
     mPrintBisectionResults = p.Get<bool>("PrintBisectionResults",false);
-    printDiagnostic = MyVector<bool>(MV::Size(6), true);
+    mFindPoles = p.Get<bool>("FindPoles",false);
     mTestTheta = p.Get<double>("TestTheta",0.);
     mTestPhi = p.Get<double>("TestPhi",0.);
+    mTestEqTheta = p.Get<double>("TestEqTheta",-1);
+    mTestEqPhi = p.Get<double>("TestEqPhi",-1);
+    printDiagnostic = MyVector<bool>(MV::Size(6), true);
     if(p.OptionIsDefined("DivNorm")) printDiagnostic[0]=p.Get<bool>("DivNorm");
     if(p.OptionIsDefined("VortNorm")) printDiagnostic[1]=p.Get<bool>("VortNorm");
     if(p.OptionIsDefined("SS")) printDiagnostic[2]=p.Get<bool>("SS");
@@ -71,31 +74,59 @@ namespace ComputeItems {
     const DataMesh phi = boxa.Get<StrahlkorperWithMesh>(mSkwm).Grid().SurfaceCoords()(1);
 
 //test Mobius transformation
-//MyVector<std::complex<double> > z = MobiusTransformPoints(0.,0.,M_PI,0.,M_PI/2.,0.);
-MyVector<std::complex<double> > z = MobiusTransformPoints(0.,0.,0.,0.);
+//MyVector<std::complex<double> > zz = MobiusTransformPoints(0.,0.,M_PI,0.,M_PI/2.,0.);
+//MyVector<std::complex<double> > zz = MobiusTransformPoints(0.,0.,0.,0.);
+
 DataMesh rotated_theta = RotateOnSphere(theta,theta,phi,sb,mTestTheta,mTestPhi);
-DataMesh rotated_phi = RotateOnSphere(phi,theta,phi,sb,mTestTheta,mTestPhi);
+//DataMesh rotated_phi = RotateOnSphere(phi,theta,phi,sb,mTestTheta,mTestPhi);
 //logic for determining transform points
-double phip_antipode = 0.;
+double phip_antipode = mTestPhi;
 double thetap_antipode = M_PI-mTestTheta;
 double phip_tmp = (mTestPhi < 0. ? mTestPhi+2.*M_PI : mTestPhi);
 if( fmod(mTestTheta, M_PI) > 1.e-5){
   phip_antipode = phip_tmp-M_PI;
+  std::cout << POSITION << std::endl;
 }
 std::cout << "thetap=" << mTestTheta
           << " phip=" << phip_tmp
           << " thetap_antipode=" << thetap_antipode
           << " phip_antipode=" << phip_antipode << std::endl;
-z = MobiusTransformPoints(mTestTheta,
-                          //fmod(phip[a],2.*M_PI),
+MyVector<std::complex<double> > zz = MobiusTransformPoints(mTestTheta,
+                          //fmod(phip_tmp,2.*M_PI)+M_PI,
                           fmod(phip_tmp,2.*M_PI),
                           thetap_antipode,
-                          fmod(phip_antipode,2.*M_PI));//,
-                          //0.,0.);
-DataMesh transformed_theta = MobiusTransform(theta,theta,phi,sb,z);
-DataMesh transformed_phi = MobiusTransform(phi,theta,phi,sb,z);
-DataMesh difference = (rotated_theta - transformed_theta);
+                          //fmod(phip_antipode,2.*M_PI)+M_PI,
+                          fmod(phip_antipode,2.*M_PI),
+                          mTestEqTheta,mTestEqPhi);
+std::cout << "z = " << zz << std::endl;
+/*
+DataMesh transformed_theta = MobiusTransform(theta,theta,phi,sb,zz);
+DataMesh transformed_phi = MobiusTransform(phi,theta,phi,sb,zz);*/
+DataMesh transformed_theta(sb.CollocationMesh());
+DataMesh transformed_phi(sb.CollocationMesh());
+MobiusTransform(theta, theta, phi, sb, zz, transformed_theta, transformed_phi);
+//DataMesh difference = (rotated_theta - transformed_theta);
 //if(a==2){
+  std::cout << "Original / Rotated / Transformed" << std::endl;
+  //use this for mapping in GNUplot
+/*  for(int i=0; i<rotated_theta.Size(); i++){
+    if(rotated_phi[i]<0.) rotated_phi[i] += 2.*M_PI;
+    std::cout << phi[i] << " " << theta[i]-M_PI/2. << " "
+              << rotated_phi[i] << " " << rotated_theta[i]-M_PI/2. << " "
+              << transformed_phi[i] << " " << transformed_theta[i]-M_PI/2.
+              << std::endl;
+  }*/
+  //use this for reading by human
+  /*for(int i=0; i<rotated_theta.Size(); i++){
+    std::cout << theta[i] << " " << phi[i] << " / "
+              << transformed_theta[i] << " " << transformed_phi[i]
+              << std::endl;
+  }*/
+  std::cout << "---------------------------------------------" << std::endl;
+  std::cout << "---------------------------------------------" << std::endl;
+  std::cout << "---------------------------------------------" << std::endl;
+  std::cout << "---------------------------------------------" << std::endl;
+/*
   std::cout << "Rotated1" << std::endl;
   for(int i=0; i<rotated_theta.Size(); i++){
     if(rotated_phi[i]<0.) rotated_phi[i] += 2.*M_PI;
@@ -103,19 +134,15 @@ DataMesh difference = (rotated_theta - transformed_theta);
   }
   std::cout << "---------------------------------------------" << std::endl;
   std::cout << "---------------------------------------------" << std::endl;
-/*  std::cout << "Rotated2" << std::endl;
-  for(int i=0; i<rotated_theta.Size(); i++){
-    if(rotated_phi[i]<0.) rotated_phi[i] += 2.*M_PI;
-    std::cout << rotated_theta[i]-M_PI/2. << " " << rotated_phi[i] << std::endl;
-  }*/
   std::cout << "---------------------------------------------" << std::endl;
-  std::cout << "---------------------------------------------" << std::endl;
-  std::cout << "Transformed" << std::endl;
+  std::cout << "---------------------------------------------" << std::endl;*/
+/*  std::cout << "Transformed" << std::endl;
   for(int i=0; i<rotated_theta.Size(); i++){
     if(transformed_phi[i]<0.) transformed_phi[i] += 2.*M_PI;
     std::cout << transformed_phi[i] << " " << transformed_theta[i]-M_PI/2. << std::endl;
-  }
+  }*/
 //}
+
 //end test Mobius transformation
 
       DataBox localBox("ComputeAKV DataBox");
@@ -163,6 +190,7 @@ DataMesh difference = (rotated_theta - transformed_theta);
     //save the v, xi solutions along particular axes
     MyVector<DataMesh> v(MV::Size(3),DataMesh::Empty);
     MyVector<DataMesh> rotated_v(MV::Size(3),DataMesh::Empty);
+    MyVector<DataMesh> transformed_v(MV::Size(3),DataMesh::Empty);
     MyVector<Tensor<DataMesh> > xi(MV::Size(axes),Tensor<DataMesh>(2,"1",DataMesh::Empty));
 
     //save the <v_i|v_j> inner product solutions
@@ -292,76 +320,54 @@ DataMesh difference = (rotated_theta - transformed_theta);
       //rotate v, Psi for analysis
       rotated_v[a] = RotateOnSphere(v[a],theta,phi,
                                           sb,thetap[a],phip[a]);
-//test Mobius transformation
-/*
-DataMesh rotated_theta = RotateOnSphere(theta,theta,phi,sb,thetap[a],phip[a]);
-DataMesh rotated_phi = RotateOnSphere(phi,theta,phi,sb,thetap[a],phip[a]);
-//logic for determining transform points
-double phip_antipode = 0.;
-double thetap_antipode = M_PI-thetap[a];
-double phip_tmp = (phip[a] < 0. ? phip[a]+2.*M_PI : phip[a]);
-if( fmod(thetap[a], M_PI) > min_thetap){
-  phip_antipode = phip_tmp-M_PI;
-}
-std::cout << "thetap=" << thetap[a]
-          << " phip=" << phip_tmp
-          << " thetap_antipode=" << thetap_antipode
-          << " phip_antipode=" << phip_antipode << std::endl;
-z = MobiusTransformPoints(thetap[a],
-                          //fmod(phip[a],2.*M_PI),
-                          fmod(phip_tmp,2.*M_PI),
-                          thetap_antipode,
-                          fmod(phip_antipode,2.*M_PI));//,
-                          //0.,0.);
-DataMesh transformed_theta = MobiusTransform(theta,theta,phi,sb,z);
-DataMesh transformed_phi = MobiusTransform(phi,theta,phi,sb,z);
-DataMesh difference = (rotated_theta - transformed_theta);
-if(a==2){
-  std::cout << "Rotated" << std::endl;
-  for(int i=0; i<rotated_theta.Size(); i++){
-    std::cout << rotated_phi[i] << " " << rotated_theta[i]-M_PI/2. << std::endl;
-  }
-  std::cout << "---------------------------------------------" << std::endl;
-  std::cout << "Transformed" << std::endl;
-  for(int i=0; i<rotated_theta.Size(); i++){
-    std::cout << transformed_phi[i] << " " << transformed_theta[i]-M_PI/2. << std::endl;
-  }
-}
-*/
-/*
-std::cout << "rotated_theta" << std::endl;
-std::cout << rotated_theta << std::endl;
-std::cout << "transformed_theta" << std::endl;
-std::cout << transformed_theta << std::endl;
-std::cout << "rotated_phi" << std::endl;
-std::cout << rotated_phi << std::endl;
-std::cout << "transformed_phi" << std::endl;
-std::cout << transformed_phi << std::endl;
-*/
-//std::cout << "rotated_theta - transformed_theta " << std::endl;
-//std::cout << difference << std::endl;
-//std::cout << "rotated_phi - transformed_phi " << std::endl;
-// difference = (rotated_phi - transformed_phi);
-//std::cout << difference << std::endl;
-//MyVector<std::complex<double> > 
-//z = MobiusTransformPoints(0.0,0.,M_PI-0.0,0.);
-//DataMesh transformed_v = MobiusTransform(v[a],theta,phi,sb,z);
-//DataMesh difference = (v[a] - transformed_v);
-//std::cout << "v[a] " << v[a] << std::endl;
-//std::cout << "(0.01, 0.)-transformed_v " << transformed_v << std::endl;
-//std::cout << "v[a] - transformed_v " << std::endl;
-//std::cout << difference << std::endl;
-//z = MobiusTransformPoints(thetap[a],phip[a],M_PI-thetap[a],M_PI+phip[a]);
-//DataMesh transformed_v = MobiusTransform(v[a],theta,phi,sb,z);
-//std::cout << "rotated_v[a] " << rotated_v[a] << std::endl;
-//std::cout << "(theta, phi)-transformed_v " << transformed_v << std::endl;
-//difference = (rotated_v[a] - transformed_v);
-//std::cout << "rotated_v[a] - transformed_v " << std::endl;
-//std::cout << difference << std::endl;
-//end test Mobius transformation
       DataMesh rotated_Psi = RotateOnSphere(Psi,theta,phi,
                                             sb,thetap[a],phip[a]);
 
+      //Mobius transform v, Psi for analysis
+      //determine min and max points (poles)
+      MyVector<double> maxPoint(MV::Size(2));
+      MyVector<double> minPoint(MV::Size(2));
+      MyVector<double> eqPoint(MV::Size(2));
+      if(mFindPoles){
+        DataMeshExtrema(v[a], theta, phi, sb, maxPoint, minPoint);
+      } else {
+        minPoint[0] = thetap[a];
+        minPoint[1] = phip[a];
+        maxPoint[0] = M_PI-thetap[a];
+        maxPoint[1] =  (fmod(thetap[a], M_PI) > 1.e-5 ? phip[a]-M_PI : phip[a]);
+        //eqPoint[0]  = M_PI/2. - minPoint[0];
+        //eqPoint[1]  = (fabs(minPoint[1]) + fabs(maxPoint[1])) / 2.;
+      }
+
+      std::cout << "minPoint: " << minPoint << std::endl;
+      std::cout << "maxPoint: " << maxPoint << std::endl;
+      std::cout << "eqPoint:  " << eqPoint  << std::endl;
+      //std::cout << POSITION << std::endl;
+      //mapping to 0, 1, infty
+      MyVector<std::complex<double> > z = MobiusTransformPoints(minPoint[0],
+                          minPoint[1],
+                          maxPoint[0],
+                          maxPoint[1]);//,
+                          //eqPoint[0],eqPoint[1]);
+
+      //perform Mobius transformation
+      transformed_v[a] = MobiusTransform(v[a], theta, phi, sb, z, 
+                                         transformed_theta, transformed_phi);
+      DataMesh transformed_Psi = MobiusTransform(Psi, theta, phi, sb, z,
+                                                 transformed_theta, transformed_phi);
+
+//Testing outupt
+  std::cout << "Original / Rotated / Transformed" << std::endl;
+  for(int i=0; i<rotated_v[a].Size(); i++){
+    //if(rotated_phi[i]<0.) rotated_phi[i] += 2.*M_PI;
+    std::cout << v[a][i] << " " //<< v[a][i]-M_PI/2. << " "
+              << rotated_v[a][i] << " " //<< rotated_v[a][i]-M_PI/2. << " "
+              << transformed_v[a][i] << " " //<< transformed_v[a][i]-M_PI/2.
+              << std::endl;
+  }
+//end testing output
+
+/*
       //A secondary test to make sure that the solution is valid and Killing paths
       //are centered on a valid axis
       double thetaOffAxis = 0.; double phiOffAxis = 0.;
@@ -375,44 +381,6 @@ std::cout << transformed_phi << std::endl;
                   << ", " << phip[a]*(180./M_PI) << "), the Killing path is centered on ("
                   << thetaOffAxis*(180./M_PI) << ", " << phiOffAxis*(180./M_PI) << ").\n"
                   << "The program is exiting.");
-/*
-      if(!isKillingCentered){
-        //I have learned that this does not work.  This is just a bad solution, and I
-        //cannot seem to fix it.
-        //Turn this into a REQUIRE
-        std::cout << "A Killing path near the north pole is not centered on the pole. \n"
-                  << "With respect to the rotation (thetap, phip) = (" << thetap[a]*(180./M_PI) 
-                  << ", " << phip[a]*(180./M_PI) << "), the Killing path is centered on ("
-                  << thetaOffAxis*(180./M_PI) << ", " << phiOffAxis*(180./M_PI) << ").\n"
-                  << "The program is exiting." << std::endl;
-        return;
-        
-        std::cout << "This solution seems to be inconsistent.  Try theta = " 
-                  << (thetap[a]+thetaOffAxis)*(180./M_PI)
-                  << ", phi = " 
-                  << (phip[a]+phiOffAxis)*(180./M_PI) << std::endl;
-        badAKVSolution = true;
-        std::cout << "thetap[a] before = " << thetap[a]*(180./M_PI) << std::endl;
-        std::cout << "phip[a] before = " << phip[a]*(180./M_PI) << std::endl;
-        THETA[a] = 0.;
-        thetap[a] += thetaOffAxis; 
-        phip[a] += phiOffAxis;
-        std::cout << "thetap[a] after = " << thetap[a]*(180./M_PI) << std::endl;
-        std::cout << "phip[a] after = " << phip[a]*(180./M_PI) << std::endl;
-        v[a] = 0.;
-        //struct rparam1D p1D = {p, thetap[a], phip[a]};
-        //test a 1D solver for THETA since we now "know" thetap, phip
-        if(FindTHETA(&p,THETA[a],mResidualSize,mVerbose,thetap[a],phip[a])){
-          std::cout << "Alternative solution: THETA[" << a << "] = " << THETA[a] << "\n"
-  	  << "                     thetap[" << a << "] = " << (180.0/M_PI)*thetap[a] << "\n"
-	  << "                       phip[" << a << "] = " << (180.0/M_PI)*phip[a] 
-	  << std::endl;
-        } else {
-          std::cout << POSITION << " Alternative solution not found." << std::endl;
-        }
-        a--;
-        continue; 
-      }
 */
       //determine scale factors
       double scale = 0.0;
@@ -433,8 +401,7 @@ std::cout << transformed_phi << std::endl;
       } else if(mScaleFactor=="InnerProduct6"){
         scale = InnerProductScaleFactors(v[a], v[a], Ricci, r2p4, sb,false)[2];
       } else if(mScaleFactor=="InnerProducts"){
-        //std::cout << POSITION << " this is a test bed that can be deleted later" << std::endl;
-        //std::cout << POSITION << " cheat to force mPrintSteps=true" << std::endl;
+        std::cout << POSITION << " this is a test bed that can be deleted later" << std::endl;
         bool print = mPrintSteps;
         //if(a==1) print=true;
         const MyVector<double> scaleIP 
@@ -447,17 +414,24 @@ std::cout << transformed_phi << std::endl;
         //const MyVector<double> artificialScaleIP 
         //      = InnerProductScaleFactors(v[a]*artificialScale, v[a]*artificialScale,
         //                                 Ricci, r2p4, sb,true);
-        //scale = scaleIP[0];
-        scale = scaleIPNoRicci[0];
-          std::cout << "IP1 " << std::endl;
+        scale = scaleIP[0];
+        //scale = scaleIPNoRicci[0];
+          std::cout << "IP1 Rotated" << std::endl;
           PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleIP[0],mRad,print);
           //std::cout << "IP1 artificial scale" << std::endl;
           //PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],
           //                          artificialScaleIP[0],mRad,mPrintSteps);
-          std::cout << "IP2 " << std::endl;
+          std::cout << "IP2 Rotated" << std::endl;
           PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleIP[1],mRad,print);
-          std::cout << "IP3 " << std::endl;
+          std::cout << "IP3 Rotated" << std::endl;
           PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleIP[2],mRad,print);
+          std::cout << "IP1 Transformed" << std::endl;
+          PrintSurfaceNormalization(sb,transformed_Psi,theta,phi,transformed_v[a],scaleIP[0],mRad,print);
+          std::cout << "IP2 Transformed" << std::endl;
+          PrintSurfaceNormalization(sb,transformed_Psi,theta,phi,transformed_v[a],scaleIP[1],mRad,print);
+          std::cout << "IP3 Transformed" << std::endl;
+          PrintSurfaceNormalization(sb,transformed_Psi,theta,phi,transformed_v[a],scaleIP[2],mRad,print);
+/*
           std::cout << "IP4 " << std::endl;
           PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],
                                     scaleIPNoRicci[0],mRad,print);
@@ -466,7 +440,8 @@ std::cout << transformed_phi << std::endl;
                                     scaleIPNoRicci[1],mRad,print);
           std::cout << "IP6 " << std::endl;
           PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],
-                                    scaleIPNoRicci[2],mRad,print); 
+                                    scaleIPNoRicci[2],mRad,print);
+*/
       } else if(mScaleFactor=="Optimize"){
         const double scaleAtEquator
               = NormalizeAKVAtOnePoint(sb, rotated_Psi, rotated_v[a], mRad, M_PI/2., 0.0, mPrintSteps);

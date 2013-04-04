@@ -539,26 +539,126 @@ void print_state (size_t iter, gsl_multiroot_fsolver * s)
             << std::endl << std::flush;
 }
 
+//helper function required for GSL multidimensional minimizer routine
+double InterpolateDataMesh(const gsl_vector *v,
+                           void *params)
+{
+  const SurfaceBasis& sb = static_cast<struct interpparams*>(params)->sb;
+  const DataMesh& collocationValues = static_cast<struct interpparams*>(params)->collocationValues;
+  const double theta = gsl_vector_get(v,0);
+  const double phi = gsl_vector_get(v,1);
+
+  //std::cout << POSITION << " (" << theta << ", " << phi << ") "
+  //          << " Interp = " << sb.Evaluate(collocationValues, theta, phi) << std::endl;
+
+  return sb.Evaluate(collocationValues, theta, phi);
+}
+
 //returns the theta, phi components of the extrema for a given DataMesh
 void DataMeshExtrema(const DataMesh& collocationvalues,
                      const DataMesh& thetaGrid,
                      const DataMesh& phiGrid,
+                     const SurfaceBasis& sb,
                      MyVector<double>& minPoint,
                      MyVector<double>& maxPoint)
 {
+  //find minimum value in the mesh
   double min = collocationvalues[0];
   int minIndex = 0;
   double max = collocationvalues[0];
   int maxIndex = 0;
   for(int i=0; i<collocationvalues.Size(); i++){
     if(collocationvalues[i] < min){
+      /*std::cout << "minIndex = " << minIndex 
+                << " min = " << min 
+                << " collocationvalues[i] = " << collocationvalues[i] << std::endl;*/
       minIndex = i; min = collocationvalues[i];
     } else if(collocationvalues[i] > max){
+      /*std::cout << "maxIndex = " << maxIndex
+                << " max = " << max << " collocationvalues[i] = " 
+                << collocationvalues[i] << std::endl;*/
       maxIndex = i; max = collocationvalues[i];
     } else if(collocationvalues[i] == min || collocationvalues[i] == max){
       std::cout << POSITION << "Problem with equivalence in DataMeshExtrema" << std::endl;
     }
   }
+  //std::cout << "minIndex = " << minIndex << " maxIndex = " << maxIndex << std::endl;
+  minPoint[0] = thetaGrid[minIndex]; minPoint[1] = phiGrid[minIndex];
+  maxPoint[0] = thetaGrid[maxIndex]; maxPoint[1] = phiGrid[maxIndex];
+  //std::cout << POSITION << "Min = (" << minPoint[0] << ", " << minPoint[1] << ") "
+  //          << "Max = (" << maxPoint[0] << ", " << maxPoint[1] << ")" << std::endl;
+
+  //alternative GSL minimizing finder
+  const gsl_multimin_fminimizer_type *T = gsl_multimin_fminimizer_nmsimplex2;
+  gsl_multimin_fminimizer *s = NULL;
+  gsl_vector *ss, *x;
+
+  //simple switch to perform this for both min and max values
+  for(int i=0; i<2; i++){ //0->min value, 1->max value
+    DataMesh collocation(DataMesh::Empty);
+    if(i==0){
+      collocation = collocationvalues;
+    } else {
+      collocation = -collocationvalues;
+    }
+
+    interpparams p = {sb, collocation};
+    gsl_multimin_function f = {&InterpolateDataMesh, 2, &p};
+
+    size_t iter=0;
+    int status;
+    double size;
+
+    //starting point
+    x = gsl_vector_alloc(2);
+    if(i==0){
+      gsl_vector_set(x, 0, minPoint[0]);
+      gsl_vector_set(x, 1, minPoint[1]);
+    } else {
+      gsl_vector_set(x, 0, maxPoint[0]);
+      gsl_vector_set(x, 1, maxPoint[1]);
+    }
+
+    //set initial step sizes to 1/10 grid spacing
+    ss = gsl_vector_alloc(2);
+    gsl_vector_set_all (ss, M_PI/(thetaGrid.Extents()[0]*10.));
+
+    s = gsl_multimin_fminimizer_alloc (T, 2);
+    gsl_multimin_fminimizer_set (s, &f, x, ss);
+     
+    do{
+      //std::cout << POSITION << " iter = " << iter 
+      //          << " x0 = " << gsl_vector_get(s->x,0) << std::endl;
+      iter++;
+      status = gsl_multimin_fminimizer_iterate(s);
+           
+      if (status) break;
+     
+      size = gsl_multimin_fminimizer_size (s);
+      status = gsl_multimin_test_size (size, 1.e-3);
+     
+      if(status == GSL_SUCCESS){
+        std::cout << "Converged to minimum at " << gsl_vector_get(s->x,0) << std::endl;
+      }
+     
+    }while (status == GSL_CONTINUE && iter < 100);
+
+    if(i==0){
+      minPoint[0] = gsl_vector_get(s->x,0);
+      minPoint[1] = gsl_vector_get(s->x,1);
+      /*std::cout << POSITION << "Min = (" << minPoint[0] << ", " << minPoint[1] << ") " << std::endl;*/
+    } else {
+      maxPoint[0] = gsl_vector_get(s->x,0);
+      maxPoint[1] = gsl_vector_get(s->x,1);
+    }
+
+    gsl_vector_free(x);
+    gsl_vector_free(ss);
+    gsl_multimin_fminimizer_free (s);
+  } //end loop over min and max values 
+
+  /*std::cout << POSITION << "Min = (" << minPoint[0] << ", " << minPoint[1] << ") "
+            << "Max = (" << maxPoint[0] << ", " << maxPoint[1] << ")" << std::endl;*/
 }
 
 //create the set of three complex z values that determine the transform
@@ -576,25 +676,48 @@ double eqPhi //default = -1
   MyVector<std::complex<double> > z(MV::Size(3),std::complex<double>(0.,0.));
 
   //create z1
-  z[0] = std::complex<double> (tan(nPoleTheta/2.)*cos(nPolePhi), tan(nPoleTheta/2.)*sin(nPolePhi));
+  z[0] = std::complex<double> (tan(nPoleTheta/2.)*cos(nPolePhi), tan(nPoleTheta/2.)*sin(nPolePhi));//o
 
   //create z2
-  z[1] = std::complex<double> (tan(sPoleTheta/2.)*cos(sPolePhi), tan(sPoleTheta/2.)*sin(sPolePhi));
+  z[1] = std::complex<double> (tan(sPoleTheta/2.)*cos(sPolePhi), tan(sPoleTheta/2.)*sin(sPolePhi));//o
 
   //check to see if eqTheta, eqPhi = -1, which is a flag to make z3 halfway between z1 and z2
   if(eqTheta==-1. && eqPhi==-1. && fmod(nPoleTheta,M_PI)<1.e-6){
     eqTheta = (nPoleTheta+sPoleTheta)/2.;
-    double cx = sin(nPoleTheta)*cos(nPolePhi) + sin(sPoleTheta)*cos(sPolePhi);
-    double cy = sin(nPoleTheta)*sin(nPolePhi) + sin(sPoleTheta)*sin(sPolePhi);
+    std::cout << POSITION << std::endl;
+    double cx = sin(nPoleTheta)*cos(nPolePhi) + sin(sPoleTheta)*cos(sPolePhi);//o
+    double cy = sin(nPoleTheta)*sin(nPolePhi) + sin(sPoleTheta)*sin(sPolePhi);//o
     eqPhi = atan2(cy,cx);
   } else if(eqTheta==-1. && eqPhi==-1.){
-    double cx = sin(nPoleTheta)*cos(nPolePhi) + sin(sPoleTheta)*cos(sPolePhi);
-    double cy = sin(nPoleTheta)*sin(nPolePhi) + sin(sPoleTheta)*sin(sPolePhi);
+    double cx = sin(nPoleTheta)*cos(nPolePhi) + sin(sPoleTheta)*cos(sPolePhi);//o
+    double cy = sin(nPoleTheta)*sin(nPolePhi) + sin(sPoleTheta)*sin(sPolePhi);//o
+    std::cout << POSITION << std::endl;
+    /*double cx = sin(nPoleTheta)*cos(-nPolePhi+M_PI) + sin(sPoleTheta)*cos(-sPolePhi+M_PI);
+    double cy = sin(nPoleTheta)*sin(-nPolePhi+M_PI) + sin(sPoleTheta)*sin(-sPolePhi+M_PI);*/
     double cz = cos(nPoleTheta) + cos(sPoleTheta);
-    eqTheta = atan2(sqrt(cx*cx+cy*cy),cz);
-    eqPhi = atan2(cy,cx);
+    std::cout << "cx = " << cx << " cy = " << cy << " cz = " << cz << std::endl;
+    //atan2(0,0) undefined
+    //if cy or cx are both "zero" but one is not identically zero, ex. cx=0, cy=1.e-16,
+    //atan2(cy,cx) automatically spits out (+/-)Pi/2, when it should be 0
+    //see wikipedia.org/wiki/Atan2#Definition for more info
+    if(fabs(cx)<1.e-10 && fabs(cy)<1.e-10 && fabs(cz)<1.e-10){
+      if(nPoleTheta <= M_PI/2) {
+        eqTheta = M_PI/2. + nPoleTheta;
+        eqPhi = nPolePhi;
+      } else {
+        eqTheta = M_PI/2. - nPoleTheta;
+        eqPhi = nPolePhi+M_PI;
+      }
+    } else {
+      eqTheta = atan2(sqrt(cx*cx+cy*cy),cz);
+      eqPhi = atan2(cy,cx);
+    }
   }
-
+  std::cout << "(nt, np) = (" << nPoleTheta << ", " << nPolePhi
+            << ") (st, sp) = (" << sPoleTheta << ", " << sPolePhi << ")"
+            << ") (eqt, eqp) = (" << eqTheta << ", " << eqPhi << ")"
+            << std::endl;
+        std::cout << POSITION << std::endl;
   //create z3
   z[2] = std::complex<double> (tan(eqTheta/2.)*cos(eqPhi), tan(eqTheta/2.)*sin(eqPhi));
   std::cout << "z[0] = " << z[0] << "; z[1] = " << z[1] << "; z[2] = " << z[2] << std::endl;
@@ -605,19 +728,16 @@ double eqPhi //default = -1
 std::complex<double> Mobius(const MyVector<std::complex<double> > z,
                             const std::complex<double> z4)
 {
+
   std::complex<double> w;
   if(abs(z[1])>1.e10){
     w = (z4-z[0])/(z[2]-z[0]);
-    //std::cout << POSITION << std::endl;
   } else if(abs(z[0])>1.e10){
     w = (z[2]-z[1])/(z4-z[1]);
-    //std::cout << POSITION << std::endl;
   } else if(abs(z[2])>1.e10){
     w = (z4-z[0])/(z4-z[1]);
-    //std::cout << POSITION << std::endl;
   } else {
     w = (z4-z[0])*(z[2]-z[1]) / ((z4-z[1])*(z[2]-z[0]));
-    //std::cout << POSITION << std::endl;
   }
 
   return w;
@@ -651,44 +771,49 @@ DataMesh MobiusTransform(const DataMesh& collocationvalues,//unused right now
                          const DataMesh& thetaGrid,
                          const DataMesh& phiGrid,
                          const SurfaceBasis& sb,
-                         const MyVector<std::complex<double> > z)//,
-                         //DataMesh& thetaMobius,
-                         //DataMesh& phiMobius)
+                         const MyVector<std::complex<double> > z,
+                         DataMesh& thetaMobius,
+                         DataMesh& phiMobius)
 {
   //REQUIRE(thetaMobius.Size() == sb.CollocationMesh().Size()
   //        && phiMobius.Size() == sb.CollocationMesh().Size(),
   //        "thetaMobius and phiMobius DataMeshes must be the same size as the SurfaceBasis \n"
   //         "collocation Mesh.");
-
+      std::cout << POSITION << std::endl;
   //Do I even need DataMeshes?  None of this really needs to be saved, and I'm just performing
   //the evaluation point-wise anyway...
-  DataMesh thetaMobius(sb.CollocationMesh());
-  DataMesh phiMobius(sb.CollocationMesh());
+  //DataMesh thetaMobius(sb.CollocationMesh());
+  //DataMesh phiMobius(sb.CollocationMesh());
   DataMesh MobiusCF(sb.CollocationMesh());
   DataMesh result(sb.CollocationMesh());
-
+      std::cout << "I think the problem is with the atan(abs(w)) and arg(w). "
+                << "I need to work out a couple scenarios by hand to really figure this out."
+                << std::endl;
   for(int i=0; i<thetaGrid.Size(); i++){
+      //std::cout << POSITION << " " << i << std::endl;
     const std::complex<double> 
           z4(tan(thetaGrid[i]/2.)*cos(phiGrid[i]), tan(thetaGrid[i]/2.)*sin(phiGrid[i]));
     const std::complex<double> w = Mobius(z, z4);
-    thetaMobius[i] = 2. * atan(abs(w));
+    thetaMobius[i] = 2. * atan(abs(w)); //seems to have a quadrant problem
+    //const int n = ( w.real()<0. ? -1 : 1);
+    //thetaMobius[i] = 2. * atan2(abs(w),n);
     phiMobius[i] = arg(w);
     MobiusCF[i] = MobiusConformalFactor(z, z4);
     //result[i] = MobiusCF[i]*sb.Evaluate(collocationvalues, thetaMobius[i], phiMobius[i]);
     result[i] = sb.Evaluate(collocationvalues, thetaMobius[i], phiMobius[i]);
-    if(i==0){
-      std::cout << "I think the problem is with the atan(abs(w)) and arg(w)."
-                << "I need to work out a couple scenarious by hand to really figure this out."
+
+      //this is useful output for checking against Mathematica
+      std::cout << thetaGrid[i] << " " << phiGrid[i] << " "
+                //<< z4 << " "
+                << thetaMobius[i] << " " << phiMobius[i] << " "
+                << result[i] << " " << MobiusCF[i]
                 << std::endl;
-      std::cout << "(theta, phi) = (" << thetaGrid[i] << ", " << phiGrid[i] << ")" << std::endl;
-      //std::cout << "z4(theta) = " << tan(thetaGrid[i]/2.)*cos(phiGrid[i]) << std::endl;
-      //std::cout << "z4(phi) = " << tan(thetaGrid[i]/2.)*sin(phiGrid[i]) << std::endl;
-      std::cout << "z4 = " << z4 << std::endl;
-      std::cout << "w = " << w << std::endl;
-      std::cout << "thetaMobius = " << thetaMobius[i] << std::endl;
-      std::cout << "phiMobius = " << phiMobius[i] << std::endl;
-      std::cout << "MobiusCF = " << MobiusCF[i] << std::endl;
-    }
+
+/*      //std::cout << "w = " << w << std::endl;
+      std::cout << " (thetaM, phiM) = (" << thetaMobius[i] << ", " << phiMobius[i] << ")" << std::endl;
+      //std::cout << "phiMobius = " << phiMobius[i] << std::endl;
+      //std::cout << "MobiusCF = " << MobiusCF[i] << std::endl;
+    }*/
   }
 
   //std::cout << "Before CF: " << result << std::endl;
@@ -739,6 +864,10 @@ DataMesh RotateOnSphere
     } else { // evaluate at south pole
       newTheta = M_PI;
       newPhi = 0.0;
+    }
+    if(fabs(phiGrid[0]) < 0.01){
+      std::cout << POSITION << " " << thetaGrid[i] << " " << phiGrid[i]
+              << " " << newTheta << " " << newPhi << std::endl;
     }
     result[i] = sb.Evaluate(collocationvalues, newTheta, newPhi);
   }
@@ -1025,8 +1154,8 @@ bool KillingPath(const SurfaceBasis& sb,
   double y[2] = {theta, phi-2.*M_PI}; //this makes the stopping criteria easier
   bool limit_h = false;
   double hmax = h; //maximum step size
-  //const double hmax2 = 2.0*M_PI/100.0; //hard maximum for h size, original
-  const double hmax2 = 0.1; //hard maximum for h size, new
+  const double hmax2 = 2.0*M_PI/100.0; //hard maximum for h size, original
+  //const double hmax2 = 0.1; //hard maximum for h size, new
 
   //useful for calculating the "center point" of the path taken
   double pathTotal[2] = {0.,0.};
@@ -1098,14 +1227,14 @@ bool KillingPath(const SurfaceBasis& sb,
     if(fabs(y[1] - phi) < 1.e-12) break; //original condition assuming navigation about the pole
     //if a path brings you back to the original point,
     //you have closure, and that's what we're interested in
-    if(   fabs(y[1]+2.*M_PI - phi) < 1.e-6      //close to original phi
+/*    if(   fabs(y[1]+2.*M_PI - phi) < 1.e-6      //close to original phi
        && t > 1.e-2 ){
        //&& printSteps){
       std::cout << POSITION << " Off-axis closure rules have been triggered." << std::endl;
       std::cout << "Path average (theta, phi) = (" << pathTotal[0]
                 << ", " << pathTotal[1]/(2.*M_PI)-M_PI << ")" << std::endl;
       break;
-    }
+    }*/
     else if(y[1] > phi) { //if solver went too far...
       if(!limit_h) hmax = h;
       limit_h = true;
@@ -1113,7 +1242,7 @@ bool KillingPath(const SurfaceBasis& sb,
       y[0] = ysave[0]; y[1] = ysave[1]; t = tsave; //return variables to previous state
       gsl_odeiv2_evolve_reset(e); //return solver to previous state
     } //end ifs
-    //alternative else if
+/*    //alternative else if
     else if(ysave[1] < phi-2.*M_PI && y[1]>phi-2.*M_PI){ //Killing path has been followed too far
       //std::cout << POSITION << " Off-axis overstepping rules have been triggered." << std::endl;
       if(!limit_h) hmax = h;
@@ -1121,7 +1250,7 @@ bool KillingPath(const SurfaceBasis& sb,
       h = hmax *= 0.5; //...reset h, hmax
       y[0] = ysave[0]; y[1] = ysave[1]; t = tsave; iter--; //return variables to previous state
       gsl_odeiv2_evolve_reset(e); //return solver to previous state
-    }
+    }*/
     if(h > hmax2) h = hmax2;
 
     //diagnostics on average (theta, phi) position.

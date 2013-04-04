@@ -8,6 +8,7 @@
 #include "Utils/DataBox/DataBoxAccess.hpp"
 //#include "gsl/gsl_vector.h"
 #include "gsl/gsl_multiroots.h"
+#include "gsl/gsl_multimin.h"
 
 //Is the Killing path centered on the axis after the appropriate (theta, phi) rotation?
 //If not, return false *and* return the relative position of the axis
@@ -84,10 +85,15 @@ int AKVsolver(const gsl_vector * x,
 //prints the state of the multidimensional root finder
 void print_state (size_t iter, gsl_multiroot_fsolver * s);
 
+//helper function required for GSL multidimensional minimizer routine
+double InterpolateDataMesh(const gsl_vector *v,
+                           void *params);
+
 //returns the theta, phi components of the extrema for a given DataMesh
 void DataMeshExtrema(const DataMesh& collocationvalues,
                      const DataMesh& thetaGrid,
                      const DataMesh& phiGrid,
+                     const SurfaceBasis& sb,
                      MyVector<double>& minPoint,
                      MyVector<double>& maxPoint);
 
@@ -115,9 +121,9 @@ DataMesh MobiusTransform(const DataMesh& collocationvalues,//unused right now
                          const DataMesh& thetaGrid,
                          const DataMesh& phiGrid,
                          const SurfaceBasis& sb,
-                         const MyVector<std::complex<double> > z);//,
-                         //DataMesh& thetaMobius,
-                         //DataMesh& phiMobius);
+                         const MyVector<std::complex<double> > z,
+                         DataMesh& thetaMobius,
+                         DataMesh& phiMobius);
 
 //rotates a DataMesh by an amount (Theta,Phi)
 DataMesh RotateOnSphere
@@ -272,6 +278,12 @@ struct ODEparams{
   const DataMesh& Psi_ha;
   const Tensor<DataMesh>& xi_ha;
   const double& rad;
+};
+
+//a structure to perform the GSL multidimensional minimizing routine
+struct interpparams{
+  const SurfaceBasis& sb;
+  const DataMesh& collocationValues;
 };
 
 #endif
