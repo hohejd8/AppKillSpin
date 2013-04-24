@@ -108,9 +108,11 @@ double eqTheta=-1.,
 double eqPhi=-1.
 );
 
-//perform Mobius transform at one point
+//perform Mobius transform at one point, and inverse Mobius transform
 std::complex<double> Mobius(const MyVector<std::complex<double> > z,
                             const std::complex<double> z4);
+std::complex<double> InvMobius(const MyVector<std::complex<double> > z,
+                               const std::complex<double> w);
 
 //compute the Mobius conformal factor
 double MobiusConformalFactor(const MyVector<std::complex<double> > z,

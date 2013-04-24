@@ -13,6 +13,8 @@
 //Is the Killing path centered on the axis after the appropriate (theta, phi) rotation?
 //If not, return false *and* return the relative position of the axis
 //that the Killing path seems to be centered on.
+
+//this is now an unnecessary routine
 bool IsKillingPathCentered(const SurfaceBasis& sb,
                            double& thetaOffAxis,
                            double& phiOffAxis,
@@ -579,10 +581,10 @@ void DataMeshExtrema(const DataMesh& collocationvalues,
                 << collocationvalues[i] << std::endl;*/
       maxIndex = i; max = collocationvalues[i];
     } else if(collocationvalues[i] == min || collocationvalues[i] == max){
-      std::cout << POSITION << "Problem with equivalence in DataMeshExtrema" << std::endl;
+      //std::cout << POSITION << "Problem with equivalence in DataMeshExtrema" << std::endl;
     }
   }
-  //std::cout << "minIndex = " << minIndex << " maxIndex = " << maxIndex << std::endl;
+
   minPoint[0] = thetaGrid[minIndex]; minPoint[1] = phiGrid[minIndex];
   maxPoint[0] = thetaGrid[maxIndex]; maxPoint[1] = phiGrid[maxIndex];
   //std::cout << POSITION << "Min = (" << minPoint[0] << ", " << minPoint[1] << ") "
@@ -657,8 +659,8 @@ void DataMeshExtrema(const DataMesh& collocationvalues,
     gsl_multimin_fminimizer_free (s);
   } //end loop over min and max values 
 
-  /*std::cout << POSITION << "Min = (" << minPoint[0] << ", " << minPoint[1] << ") "
-            << "Max = (" << maxPoint[0] << ", " << maxPoint[1] << ")" << std::endl;*/
+  std::cout << POSITION << "Min = (" << minPoint[0] << ", " << minPoint[1] << ") "
+            << "Max = (" << maxPoint[0] << ", " << maxPoint[1] << ")" << std::endl;
 }
 
 //create the set of three complex z values that determine the transform
@@ -684,18 +686,14 @@ double eqPhi //default = -1
   //check to see if eqTheta, eqPhi = -1, which is a flag to make z3 halfway between z1 and z2
   if(eqTheta==-1. && eqPhi==-1. && fmod(nPoleTheta,M_PI)<1.e-6){
     eqTheta = (nPoleTheta+sPoleTheta)/2.;
-    std::cout << POSITION << std::endl;
     double cx = sin(nPoleTheta)*cos(nPolePhi) + sin(sPoleTheta)*cos(sPolePhi);//o
     double cy = sin(nPoleTheta)*sin(nPolePhi) + sin(sPoleTheta)*sin(sPolePhi);//o
     eqPhi = atan2(cy,cx);
   } else if(eqTheta==-1. && eqPhi==-1.){
     double cx = sin(nPoleTheta)*cos(nPolePhi) + sin(sPoleTheta)*cos(sPolePhi);//o
     double cy = sin(nPoleTheta)*sin(nPolePhi) + sin(sPoleTheta)*sin(sPolePhi);//o
-    std::cout << POSITION << std::endl;
-    /*double cx = sin(nPoleTheta)*cos(-nPolePhi+M_PI) + sin(sPoleTheta)*cos(-sPolePhi+M_PI);
-    double cy = sin(nPoleTheta)*sin(-nPolePhi+M_PI) + sin(sPoleTheta)*sin(-sPolePhi+M_PI);*/
     double cz = cos(nPoleTheta) + cos(sPoleTheta);
-    std::cout << "cx = " << cx << " cy = " << cy << " cz = " << cz << std::endl;
+    //std::cout << "cx = " << cx << " cy = " << cy << " cz = " << cz << std::endl;
     //atan2(0,0) undefined
     //if cy or cx are both "zero" but one is not identically zero, ex. cx=0, cy=1.e-16,
     //atan2(cy,cx) automatically spits out (+/-)Pi/2, when it should be 0
@@ -720,7 +718,8 @@ double eqPhi //default = -1
         std::cout << POSITION << std::endl;
   //create z3
   z[2] = std::complex<double> (tan(eqTheta/2.)*cos(eqPhi), tan(eqTheta/2.)*sin(eqPhi));
-  std::cout << "z[0] = " << z[0] << "; z[1] = " << z[1] << "; z[2] = " << z[2] << std::endl;
+  /*std::cout << POSITION << " z[0] = " << z[0] 
+            << "; z[1] = " << z[1] << "; z[2] = " << z[2] << std::endl;*/
   return z;
 }
 
@@ -728,7 +727,6 @@ double eqPhi //default = -1
 std::complex<double> Mobius(const MyVector<std::complex<double> > z,
                             const std::complex<double> z4)
 {
-
   std::complex<double> w;
   if(abs(z[1])>1.e10){
     w = (z4-z[0])/(z[2]-z[0]);
@@ -741,6 +739,23 @@ std::complex<double> Mobius(const MyVector<std::complex<double> > z,
   }
 
   return w;
+}
+
+std::complex<double> InvMobius(const MyVector<std::complex<double> > z,
+                               const std::complex<double> w)
+{
+  std::complex<double> z4;
+  if(abs(z[1])>1.e10){
+    z4 = w*(z[2]-z[0])+z[0];
+  } else if(abs(z[0])>1.e10){
+    z4 = (z[2]-z[1])/w + z[1];
+  } else if(abs(z[2])>1.e10){
+    z4 = (w*z[1]-z[0])/(w-std::complex<double>(1,0));
+  } else {
+    z4 = (w*z[1]*(z[2]-z[0]) - z[0]*(z[2]-z[1]))/(w*(z[2]-z[0]) - (z[2]-z[1]));
+  }
+
+  return z4;
 }
 
 //compute the Mobius conformal factor
@@ -779,36 +794,33 @@ DataMesh MobiusTransform(const DataMesh& collocationvalues,//unused right now
   //        && phiMobius.Size() == sb.CollocationMesh().Size(),
   //        "thetaMobius and phiMobius DataMeshes must be the same size as the SurfaceBasis \n"
   //         "collocation Mesh.");
-      std::cout << POSITION << std::endl;
+
   //Do I even need DataMeshes?  None of this really needs to be saved, and I'm just performing
   //the evaluation point-wise anyway...
   //DataMesh thetaMobius(sb.CollocationMesh());
   //DataMesh phiMobius(sb.CollocationMesh());
   DataMesh MobiusCF(sb.CollocationMesh());
   DataMesh result(sb.CollocationMesh());
-      std::cout << "I think the problem is with the atan(abs(w)) and arg(w). "
-                << "I need to work out a couple scenarios by hand to really figure this out."
-                << std::endl;
+
   for(int i=0; i<thetaGrid.Size(); i++){
-      //std::cout << POSITION << " " << i << std::endl;
     const std::complex<double> 
           z4(tan(thetaGrid[i]/2.)*cos(phiGrid[i]), tan(thetaGrid[i]/2.)*sin(phiGrid[i]));
-    const std::complex<double> w = Mobius(z, z4);
+    //const std::complex<double> w = Mobius(z, z4);
+    const std::complex<double> w = InvMobius(z, z4);
     thetaMobius[i] = 2. * atan(abs(w)); //seems to have a quadrant problem
-    //const int n = ( w.real()<0. ? -1 : 1);
-    //thetaMobius[i] = 2. * atan2(abs(w),n);
     phiMobius[i] = arg(w);
     MobiusCF[i] = MobiusConformalFactor(z, z4);
-    //result[i] = MobiusCF[i]*sb.Evaluate(collocationvalues, thetaMobius[i], phiMobius[i]);
-    result[i] = sb.Evaluate(collocationvalues, thetaMobius[i], phiMobius[i]);
-
+    result[i] = MobiusCF[i]*sb.Evaluate(collocationvalues, thetaMobius[i], phiMobius[i]);
+    //result[i] = sb.Evaluate(collocationvalues, thetaMobius[i], phiMobius[i]);
+/*
       //this is useful output for checking against Mathematica
       std::cout << thetaGrid[i] << " " << phiGrid[i] << " "
                 //<< z4 << " "
                 << thetaMobius[i] << " " << phiMobius[i] << " "
+                //<< 2. * atan(abs(ww)) << " " << arg(ww) //test for InvMobius
                 << result[i] << " " << MobiusCF[i]
                 << std::endl;
-
+*/
 /*      //std::cout << "w = " << w << std::endl;
       std::cout << " (thetaM, phiM) = (" << thetaMobius[i] << ", " << phiMobius[i] << ")" << std::endl;
       //std::cout << "phiMobius = " << phiMobius[i] << std::endl;
@@ -865,10 +877,10 @@ DataMesh RotateOnSphere
       newTheta = M_PI;
       newPhi = 0.0;
     }
-    if(fabs(phiGrid[0]) < 0.01){
+    /*if(fabs(phiGrid[0]) < 0.01){
       std::cout << POSITION << " " << thetaGrid[i] << " " << phiGrid[i]
               << " " << newTheta << " " << newPhi << std::endl;
-    }
+    }*/
     result[i] = sb.Evaluate(collocationvalues, newTheta, newPhi);
   }
   return result;
@@ -1052,9 +1064,12 @@ double NormalizeAKVAtOnePoint(const SurfaceBasis& sb,
   double thetaOffAxis = 0.; double phiOffAxis = 0.;
   bool goodtheta = KillingPath(sb, rotated_Psi, xi, rad, t, thetap, phip,
                                thetaOffAxis, phiOffAxis, printSteps);
-  REQUIRE(goodtheta, "Killing trajectory did not close " << POSITION);
+  //REQUIRE(goodtheta, "Killing trajectory did not close " << POSITION); //original diagnostic
 
-  const double scale = t/(2.0*M_PI);
+  //const double scale = t/(2.0*M_PI); //original
+  double scale = t/(2.0*M_PI); //I'd rather go back to the const version
+
+  if(!goodtheta) scale = -1.;
 
   return scale;
 } //end normalizeKillingVector
@@ -1173,7 +1188,7 @@ bool KillingPath(const SurfaceBasis& sb,
   }
 */     
   int iter = 0;
-  const int iterMax = 1000;
+  const int iterMax = 100000;
   while (true && iter<iterMax) {
     iter++;
     const double ysave[2] = {y[0],y[1]};
