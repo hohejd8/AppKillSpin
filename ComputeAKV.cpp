@@ -54,6 +54,7 @@ namespace ComputeItems {
     mTestPhi = p.Get<double>("TestPhi",0.);
     mTestEqTheta = p.Get<double>("TestEqTheta",-1);
     mTestEqPhi = p.Get<double>("TestEqPhi",-1);
+    mPrintAllFormsOfv = p.Get<bool>("PrintAllFormsOfv",false);
     printDiagnostic = MyVector<bool>(MV::Size(6), true);
     if(p.OptionIsDefined("DivNorm")) printDiagnostic[0]=p.Get<bool>("DivNorm");
     if(p.OptionIsDefined("VortNorm")) printDiagnostic[1]=p.Get<bool>("VortNorm");
@@ -353,45 +354,43 @@ MobiusTransform(theta, theta, phi, sb, zz, transformed_theta, transformed_phi);
                                          transformed_theta, transformed_phi);
       DataMesh transformed_Psi = MobiusTransform(Psi, theta, phi, sb, z,
                                                  transformed_theta, transformed_phi);
-
+if(mPrintAllFormsOfv){
 //plot v[a], rotated_v[a] and transformed_v[a] to find lines of constant v[a]
   std::cout << POSITION << " v[a]" << std::endl;
-  for(int i=0; i<v[a].Size(); i++){
-    //if(rotated_phi[i]<0.) rotated_phi[i] += 2.*M_PI;
-    std::cout << theta[i]-M_PI/2. << " " << phi[i] << " "
-              << 1.0 << " " << v[a][i]
-              << std::endl;
+  for(int i=0; i<v[a].Extents()[0]; i++){
+    for(int j=0; j<v[a].Extents()[1]; j++){
+      const int index = i + j*v[a].Extents()[0];
+      std::cout << theta[index]-M_PI/2. << " " << phi[index] << " "
+                << 1.0 << " " << v[a][index]
+                << std::endl;
+    }
+    std::cout << std::endl;
   }
   std::cout << "-----------------------------------------------" << std:: endl;
   std::cout << POSITION << " rotated_v[a]" << std::endl;
-  for(int i=0; i<rotated_v[a].Size(); i++){
-    //if(rotated_phi[i]<0.) rotated_phi[i] += 2.*M_PI;
-    std::cout << theta[i]-M_PI/2. << " " << phi[i] << " "
-              << 1.0 << " " << rotated_v[a][i]
-              << std::endl;
+  for(int i=0; i<rotated_v[a].Extents()[0]; i++){
+    for(int j=0; j<v[a].Extents()[1]; j++){
+      const int index = i + j*v[a].Extents()[0];
+      std::cout << theta[index]-M_PI/2. << " " << phi[index] << " "
+                << 1.0 << " " << rotated_v[a][index]
+                << std::endl;
+    }
+    std::cout << std::endl;
   }
   std::cout << "-----------------------------------------------" << std:: endl;
   std::cout << POSITION << " transformed_v[a]" << std::endl;
-  for(int i=0; i<rotated_v[a].Size(); i++){
-    //if(rotated_phi[i]<0.) rotated_phi[i] += 2.*M_PI;
-    std::cout << theta[i]-M_PI/2. << " " << phi[i] << " "
-              << 1.0 << " " << transformed_v[a][i]
-              << std::endl;
+  for(int i=0; i<rotated_v[a].Extents()[0]; i++){
+    for(int j=0; j<v[a].Extents()[1]; j++){
+      const int index = i + j*v[a].Extents()[0];
+      std::cout << theta[index]-M_PI/2. << " " << phi[index] << " "
+                << 1.0 << " " << transformed_v[a][index]
+                << std::endl;
+    }
+    std::cout << std::endl;
   }
+}
 
 
-//Testing outupt
-/*
-  std::cout << "Original / Rotated / Transformed" << std::endl;
-  for(int i=0; i<rotated_v[a].Size(); i++){
-    //if(rotated_phi[i]<0.) rotated_phi[i] += 2.*M_PI;
-    std::cout << v[a][i] << " " //<< v[a][i]-M_PI/2. << " "
-              << rotated_v[a][i] << " " //<< rotated_v[a][i]-M_PI/2. << " "
-              << transformed_v[a][i] << " " //<< transformed_v[a][i]-M_PI/2.
-              << std::endl;
-  }
-*/
-//end testing output
 
 /*
       //A secondary test to make sure that the solution is valid and Killing paths
@@ -434,44 +433,47 @@ MobiusTransform(theta, theta, phi, sb, zz, transformed_theta, transformed_phi);
               = InnerProductScaleFactors(v[a], v[a], Ricci, r2p4, sb,true);
         const MyVector<double> scaleIPNoRicci 
               = InnerProductScaleFactors(v[a], v[a], Ricci, r2p4, sb,false);
-        //const double artificialScale = 0.9;
-        //std::cout << POSITION << " artificial scaling of rotated_v by " 
-        //          << artificialScale << std::endl;
-        //const MyVector<double> artificialScaleIP 
-        //      = InnerProductScaleFactors(v[a]*artificialScale, v[a]*artificialScale,
-        //                                 Ricci, r2p4, sb,true);
         scale = scaleIP[0];
         //scale = scaleIPNoRicci[0];
-          std::cout << "IP1 Rotated" << std::endl;
-          PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleIP[0],mRad,print);
+          if(a==0){
+            std::cout << "IP1 Rotated" << std::endl;
+            PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleIP[0],mRad,print);
+          }
           std::cout << "IP1 Transformed" << std::endl;
           PrintSurfaceNormalization(sb,transformed_Psi,theta,phi,transformed_v[a],scaleIP[0],mRad,print);
-          //std::cout << "IP1 artificial scale" << std::endl;
-          //PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],
-          //                          artificialScaleIP[0],mRad,mPrintSteps);
-          std::cout << "IP2 Rotated" << std::endl;
-          PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleIP[1],mRad,print);
+          if(a==0){
+            std::cout << "IP2 Rotated" << std::endl;
+            PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleIP[1],mRad,print);
+          }
           std::cout << "IP2 Transformed" << std::endl;
           PrintSurfaceNormalization(sb,transformed_Psi,theta,phi,transformed_v[a],scaleIP[1],mRad,print);
-          std::cout << "IP3 Rotated" << std::endl;
-          PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleIP[2],mRad,print);
+          if(a==0){
+            std::cout << "IP3 Rotated" << std::endl;
+            PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleIP[2],mRad,print);
+          }
           std::cout << "IP3 Transformed" << std::endl;
           PrintSurfaceNormalization(sb,transformed_Psi,theta,phi,transformed_v[a],scaleIP[2],mRad,print);
-          std::cout << "IP4 Rotated" << std::endl;
-          PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],
-                                    scaleIPNoRicci[0],mRad,print);
+          if(a==0){
+            std::cout << "IP4 Rotated" << std::endl;
+            PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],
+                                      scaleIPNoRicci[0],mRad,print);
+          }
           std::cout << "IP4 Transformed" << std::endl;
           PrintSurfaceNormalization(sb,transformed_Psi,theta,phi,transformed_v[a],
                                     scaleIPNoRicci[0],mRad,print);
-          std::cout << "IP5 Rotated" << std::endl;
-          PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],
-                                    scaleIPNoRicci[1],mRad,print);
+          if(a==0){
+            std::cout << "IP5 Rotated" << std::endl;
+            PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],
+                                      scaleIPNoRicci[1],mRad,print);
+          }
           std::cout << "IP5 Transformed" << std::endl;
           PrintSurfaceNormalization(sb,transformed_Psi,theta,phi,transformed_v[a],
                                     scaleIPNoRicci[1],mRad,print);
-          std::cout << "IP6 Rotated" << std::endl;
-          PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],
-                                    scaleIPNoRicci[2],mRad,print);
+          if(a==0){
+            std::cout << "IP6 Rotated" << std::endl;
+            PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],
+                                      scaleIPNoRicci[2],mRad,print);
+          }
           std::cout << "IP6 Transformed" << std::endl;
           PrintSurfaceNormalization(sb,transformed_Psi,theta,phi,transformed_v[a],
                                     scaleIPNoRicci[2],mRad,print);
@@ -510,7 +512,7 @@ std::cout << POSITION << " Introduce IP4, IP5, IP6" << std::endl;
 
       if(mPrintSurfaceNormalization){
         std::cout << mScaleFactor << std::endl;
-        PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scale,mRad,mPrintSteps);
+        PrintSurfaceNormalization(sb,transformed_Psi,theta,phi,transformed_v[a],scale,mRad,mPrintSteps);
       }
 
       //scale v

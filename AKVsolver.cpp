@@ -810,8 +810,8 @@ DataMesh MobiusTransform(const DataMesh& collocationvalues,//unused right now
     thetaMobius[i] = 2. * atan(abs(w)); //seems to have a quadrant problem
     phiMobius[i] = arg(w);
     MobiusCF[i] = MobiusConformalFactor(z, z4);
-    result[i] = MobiusCF[i]*sb.Evaluate(collocationvalues, thetaMobius[i], phiMobius[i]);
-    //result[i] = sb.Evaluate(collocationvalues, thetaMobius[i], phiMobius[i]);
+    //result[i] = MobiusCF[i]*sb.Evaluate(collocationvalues, thetaMobius[i], phiMobius[i]);
+    result[i] = sb.Evaluate(collocationvalues, thetaMobius[i], phiMobius[i]);
 /*
       //this is useful output for checking against Mathematica
       std::cout << thetaGrid[i] << " " << phiGrid[i] << " "
@@ -829,9 +829,9 @@ DataMesh MobiusTransform(const DataMesh& collocationvalues,//unused right now
   }
 
   //std::cout << "Before CF: " << result << std::endl;
-  //result = result*MobiusCF;
-  //std::cout << "Mobius Result: " << result << std::endl;
   //std::cout << "MobiusCF: " << MobiusCF << std::endl;
+  //DataMesh test = result*MobiusCF;
+  //std::cout << "Mobius Result: " << test << std::endl;
   return result;
 }
 
@@ -1064,7 +1064,7 @@ double NormalizeAKVAtOnePoint(const SurfaceBasis& sb,
   double thetaOffAxis = 0.; double phiOffAxis = 0.;
   bool goodtheta = KillingPath(sb, rotated_Psi, xi, rad, t, thetap, phip,
                                thetaOffAxis, phiOffAxis, printSteps);
-  //REQUIRE(goodtheta, "Killing trajectory did not close " << POSITION); //original diagnostic
+  REQUIRE(goodtheta, "Killing trajectory did not close " << POSITION); //original diagnostic
 
   //const double scale = t/(2.0*M_PI); //original
   double scale = t/(2.0*M_PI); //I'd rather go back to the const version

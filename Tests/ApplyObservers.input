@@ -6,9 +6,12 @@ DataBoxItems=
                 SurfaceName=TestSkS;
                 MeshName=TestSkM;
                 Nth=18;
+                #Nth=14;
                 Nph=36;
+                #Nph=28;
                 Center=0.,0.,0.;
                 Radius=1.0;
+                #Radius=0.78125;
               ),
               ComputeStrahlkorperWithMesh(
                 Surface=TestSkS;
@@ -18,7 +21,8 @@ DataBoxItems=
               ComputeS2ConformalFactor(
                 StrahlkorperWithMesh=TestSkWM;
                 #Symmetry=Spherical;
-                Symmetry=Z12;
+                #Symmetry=Z;
+                Symmetry=Z4;
                 #Symmetry=None;
                 #Symmetry=OffAxis;
                 #Symmetry=__Symmetry__;
@@ -26,15 +30,16 @@ DataBoxItems=
               ComputeAKV(
                 StrahlkorperWithMesh=TestSkWM;
                 ConformalFactor=ConformalFactor;
-                ScaleFactor=InnerProduct4;
+                ScaleFactor=InnerProducts;
+                #ScaleFactor=Equator;
                 PrintInnerProducts=true;
                 PrintResiduals=false;
                 #PrintSteps=true;
-                #WithRicciScaling=true;
-                WithRicciScaling=false;
+                WithRicciScaling=true;
+                #WithRicciScaling=false;
                 InterpolateConformalFactor=false;
-                #AKVGuess=0.0, 0.0, 0.0;
-                AKVGuess=0.0, 3.14159/4.0, 3.14159/4.0;#better guess for off-axis symmetry
+                AKVGuess=0.0, 0.0, 0.0;
+                #AKVGuess=0.0, 3.14159/4.0, 3.14159/4.0;#better guess for off-axis symmetry
                 Radius=1.0;
                 Verbose=true;
                 AKVSolution=TestAKV;
@@ -46,6 +51,13 @@ DataBoxItems=
                 fLambdaNorm=true;
                 XiDivLNorm=true;
                 PrintSurfaceNormalization=true;
+                FindPoles=true;
+                #FindPoles=false;
+                PrintBisectionResults=true;
+                TestTheta=0.*3.14159/4.;
+                TestPhi=0.+1.*3.14159/4.;
+                TestEqTheta=2.*3.14159/4.;
+                TestEqPhi=0.+1.*3.14159/4.;
               );
     );
 

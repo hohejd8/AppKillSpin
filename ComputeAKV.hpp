@@ -139,7 +139,7 @@ namespace ComputeItems {
       bool mVerbose, mInterpolateConformalFactor, mPrintResiduals,
            mPrintTtpSolution, mPrintInnerProducts, mWithRicciScaling,
            mPrintScaleFactor, mPrintSurfaceNormalization, mPrintSteps,
-           mPrintBisectionResults, mFindPoles;
+           mPrintBisectionResults, mFindPoles, mPrintAllFormsOfv;
 
       mutable result_type* mResult;
   }; //class ComputeAKV
