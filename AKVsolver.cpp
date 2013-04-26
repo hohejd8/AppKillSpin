@@ -788,7 +788,8 @@ DataMesh MobiusTransform(const DataMesh& collocationvalues,//unused right now
                          const SurfaceBasis& sb,
                          const MyVector<std::complex<double> > z,
                          DataMesh& thetaMobius,
-                         DataMesh& phiMobius)
+                         DataMesh& phiMobius,
+                         const bool isConformalFactor /*default false*/)
 {
   //REQUIRE(thetaMobius.Size() == sb.CollocationMesh().Size()
   //        && phiMobius.Size() == sb.CollocationMesh().Size(),
@@ -809,7 +810,7 @@ DataMesh MobiusTransform(const DataMesh& collocationvalues,//unused right now
     const std::complex<double> w = InvMobius(z, z4);
     thetaMobius[i] = 2. * atan(abs(w)); //seems to have a quadrant problem
     phiMobius[i] = arg(w);
-    MobiusCF[i] = MobiusConformalFactor(z, z4);
+    if(isConformalFactor) MobiusCF[i] = MobiusConformalFactor(z, z4);
     //result[i] = MobiusCF[i]*sb.Evaluate(collocationvalues, thetaMobius[i], phiMobius[i]);
     result[i] = sb.Evaluate(collocationvalues, thetaMobius[i], phiMobius[i]);
 /*
@@ -828,9 +829,10 @@ DataMesh MobiusTransform(const DataMesh& collocationvalues,//unused right now
     }*/
   }
 
+
   //std::cout << "Before CF: " << result << std::endl;
   //std::cout << "MobiusCF: " << MobiusCF << std::endl;
-  //DataMesh test = result*MobiusCF;
+  if(isConformalFactor) result = result*MobiusCF;
   //std::cout << "Mobius Result: " << test << std::endl;
   return result;
 }

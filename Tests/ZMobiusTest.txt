@@ -1,0 +1,78 @@
+MPI starting on 1 processors at Fri Apr 26 15:02:04 2013
+Processor Names = Watson
+RunDirectory is /home/hohejd8/SpEC/AppKillSpin/Tests
+Compiled at Watson:/home/hohejd8/SpEC
+Code Revision a74c5e629474ee1320f04c29605b64fcb979cc61 (InitialCommit-20769-ga74c5e6)
+Linked on Fri Apr 26 15:00:17 EDT 2013
+Executed ApplyObservers: /home/hohejd8/SpEC/Support/ApplyObservers/Executables/ApplyObservers -UseTimes=0 ApplyObservers.input
+
+With Ricci scaling = 1
+Conformal factor is: Z
+symmetry axis guess : 0 0
+Beginning of loop.  Axis initial guess: 0, 0
+Starting the gsl 1D root finder at (thetap, phip) = (0, 0).
+Converged
+f0 = -1.26396e-16 fp = 0 fm = 0
+Solution found with : THETA[0] = -1.11159e-16
+                     thetap[0] = 0
+                       phip[0] = 0
+L2 Norm of Divergence = 2.12896102183e-15
+L2 Norm of Vorticity = 8.34890554642e-14
+Integral S_{ij}S^{ij} dA -1.14149490436e-14
+L2 Norm of f_L= 5.87936455058e-28
+L2 Norm of f_lam= 2.60124311989e-27
+L2 Norm of xi*Grad(L) = 5.33571926112e-32
+ComputeAKV.cpp (line 327; RecomputeData) Calculating extrema for use in Mobius transform
+AKVsolver.cpp (line 662; DataMeshExtrema)Min = (3.14159266193, -0.0649873723817) Max = (8.30095581018e-09, 0.0649873640594)
+minPoint: (8.30095581018e-09,0.0649873640594)
+maxPoint: (3.14159266193,-0.0649873723817)
+eqPoint:  (0,0)
+(nt, np) = (8.30095581018e-09, 0.0649873640594) (st, sp) = (3.14159266193, -0.0649873723817)) (eqt, eqp) = (1.57079633512, 1.61033162753)
+AKVsolver.cpp (line 718; MobiusTransformPoints)
+
+
+Test for slightly off-axis rotation:
+thetap[a] = 0 smallThetap = 0.0298346078209
+IP1 Rotated:
+0.998750418345224 3.56009610239336e-14
+IP1 Transformed w/ MobiusCF:
+(nt, np) = (0.0298346078209232, 1.5707963267949) (st, sp) = (3.11175804576887, 4.71238898038469)) (eqt, eqp) = (1.60063093461582, 1.5707963267949)
+0.998750418345224 3.34552797318941e-14
+IP1 Transformed w/o MobiusCF:
+0.998750418345224 3.36507837854527e-14
+
+Test for slightly off-axis transformation:
+(nt, np) = (0.0298346078209232, 1.5707963267949) (st, sp) = (3.11175804576887, 1.5707963267949)) (eqt, eqp) = (1.5707963267949, 1.5707963267949)
+IP1 Transformed w/ MobiusCF:
+0.998750418345224 0.00136174772030459
+IP1 Transformed w/o MobiusCF:
+0.998750418345224 0.000144426815822266
+
+
+Scale factor:       RMS deviation:
+IP1 Rotated
+0.998750418345224 1.8817747788032e-14
+IP1 Transformed
+0.998750418345224 3.62534042058341e-09
+IP2 Rotated
+0.999582604031622 0.000301983267493791
+IP2 Transformed
+0.999582604031622 0.000301983267545064
+IP3 Rotated
+0.999165382282639 0.000150644855399799
+IP3 Transformed
+0.999165382282639 0.000150644855396227
+IP4 Rotated
+0.276516481377791 0.947410508129091
+IP4 Transformed
+0.276516481377791 0.947410508129172
+IP5 Rotated
+0.86199885016167 0.0575449154706535
+IP5 Transformed
+0.86199885016167 0.0575449154706364
+IP6 Rotated
+0.743042017680041 0.124828269701784
+IP6 Transformed
+0.743042017680041 0.1248282697018
+InnerProducts
+0.998750418345224 3.62534042058341e-09
