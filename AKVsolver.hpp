@@ -126,7 +126,8 @@ DataMesh MobiusTransform(const DataMesh& collocationvalues,//unused right now
                          const MyVector<std::complex<double> > z,
                          DataMesh& thetaMobius,
                          DataMesh& phiMobius,
-                         const bool isConformalFactor = false);
+                         const bool isConformalFactor = false,
+                         const int exponent = 1);
 
 //rotates a DataMesh by an amount (Theta,Phi)
 DataMesh RotateOnSphere

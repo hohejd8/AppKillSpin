@@ -716,10 +716,15 @@ double eqPhi //default = -1
             << ") (eqt, eqp) = (" << eqTheta << ", " << eqPhi << ")"
             << std::endl;
         std::cout << POSITION << std::endl;
+  /*std::cout << "[" << minPoint[0] << ", " << minPoint[1] << ", "
+                << maxPoint[0] << ", " << maxPoint[1] << ", "
+                << eqPoint[0] << ", " << eqPoint[1] << ", " << std::endl;*/
   //create z3
   z[2] = std::complex<double> (tan(eqTheta/2.)*cos(eqPhi), tan(eqTheta/2.)*sin(eqPhi));
   /*std::cout << POSITION << " z[0] = " << z[0] 
-            << "; z[1] = " << z[1] << "; z[2] = " << z[2] << std::endl;*/
+            << "; z[1] = " << z[1] << "; z[2] = " << z[2] << std::endl;
+  std::cout << POSITION << " abs(z[0]) = " << abs(z[0]) 
+            << "; abs(z[1]) = " << abs(z[1]) << "; abs(z[2]) = " << abs(z[2]) << std::endl;*/
   return z;
 }
 
@@ -764,21 +769,30 @@ double MobiusConformalFactor(const MyVector<std::complex<double> > z,
 {
   double cf;
   if(abs(z[1])>1.e10){
+    //std::cout << " z[1] ";
     cf = abs(z4-z[0])*abs(z4-z[0]) + abs(z[0]-z[2])*abs(z[0]-z[2]);
     cf /= (1.+abs(z4)*abs(z4)) * abs(z[0]-z[2]);
   } else if(abs(z[0])>1.e10){
+    //std::cout << " z[0] ";
     cf = abs(z4-z[1])*abs(z4-z[1]) + abs(z[1]-z[2])*abs(z[1]-z[2]);
     cf /= (1.+abs(z4)*abs(z4)) * abs(z[1]-z[2]);
   } else if(abs(z[2])>1.e10){
+    //std::cout << " z[2] ";
     cf = abs(z4-z[0])*abs(z4-z[0]) + abs(z4-z[1])*abs(z4-z[1]);
     cf /= (1.+abs(z4)*abs(z4)) * abs(z[0]-z[1]);
   } else {
+    //std::cout << " z full ";
     cf = abs(z4-z[0])*abs(z4-z[0])*abs(z[1]-z[2])*abs(z[1]-z[2])
        + abs(z4-z[1])*abs(z4-z[1])*abs(z[0]-z[2])*abs(z[0]-z[2]);
+    //std::cout << "cf numerator = " << cf ;
     cf /= (1.+abs(z4)*abs(z4)) * abs(z[0]-z[1]) * abs(z[0]-z[2])* abs(z[1]-z[2]);
+    //std::cout << " cf/denomenator = " << cf << std::endl;
   }
 
-  return cf;
+  //return cf;
+  //std::cout << "z = " << z4 << " z1 = " << z[0] << " z2 = " << z[1] << " z3 = " << z[2]
+  //          << " Psi = " << cf << std::endl;
+  return sqrt(cf);
 }
 
 //Mobius transformation on a sphere
@@ -789,7 +803,8 @@ DataMesh MobiusTransform(const DataMesh& collocationvalues,//unused right now
                          const MyVector<std::complex<double> > z,
                          DataMesh& thetaMobius,
                          DataMesh& phiMobius,
-                         const bool isConformalFactor /*default false*/)
+                         const bool isConformalFactor, /*default false*/
+                         const int exponent /*default 1*/)
 {
   //REQUIRE(thetaMobius.Size() == sb.CollocationMesh().Size()
   //        && phiMobius.Size() == sb.CollocationMesh().Size(),
@@ -810,29 +825,21 @@ DataMesh MobiusTransform(const DataMesh& collocationvalues,//unused right now
     const std::complex<double> w = InvMobius(z, z4);
     thetaMobius[i] = 2. * atan(abs(w)); //seems to have a quadrant problem
     phiMobius[i] = arg(w);
-    if(isConformalFactor) MobiusCF[i] = MobiusConformalFactor(z, z4);
+    if(isConformalFactor){
+      MobiusCF[i] = MobiusConformalFactor(z, z4);
+      std::cout << thetaGrid[i] << ", " << phiGrid[i] << "] " << MobiusCF[i] 
+                //<< MobiusCF[i]
+                //<< " z4 = " << z4 << " abs(z4) = " << abs(z4) 
+                << std::endl;
+    }
     //result[i] = MobiusCF[i]*sb.Evaluate(collocationvalues, thetaMobius[i], phiMobius[i]);
     result[i] = sb.Evaluate(collocationvalues, thetaMobius[i], phiMobius[i]);
-/*
-      //this is useful output for checking against Mathematica
-      std::cout << thetaGrid[i] << " " << phiGrid[i] << " "
-                //<< z4 << " "
-                << thetaMobius[i] << " " << phiMobius[i] << " "
-                //<< 2. * atan(abs(ww)) << " " << arg(ww) //test for InvMobius
-                << result[i] << " " << MobiusCF[i]
-                << std::endl;
-*/
-/*      //std::cout << "w = " << w << std::endl;
-      std::cout << " (thetaM, phiM) = (" << thetaMobius[i] << ", " << phiMobius[i] << ")" << std::endl;
-      //std::cout << "phiMobius = " << phiMobius[i] << std::endl;
-      //std::cout << "MobiusCF = " << MobiusCF[i] << std::endl;
-    }*/
   }
 
 
-  //std::cout << "Before CF: " << result << std::endl;
-  //std::cout << "MobiusCF: " << MobiusCF << std::endl;
-  if(isConformalFactor) result = result*MobiusCF;
+
+  //if(isConformalFactor) result = result*MobiusCF; //original
+  if(isConformalFactor) result = result*pow(MobiusCF,exponent);
   //std::cout << "Mobius Result: " << test << std::endl;
   return result;
 }
