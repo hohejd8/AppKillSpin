@@ -1,0 +1,180 @@
+MPI starting on 1 processors at Fri May  3 14:31:19 2013
+Processor Names = Watson
+RunDirectory is /home/hohejd8/SpEC/AppKillSpin/Tests
+Compiled at Watson:/home/hohejd8/SpEC
+Code Revision a74c5e629474ee1320f04c29605b64fcb979cc61 (InitialCommit-20769-ga74c5e6)
+Linked on Fri May  3 14:28:46 EDT 2013
+Executed ApplyObservers: /home/hohejd8/SpEC/Support/ApplyObservers/Executables/ApplyObservers -UseTimes=0 ApplyObservers.input
+
+With Ricci scaling = 1
+Conformal factor is: Z
+symmetry axis guess : 0 0
+Beginning of loop.  Axis initial guess: 0, 0
+Starting the gsl 1D root finder at (thetap, phip) = (0, 0).
+Converged
+f0 = -1.26396e-16 fp = 0 fm = 0
+Solution found with : THETA[0] = -1.11159e-16
+                     thetap[0] = 0
+                       phip[0] = 0
+L2 Norm of Divergence = 2.12896102183e-15
+L2 Norm of Vorticity = 8.34890554642e-14
+Integral S_{ij}S^{ij} dA -1.14149490436e-14
+L2 Norm of f_L= 5.87936455058e-28
+L2 Norm of f_lam= 2.60124311989e-27
+L2 Norm of xi*Grad(L) = 5.33571926112e-32
+ComputeAKV.cpp (line 327; RecomputeData) Calculating extrema for use in Mobius transform
+AKVsolver.cpp (line 662; DataMeshExtrema)Min = (3.14159266193, -0.0649873723817) Max = (8.30095581018e-09, 0.0649873640594)
+minPoint: (8.30095581018e-09,0.0649873640594)
+maxPoint: (3.14159266193,-0.0649873723817)
+eqPoint:  (0,0)
+(nt, np) = (8.30095581018e-09, 0.0649873640594) (st, sp) = (3.14159266193, -0.0649873723817)) (eqt, eqp) = (1.57079633512, 1.61033162753)
+AKVsolver.cpp (line 718; MobiusTransformPoints)
+z = ((4.14171651332e-09,2.69538798663e-10),(-239192841.538,15566434.6484),(-0.0395250026588,0.999218590104))
+Test for slightly off-axis rotation:
+thetap[a] = 0 smallThetap = 0.0596692156418
+Rotated:
+0.000453258511642
+(nt, np) = (0.0596692156418, 0) (st, sp) = (3.08192343795, 3.14159265359)) (eqt, eqp) = (1.63046554244, 0)
+AKVsolver.cpp (line 718; MobiusTransformPoints)
+Rotation, Transformed w/ MobiusCF:
+0.000453258511643
+Rotation, Transformed w/o MobiusCF:
+0.000453258511642
+Test for slightly off-axis transformation:
+(nt, np) = (0.0596692156418, 0) (st, sp) = (3.08192343795, 0)) (eqt, eqp) = (1.57079632679, 0)
+AKVsolver.cpp (line 718; MobiusTransformPoints)
+Transform, Transformed w/ MobiusCF^1:
+0.00196845995218
+Transform, Transformed w/ MobiusCF^2:
+0.00569776234404
+Transform, Transformed w/ MobiusCF^-1:
+0.00165249394139
+Transform, Transformed w/ MobiusCF^-2:
+0.0037462998512
+Transfrom, Transformed w/o MobiusCF:
+0.000453812280899
+Scale factor:       RMS deviation:
+AKVsolver.cpp (line 1342; AKVInnerProduct) AKVInnerProduct w/o Ricci
+AKVsolver.cpp (line 1342; AKVInnerProduct) AKVInnerProduct w/o Ricci
+IP1 Rotated
+0.998750418345224 1.8817747788032e-14
+IP1 Transformed
+0.998750418345224 1.8817747788032e-14
+IP2 Rotated
+0.999582604031622 0.000301983267493791
+IP2 Transformed
+0.999582604031622 0.000301983267493791
+IP3 Rotated
+0.999165382282639 0.000150644855399799
+IP3 Transformed
+0.999165382282639 0.000150644855397204
+IP4 Rotated
+0.276516481377791 0.947410508129091
+IP4 Transformed
+0.276516481377791 0.947410508129091
+IP5 Rotated
+0.86199885016167 0.0575449154706535
+IP5 Transformed
+0.86199885016167 0.0575449154706535
+IP6 Rotated
+0.743042017680041 0.124828269701784
+IP6 Transformed
+0.743042017680041 0.124828269701784
+InnerProducts
+0.998750418345224 1.8817747788032e-14
+
+symmetry axis guess : 90 180
+Beginning of loop.  Axis initial guess: 90, 180
+Starting the gsl multidimensional root finder.
+iter = 0 x =          0  1.5707963  3.1415927 f(x) = 4.6316657e-18 -3.0025202e-06 4.059861e-16
+iter = 1 x = -1.3001299e-06  1.5707971  3.1415927 f(x) = 3.1108799e-12 -2.0601167e-15 3.8165974e-16
+Solution found with : THETA[1] = -1.3001299e-06
+                     thetap[1] = 90.000042
+                       phip[1] = 180
+L2 Norm of Divergence = 1.0136190698e-14
+L2 Norm of Vorticity = 1.92984628057e-13
+Integral S_{ij}S^{ij} dA 2.92561208097e-05
+L2 Norm of f_L= 7.5884530524e-12
+L2 Norm of f_lam= 2.59545479544e-06
+L2 Norm of xi*Grad(L) = 1.64482241651e-07
+ComputeAKV.cpp (line 327; RecomputeData) Calculating extrema for use in Mobius transform
+Converged to minimum at 1.57105643938
+Converged to minimum at 1.57061545157
+AKVsolver.cpp (line 662; DataMeshExtrema)Min = (1.57105643938, -0.0005262406314) Max = (1.57061545157, 3.14151559877)
+minPoint: (1.57061545157,3.14151559877)
+maxPoint: (1.57105643938,-0.0005262406314)
+eqPoint:  (0,0)
+(nt, np) = (1.57061545157, 3.14151559877) (st, sp) = (1.57105643938, -0.0005262406314)) (eqt, eqp) = (1.74540220286, -1.57113687013)
+AKVsolver.cpp (line 718; MobiusTransformPoints)
+z = ((-0.999819138163,7.70408849652e-05),(1.00026000792,-0.000526377506724),(-0.000405873801536,-1.19184180796))
+Scale factor:       RMS deviation:
+AKVsolver.cpp (line 1342; AKVInnerProduct) AKVInnerProduct w/o Ricci
+AKVsolver.cpp (line 1342; AKVInnerProduct) AKVInnerProduct w/o Ricci
+IP1 Transformed
+1.000626741625 1.66216531370963e-05
+IP2 Transformed
+1.00020837220492 0.000151936731784656
+IP3 Transformed
+1.00041678782881 7.72347764568192e-05
+IP4 Transformed
+0.277208632863905 0.946591901164166
+IP5 Transformed
+0.863077015355619 0.0578076675677703
+IP6 Transformed
+0.744901934435164 0.124523641582498
+InnerProducts
+1.000626741625 1.66216531370963e-05
+
+symmetry axis guess : 90 -90.0000000066362
+Beginning of loop.  Axis initial guess: 90, -90.0000000066362
+Starting the gsl multidimensional root finder.
+iter = 0 x =          0  1.5707963 -1.5707963 f(x) = 7.5832574e-18 -7.4795288e-16 3.0025202e-06
+iter = 1 x = -1.3001299e-06  1.5707998 -1.5707963 f(x) = 1.482732e-11 -3.9830242e-16 -1.9254759e-15
+Solution found with : THETA[2] = -1.3001299e-06
+                     thetap[2] = 90.0002
+                       phip[2] = -90
+<v_0|v_0> = 22.530643
+-THETA_0 <v_0|v_0> = 2.504491e-15
+<v_1|v_1> = 22.502459
+<v_0|v_1> = -1.6485963e-05
+-THETA_1 <v_1|v_1> = 2.9256121e-05
+<v_2|v_2> = 22.502459
+<v_0|v_2> = -7.8576225e-05
+<v_1|v_2> = 1.700011e-08
+-THETA_2 <v_2|v_2> = 2.9256121e-05
+L2 Norm of Divergence = 9.08274417505e-15
+L2 Norm of Vorticity = 1.84658722017e-13
+Integral S_{ij}S^{ij} dA 2.92561208155e-05
+L2 Norm of f_L= 7.58845305412e-12
+L2 Norm of f_lam= 2.59545479541e-06
+L2 Norm of xi*Grad(L) = 1.64482241657e-07
+ComputeAKV.cpp (line 327; RecomputeData) Calculating extrema for use in Mobius transform
+Converged to minimum at 1.57105643938
+Converged to minimum at 1.57061545157
+AKVsolver.cpp (line 662; DataMeshExtrema)Min = (1.57105643938, 1.57027008616) Max = (1.57061545157, 4.71231192556)
+minPoint: (1.57061545157,4.71231192556)
+maxPoint: (1.57105643938,1.57027008616)
+eqPoint:  (0,0)
+(nt, np) = (1.57061545157, 4.71231192556) (st, sp) = (1.57105643938, 1.57027008616)) (eqt, eqp) = (1.74540220286, -0.00034054333647)
+AKVsolver.cpp (line 718; MobiusTransformPoints)
+z = ((-7.70408849493e-05,-0.999819138163),(0.000526377506727,1.00026000792),(1.19184180796,-0.000405873801516))
+Scale factor:       RMS deviation:
+AKVsolver.cpp (line 1342; AKVInnerProduct) AKVInnerProduct w/o Ricci
+AKVsolver.cpp (line 1342; AKVInnerProduct) AKVInnerProduct w/o Ricci
+IP1 Transformed
+1.00062674162498 1.66057115769784e-05
+IP2 Transformed
+1.00020837220491 0.000151935000553208
+IP3 Transformed
+1.0004167878288 7.7231359026407e-05
+IP4 Transformed
+0.277208632863897 0.946591901189529
+IP5 Transformed
+0.863077015355606 0.0578076675759683
+IP6 Transformed
+0.744901934435142 0.124523641594121
+InnerProducts
+1.00062674162498 1.66057115769784e-05
+
+
+
