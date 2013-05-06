@@ -765,28 +765,49 @@ std::complex<double> InvMobius(const MyVector<std::complex<double> > z,
 
 //compute the Mobius conformal factor
 double MobiusConformalFactor(const MyVector<std::complex<double> > z,
-                             const std::complex<double> z4)
+                             const std::complex<double> w)
 {
   double cf;
+/*
+  //Mobius CF for forward transformation, z4->w
+  //computes Psi^2
   if(abs(z[1])>1.e10){
-    //std::cout << " z[1] ";
     cf = abs(z4-z[0])*abs(z4-z[0]) + abs(z[0]-z[2])*abs(z[0]-z[2]);
     cf /= (1.+abs(z4)*abs(z4)) * abs(z[0]-z[2]);
   } else if(abs(z[0])>1.e10){
-    //std::cout << " z[0] ";
     cf = abs(z4-z[1])*abs(z4-z[1]) + abs(z[1]-z[2])*abs(z[1]-z[2]);
     cf /= (1.+abs(z4)*abs(z4)) * abs(z[1]-z[2]);
   } else if(abs(z[2])>1.e10){
-    //std::cout << " z[2] ";
     cf = abs(z4-z[0])*abs(z4-z[0]) + abs(z4-z[1])*abs(z4-z[1]);
     cf /= (1.+abs(z4)*abs(z4)) * abs(z[0]-z[1]);
   } else {
-    //std::cout << " z full ";
     cf = abs(z4-z[0])*abs(z4-z[0])*abs(z[1]-z[2])*abs(z[1]-z[2])
        + abs(z4-z[1])*abs(z4-z[1])*abs(z[0]-z[2])*abs(z[0]-z[2]);
-    //std::cout << "cf numerator = " << cf ;
     cf /= (1.+abs(z4)*abs(z4)) * abs(z[0]-z[1]) * abs(z[0]-z[2])* abs(z[1]-z[2]);
-    //std::cout << " cf/denomenator = " << cf << std::endl;
+  }
+*/
+
+  //Mobius CF for inverse transformation, w->z4
+  //computes Psi^2
+  if(abs(z[1])>1.e10){
+    std::cout << POSITION << " UNSIMPLIFIED z[1] term" << std::endl;
+    cf = (1.+abs(w)*abs(w)) * abs(z[0]-z[1]) * abs(z[0]-z[2]) * abs(z[1]-z[2]);
+    cf /= abs((z[2]-z[0])*w-(z[2]-z[1])) * abs((z[2]-z[0])*w-(z[2]-z[1]))
+       + abs(-z[1]*w*(z[2]-z[0]) + z[0]*(z[2]-z[1]))*abs(-z[1]*w*(z[2]-z[0]) + z[0]*(z[2]-z[1]));
+  } else if(abs(z[0])>1.e10){
+    std::cout << POSITION << " UNSIMPLIFIED z[0] term" << std::endl;
+    cf = (1.+abs(w)*abs(w)) * abs(z[0]-z[1]) * abs(z[0]-z[2]) * abs(z[1]-z[2]);
+    cf /= abs((z[2]-z[0])*w-(z[2]-z[1])) * abs((z[2]-z[0])*w-(z[2]-z[1]))
+       + abs(-z[1]*w*(z[2]-z[0]) + z[0]*(z[2]-z[1]))*abs(-z[1]*w*(z[2]-z[0]) + z[0]*(z[2]-z[1]));
+  } else if(abs(z[2])>1.e10){
+    std::cout << POSITION << " UNSIMPLIFIED z[2] term" << std::endl;
+    cf = (1.+abs(w)*abs(w)) * abs(z[0]-z[1]) * abs(z[0]-z[2]) * abs(z[1]-z[2]);
+    cf /= abs((z[2]-z[0])*w-(z[2]-z[1])) * abs((z[2]-z[0])*w-(z[2]-z[1]))
+       + abs(-z[1]*w*(z[2]-z[0]) + z[0]*(z[2]-z[1]))*abs(-z[1]*w*(z[2]-z[0]) + z[0]*(z[2]-z[1]));
+  } else {
+    cf = (1.+abs(w)*abs(w)) * abs(z[0]-z[1]) * abs(z[0]-z[2]) * abs(z[1]-z[2]);
+    cf /= abs((z[2]-z[0])*w-(z[2]-z[1])) * abs((z[2]-z[0])*w-(z[2]-z[1]))
+       + abs(-z[1]*w*(z[2]-z[0])+z[0]*(z[2]-z[1])) * abs(-z[1]*w*(z[2]-z[0])+z[0]*(z[2]-z[1]));
   }
 
   //return cf;
@@ -796,7 +817,7 @@ double MobiusConformalFactor(const MyVector<std::complex<double> > z,
 }
 
 //Mobius transformation on a sphere
-DataMesh MobiusTransform(const DataMesh& collocationvalues,//unused right now
+DataMesh MobiusTransform(const DataMesh& collocationvalues,
                          const DataMesh& thetaGrid,
                          const DataMesh& phiGrid,
                          const SurfaceBasis& sb,
@@ -806,41 +827,32 @@ DataMesh MobiusTransform(const DataMesh& collocationvalues,//unused right now
                          const bool isConformalFactor, /*default false*/
                          const int exponent /*default 1*/)
 {
-  //REQUIRE(thetaMobius.Size() == sb.CollocationMesh().Size()
-  //        && phiMobius.Size() == sb.CollocationMesh().Size(),
-  //        "thetaMobius and phiMobius DataMeshes must be the same size as the SurfaceBasis \n"
-  //         "collocation Mesh.");
-
-  //Do I even need DataMeshes?  None of this really needs to be saved, and I'm just performing
-  //the evaluation point-wise anyway...
-  //DataMesh thetaMobius(sb.CollocationMesh());
-  //DataMesh phiMobius(sb.CollocationMesh());
   DataMesh MobiusCF(sb.CollocationMesh());
   DataMesh result(sb.CollocationMesh());
 
   for(int i=0; i<thetaGrid.Size(); i++){
     const std::complex<double> 
-          z4(tan(thetaGrid[i]/2.)*cos(phiGrid[i]), tan(thetaGrid[i]/2.)*sin(phiGrid[i]));
+          w(tan(thetaGrid[i]/2.)*cos(phiGrid[i]), tan(thetaGrid[i]/2.)*sin(phiGrid[i]));
     //const std::complex<double> w = Mobius(z, z4);
-    const std::complex<double> w = InvMobius(z, z4);
-    thetaMobius[i] = 2. * atan(abs(w)); //seems to have a quadrant problem
-    phiMobius[i] = arg(w);
+    const std::complex<double> z4 = InvMobius(z, w);
+    thetaMobius[i] = 2. * atan(abs(z4));
+    phiMobius[i] = arg(z4);
     if(isConformalFactor){
-      MobiusCF[i] = MobiusConformalFactor(z, z4);
-      std::cout << thetaGrid[i] << ", " << phiGrid[i] << "] " << MobiusCF[i] 
+
+      MobiusCF[i] = MobiusConformalFactor(z, w);
+
+      /*std::cout << thetaGrid[i] << ", " << phiGrid[i] << "] " << MobiusCF[i] 
                 //<< MobiusCF[i]
                 //<< " z4 = " << z4 << " abs(z4) = " << abs(z4) 
-                << std::endl;
+                << std::endl;*/
     }
-    //result[i] = MobiusCF[i]*sb.Evaluate(collocationvalues, thetaMobius[i], phiMobius[i]);
     result[i] = sb.Evaluate(collocationvalues, thetaMobius[i], phiMobius[i]);
   }
 
 
 
   //if(isConformalFactor) result = result*MobiusCF; //original
-  if(isConformalFactor) result = result*pow(MobiusCF,exponent);
-  //std::cout << "Mobius Result: " << test << std::endl;
+  if(isConformalFactor) result = result*pow(MobiusCF,exponent); //used for testing purposes
   return result;
 }
 
@@ -1075,10 +1087,10 @@ double NormalizeAKVAtOnePoint(const SurfaceBasis& sb,
                                thetaOffAxis, phiOffAxis, printSteps);
   REQUIRE(goodtheta, "Killing trajectory did not close " << POSITION); //original diagnostic
 
-  //const double scale = t/(2.0*M_PI); //original
-  double scale = t/(2.0*M_PI); //I'd rather go back to the const version
+  const double scale = t/(2.0*M_PI); //original
+  //double scale = t/(2.0*M_PI); //I'd rather go back to the const version
 
-  if(!goodtheta) scale = -1.;
+  //if(!goodtheta) scale = -1.;
 
   return scale;
 } //end normalizeKillingVector

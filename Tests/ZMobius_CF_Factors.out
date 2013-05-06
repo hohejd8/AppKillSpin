@@ -1,9 +1,9 @@
-MPI starting on 1 processors at Mon May  6 09:57:31 2013
+MPI starting on 1 processors at Mon May  6 13:29:58 2013
 Processor Names = Watson
 RunDirectory is /home/hohejd8/SpEC/AppKillSpin/Tests
 Compiled at Watson:/home/hohejd8/SpEC
 Code Revision a74c5e629474ee1320f04c29605b64fcb979cc61 (InitialCommit-20769-ga74c5e6)
-Linked on Mon May  6 09:49:36 EDT 2013
+Linked on Mon May  6 12:28:49 EDT 2013
 Executed ApplyObservers: /home/hohejd8/SpEC/Support/ApplyObservers/Executables/ApplyObservers -UseTimes=0 ApplyObservers.input
 
 With Ricci scaling = 1
@@ -22,7 +22,7 @@ Integral S_{ij}S^{ij} dA -1.14149490436e-14
 L2 Norm of f_L= 5.87936455058e-28
 L2 Norm of f_lam= 2.60124311989e-27
 L2 Norm of xi*Grad(L) = 5.33571926112e-32
-ComputeAKV.cpp (line 327; RecomputeData) Calculating extrema for use in Mobius transform
+ComputeAKV.cpp (line 274; RecomputeData) Calculating extrema for use in Mobius transform
 AKVsolver.cpp (line 662; DataMeshExtrema)Min = (3.14159266193, -0.0649873723817) Max = (8.30095581018e-09, 0.0649873640594)
 minPoint: (8.30095581018e-09,0.0649873640594)
 maxPoint: (3.14159266193,-0.0649873723817)
@@ -37,53 +37,27 @@ Rotated:
 (nt, np) = (0.0596692156418, 0) (st, sp) = (3.08192343795, 3.14159265359)) (eqt, eqp) = (1.63046554244, 0)
 AKVsolver.cpp (line 718; MobiusTransformPoints)
 Rotation, Transformed w/ MobiusCF:
-0.000453258511642
+0.000453258511641
 Rotation, Transformed w/o MobiusCF:
 0.000453258511642
 Test for slightly off-axis transformation:
 (nt, np) = (0.0596692156418, 0) (st, sp) = (3.08192343795, 0)) (eqt, eqp) = (1.57079632679, 0)
 AKVsolver.cpp (line 718; MobiusTransformPoints)
 Transform, Transformed w/ MobiusCF^1:
-0.00278950607692
-Transform, Transformed w/ MobiusCF^2:
-0.004492025399
-Transform, Transformed w/ MobiusCF^4:
-0.0105987619035
-Transform, Transformed w/ MobiusCF^-1:
-0.00334138300535
-Transform, Transformed w/ MobiusCF^-2:
-0.00866843150897
+0.00165331149067
 Transfrom, Transformed w/o MobiusCF:
 0.000453812280899
+Transform, Transformed w/ MobiusCF^2:
+0.00374847335205
+Transform, Transformed w/ MobiusCF^4:
+0.0134548307132
+Transform, Transformed w/ MobiusCF^-1:
+0.00196572474658
+Transform, Transformed w/ MobiusCF^-2:
+0.00569352830823
 Scale factor:       RMS deviation:
-AKVsolver.cpp (line 1369; AKVInnerProduct) AKVInnerProduct w/o Ricci
-AKVsolver.cpp (line 1369; AKVInnerProduct) AKVInnerProduct w/o Ricci
-IP1 Rotated
-0.998750418345224 1.8817747788032e-14
-IP1 Transformed
-0.998750418345224 1.8817747788032e-14
-IP2 Rotated
-0.999582604031622 0.000301983267493791
-IP2 Transformed
-0.999582604031622 0.000301983267493791
-IP3 Rotated
-0.999165382282639 0.000150644855399799
-IP3 Transformed
-0.999165382282639 0.000150644855397204
-IP4 Rotated
-0.276516481377791 0.947410508129091
-IP4 Transformed
-0.276516481377791 0.947410508129092
-IP5 Rotated
-0.86199885016167 0.0575449154706535
-IP5 Transformed
-0.86199885016167 0.0575449154706535
-IP6 Rotated
-0.743042017680041 0.124828269701784
-IP6 Transformed
-0.743042017680041 0.124828269701784
-InnerProducts
-0.998750418345224 1.8817747788032e-14
+Equator
+0.998750418345247 1.8817747788032e-14
 
 symmetry axis guess : 90 180
 Beginning of loop.  Axis initial guess: 90, 180
@@ -99,7 +73,7 @@ Integral S_{ij}S^{ij} dA 2.92561208097e-05
 L2 Norm of f_L= 7.5884530524e-12
 L2 Norm of f_lam= 2.59545479544e-06
 L2 Norm of xi*Grad(L) = 1.64482241651e-07
-ComputeAKV.cpp (line 327; RecomputeData) Calculating extrema for use in Mobius transform
+ComputeAKV.cpp (line 274; RecomputeData) Calculating extrema for use in Mobius transform
 Converged to minimum at 1.57105643938
 Converged to minimum at 1.57061545157
 AKVsolver.cpp (line 662; DataMeshExtrema)Min = (1.57105643938, -0.0005262406314) Max = (1.57061545157, 3.14151559877)
@@ -110,22 +84,8 @@ eqPoint:  (0,0)
 AKVsolver.cpp (line 718; MobiusTransformPoints)
 z = ((-0.999819138163,7.70408849652e-05),(1.00026000792,-0.000526377506724),(-0.000405873801536,-1.19184180796))
 Scale factor:       RMS deviation:
-AKVsolver.cpp (line 1369; AKVInnerProduct) AKVInnerProduct w/o Ricci
-AKVsolver.cpp (line 1369; AKVInnerProduct) AKVInnerProduct w/o Ricci
-IP1 Transformed
-1.000626741625 9.55359730581779e-05
-IP2 Transformed
-1.00020837220492 0.000178725468130677
-IP3 Transformed
-1.00041678782881 0.000121736005453955
-IP4 Transformed
-0.277208632863905 0.946591992188649
-IP5 Transformed
-0.863077015355619 0.0578077716018215
-IP6 Transformed
-0.744901934435164 0.124523709020066
-InnerProducts
-1.000626741625 9.55359730581779e-05
+Equator
+1.00062458445577 7.95085755307537e-08
 
 symmetry axis guess : 90 -90.0000000066362
 Beginning of loop.  Axis initial guess: 90, -90.0000000066362
@@ -142,7 +102,7 @@ Solution found with : THETA[2] = -1.3001299e-06
 -THETA_1 <v_1|v_1> = 2.9256121e-05
 <v_2|v_2> = 22.502459
 <v_0|v_2> = -7.8576225e-05
-<v_1|v_2> = 1.700011e-08
+<v_1|v_2> = 1.7000073e-08
 -THETA_2 <v_2|v_2> = 2.9256121e-05
 L2 Norm of Divergence = 9.08274417505e-15
 L2 Norm of Vorticity = 1.84658722017e-13
@@ -150,7 +110,7 @@ Integral S_{ij}S^{ij} dA 2.92561208155e-05
 L2 Norm of f_L= 7.58845305412e-12
 L2 Norm of f_lam= 2.59545479541e-06
 L2 Norm of xi*Grad(L) = 1.64482241657e-07
-ComputeAKV.cpp (line 327; RecomputeData) Calculating extrema for use in Mobius transform
+ComputeAKV.cpp (line 274; RecomputeData) Calculating extrema for use in Mobius transform
 Converged to minimum at 1.57105643938
 Converged to minimum at 1.57061545157
 AKVsolver.cpp (line 662; DataMeshExtrema)Min = (1.57105643938, 1.57027008616) Max = (1.57061545157, 4.71231192556)
@@ -161,22 +121,8 @@ eqPoint:  (0,0)
 AKVsolver.cpp (line 718; MobiusTransformPoints)
 z = ((-7.70408849493e-05,-0.999819138163),(0.000526377506727,1.00026000792),(1.19184180796,-0.000405873801516))
 Scale factor:       RMS deviation:
-AKVsolver.cpp (line 1369; AKVInnerProduct) AKVInnerProduct w/o Ricci
-AKVsolver.cpp (line 1369; AKVInnerProduct) AKVInnerProduct w/o Ricci
-IP1 Transformed
-1.00062674162498 7.49690693052415e-07
-IP2 Transformed
-1.00020837220491 0.000150974964904954
-IP3 Transformed
-1.0004167878288 7.53767907020896e-05
-IP4 Transformed
-0.277208632863897 0.946591781461563
-IP5 Transformed
-0.863077015355606 0.0578076095805447
-IP6 Transformed
-0.744901934435142 0.124523580072567
-InnerProducts
-1.00062674162498 7.49690693052415e-07
+Equator
+1.00062458445566 7.95085961104913e-08
 
 
 

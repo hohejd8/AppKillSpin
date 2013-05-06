@@ -21,8 +21,8 @@ DataBoxItems=
               ComputeS2ConformalFactor(
                 StrahlkorperWithMesh=TestSkWM;
                 #Symmetry=Spherical;
-                #Symmetry=Z;
-                Symmetry=Z4;
+                Symmetry=Z;
+                #Symmetry=Z4;
                 #Symmetry=None;
                 #Symmetry=OffAxis;
                 #Symmetry=__Symmetry__;
@@ -30,8 +30,8 @@ DataBoxItems=
               ComputeAKV(
                 StrahlkorperWithMesh=TestSkWM;
                 ConformalFactor=ConformalFactor;
-                ScaleFactor=InnerProducts;
-                #ScaleFactor=Equator;
+                #ScaleFactor=InnerProducts;
+                ScaleFactor=Equator;
                 PrintInnerProducts=true;
                 PrintResiduals=false;
                 #PrintSteps=true;
