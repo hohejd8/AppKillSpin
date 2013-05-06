@@ -1,9 +1,9 @@
-MPI starting on 1 processors at Fri May  3 14:31:19 2013
+MPI starting on 1 processors at Mon May  6 09:57:31 2013
 Processor Names = Watson
 RunDirectory is /home/hohejd8/SpEC/AppKillSpin/Tests
 Compiled at Watson:/home/hohejd8/SpEC
 Code Revision a74c5e629474ee1320f04c29605b64fcb979cc61 (InitialCommit-20769-ga74c5e6)
-Linked on Fri May  3 14:28:46 EDT 2013
+Linked on Mon May  6 09:49:36 EDT 2013
 Executed ApplyObservers: /home/hohejd8/SpEC/Support/ApplyObservers/Executables/ApplyObservers -UseTimes=0 ApplyObservers.input
 
 With Ricci scaling = 1
@@ -37,25 +37,27 @@ Rotated:
 (nt, np) = (0.0596692156418, 0) (st, sp) = (3.08192343795, 3.14159265359)) (eqt, eqp) = (1.63046554244, 0)
 AKVsolver.cpp (line 718; MobiusTransformPoints)
 Rotation, Transformed w/ MobiusCF:
-0.000453258511643
+0.000453258511642
 Rotation, Transformed w/o MobiusCF:
 0.000453258511642
 Test for slightly off-axis transformation:
 (nt, np) = (0.0596692156418, 0) (st, sp) = (3.08192343795, 0)) (eqt, eqp) = (1.57079632679, 0)
 AKVsolver.cpp (line 718; MobiusTransformPoints)
 Transform, Transformed w/ MobiusCF^1:
-0.00196845995218
+0.00278950607692
 Transform, Transformed w/ MobiusCF^2:
-0.00569776234404
+0.004492025399
+Transform, Transformed w/ MobiusCF^4:
+0.0105987619035
 Transform, Transformed w/ MobiusCF^-1:
-0.00165249394139
+0.00334138300535
 Transform, Transformed w/ MobiusCF^-2:
-0.0037462998512
+0.00866843150897
 Transfrom, Transformed w/o MobiusCF:
 0.000453812280899
 Scale factor:       RMS deviation:
-AKVsolver.cpp (line 1342; AKVInnerProduct) AKVInnerProduct w/o Ricci
-AKVsolver.cpp (line 1342; AKVInnerProduct) AKVInnerProduct w/o Ricci
+AKVsolver.cpp (line 1369; AKVInnerProduct) AKVInnerProduct w/o Ricci
+AKVsolver.cpp (line 1369; AKVInnerProduct) AKVInnerProduct w/o Ricci
 IP1 Rotated
 0.998750418345224 1.8817747788032e-14
 IP1 Transformed
@@ -71,7 +73,7 @@ IP3 Transformed
 IP4 Rotated
 0.276516481377791 0.947410508129091
 IP4 Transformed
-0.276516481377791 0.947410508129091
+0.276516481377791 0.947410508129092
 IP5 Rotated
 0.86199885016167 0.0575449154706535
 IP5 Transformed
@@ -108,22 +110,22 @@ eqPoint:  (0,0)
 AKVsolver.cpp (line 718; MobiusTransformPoints)
 z = ((-0.999819138163,7.70408849652e-05),(1.00026000792,-0.000526377506724),(-0.000405873801536,-1.19184180796))
 Scale factor:       RMS deviation:
-AKVsolver.cpp (line 1342; AKVInnerProduct) AKVInnerProduct w/o Ricci
-AKVsolver.cpp (line 1342; AKVInnerProduct) AKVInnerProduct w/o Ricci
+AKVsolver.cpp (line 1369; AKVInnerProduct) AKVInnerProduct w/o Ricci
+AKVsolver.cpp (line 1369; AKVInnerProduct) AKVInnerProduct w/o Ricci
 IP1 Transformed
-1.000626741625 1.66216531370963e-05
+1.000626741625 9.55359730581779e-05
 IP2 Transformed
-1.00020837220492 0.000151936731784656
+1.00020837220492 0.000178725468130677
 IP3 Transformed
-1.00041678782881 7.72347764568192e-05
+1.00041678782881 0.000121736005453955
 IP4 Transformed
-0.277208632863905 0.946591901164166
+0.277208632863905 0.946591992188649
 IP5 Transformed
-0.863077015355619 0.0578076675677703
+0.863077015355619 0.0578077716018215
 IP6 Transformed
-0.744901934435164 0.124523641582498
+0.744901934435164 0.124523709020066
 InnerProducts
-1.000626741625 1.66216531370963e-05
+1.000626741625 9.55359730581779e-05
 
 symmetry axis guess : 90 -90.0000000066362
 Beginning of loop.  Axis initial guess: 90, -90.0000000066362
@@ -159,22 +161,22 @@ eqPoint:  (0,0)
 AKVsolver.cpp (line 718; MobiusTransformPoints)
 z = ((-7.70408849493e-05,-0.999819138163),(0.000526377506727,1.00026000792),(1.19184180796,-0.000405873801516))
 Scale factor:       RMS deviation:
-AKVsolver.cpp (line 1342; AKVInnerProduct) AKVInnerProduct w/o Ricci
-AKVsolver.cpp (line 1342; AKVInnerProduct) AKVInnerProduct w/o Ricci
+AKVsolver.cpp (line 1369; AKVInnerProduct) AKVInnerProduct w/o Ricci
+AKVsolver.cpp (line 1369; AKVInnerProduct) AKVInnerProduct w/o Ricci
 IP1 Transformed
-1.00062674162498 1.66057115769784e-05
+1.00062674162498 7.49690693052415e-07
 IP2 Transformed
-1.00020837220491 0.000151935000553208
+1.00020837220491 0.000150974964904954
 IP3 Transformed
-1.0004167878288 7.7231359026407e-05
+1.0004167878288 7.53767907020896e-05
 IP4 Transformed
-0.277208632863897 0.946591901189529
+0.277208632863897 0.946591781461563
 IP5 Transformed
-0.863077015355606 0.0578076675759683
+0.863077015355606 0.0578076095805447
 IP6 Transformed
-0.744901934435142 0.124523641594121
+0.744901934435142 0.124523580072567
 InnerProducts
-1.00062674162498 1.66057115769784e-05
+1.00062674162498 7.49690693052415e-07
 
 
 
