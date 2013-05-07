@@ -353,15 +353,36 @@ if(thetap[a]<1.e-5){
   //Mobius transform of v, Psi
   const DataMesh transformed_v2 = MobiusTransform(v[a], theta, phi, sb, z2, 
                                          transformed_theta, transformed_phi);
+  std::cout << "Transform, Transformed w/ MobiusCF^1:" << std::endl;
+  std::cout << "Transformed CF*CF w/ MobiusCF KillingPath" << std::endl;
   const DataMesh transformed_Psi2a = MobiusTransform(Psi, theta, phi, sb, z2,
                                    transformed_theta, transformed_phi, true);// w/ Mobius CF
-  const DataMesh transformed_Psi2b = MobiusTransform(Psi, theta, phi, sb, z2,
-                                   transformed_theta, transformed_phi, false);// w/o Mobius CF
-  std::cout << "Transform, Transformed w/ MobiusCF^1:" << std::endl;
-  std::cout << NormalizeAKVAtAllPoints(sb, transformed_Psi2a, theta, phi, rotated_v1, mRad, false)
+  std::cout << "Transformed CF*CF coefficients (w/ MobiusCF^1)" << std::endl;
+  DataMesh tmp_coeff = sb.ComputeCoefficients(transformed_Psi2a);
+  for(int i=0; i<sb.L(); i++){
+    for(int j=0; j<sb.M(); j++){
+      std::cout << tmp_coeff[j+i*sb.M()] << " ";
+    }
+    std::cout << "\n" << std::endl;
+  }
+
+
+  std::cout << NormalizeAKVAtAllPoints(sb, transformed_Psi2a,
+                        theta, phi, rotated_v1, mRad, false)
             << std::endl;
-  std::cout << "Transfrom, Transformed w/o MobiusCF:" << std::endl;
-  std::cout << NormalizeAKVAtAllPoints(sb, transformed_Psi2b, theta, phi, rotated_v1, mRad, false)
+  std::cout << "Transform, Transformed w/o MobiusCF:" << std::endl;
+  std::cout << "Transformed CF*CF w/o MobiusCF KillingPath" << std::endl;
+  const DataMesh transformed_Psi2b = MobiusTransform(Psi, theta, phi, sb, z2,
+                                   transformed_theta, transformed_phi, true);// w/o Mobius CF
+  std::cout << "Transformed CF*CF coefficients (w/o MobiusCF)" << std::endl;
+  tmp_coeff = sb.ComputeCoefficients(transformed_Psi2b);
+  for(int i=0; i<sb.L(); i++){
+    for(int j=0; j<sb.M(); j++){
+      std::cout << tmp_coeff[j+i*sb.M()] << " ";
+    }
+    std::cout << "\n" << std::endl;
+  }
+  std::cout << NormalizeAKVAtAllPoints(sb, transformed_Psi2b, theta, phi, rotated_v1, mRad, true)
             << std::endl;
 
 
