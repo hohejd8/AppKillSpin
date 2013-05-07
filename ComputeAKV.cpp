@@ -4,6 +4,7 @@
 #include "AKVsolver.hpp"
 #include "Utils/LowLevelUtils/Position.hpp"
 #include "SurfaceFinder/StrahlkorperDataSupplier/StrahlkorperParallelInterpolation.hpp"
+#include "Spectral/BasisFunctions/YlmSpherepack.hpp"
 #include "Dust/Domain/Domain.hpp"
 #include "Utils/DataBox/DataBox.hpp"
 #include <iomanip>
@@ -359,33 +360,23 @@ if(thetap[a]<1.e-5){
                                    transformed_theta, transformed_phi, true);// w/ Mobius CF
   std::cout << "Transformed CF*CF coefficients (w/ MobiusCF^1)" << std::endl;
   DataMesh tmp_coeff = sb.ComputeCoefficients(transformed_Psi2a);
-  for(int i=0; i<sb.L(); i++){
-    for(int j=0; j<sb.M(); j++){
-      std::cout << tmp_coeff[j+i*sb.M()] << " ";
-    }
-    std::cout << "\n" << std::endl;
-  }
-
-
+  YlmSpherepack ylm = YlmSpherepack(sb.L()+1, 2*sb.M());
+  ylm.PrintSpectralCoefficientsFromSpec(tmp_coeff.Data(),1,1.e-20,true);
   std::cout << NormalizeAKVAtAllPoints(sb, transformed_Psi2a,
-                        theta, phi, rotated_v1, mRad, false)
+                        theta, phi, rotated_v1, mRad, true)
             << std::endl;
+
   std::cout << "Transform, Transformed w/o MobiusCF:" << std::endl;
   std::cout << "Transformed CF*CF w/o MobiusCF KillingPath" << std::endl;
   const DataMesh transformed_Psi2b = MobiusTransform(Psi, theta, phi, sb, z2,
                                    transformed_theta, transformed_phi, true);// w/o Mobius CF
   std::cout << "Transformed CF*CF coefficients (w/o MobiusCF)" << std::endl;
   tmp_coeff = sb.ComputeCoefficients(transformed_Psi2b);
-  for(int i=0; i<sb.L(); i++){
-    for(int j=0; j<sb.M(); j++){
-      std::cout << tmp_coeff[j+i*sb.M()] << " ";
-    }
-    std::cout << "\n" << std::endl;
-  }
+  ylm.PrintSpectralCoefficientsFromSpec(tmp_coeff.Data(),1,1.e-20,true);
   std::cout << NormalizeAKVAtAllPoints(sb, transformed_Psi2b, theta, phi, rotated_v1, mRad, true)
             << std::endl;
 
-
+/*
   //setup additional tests for factors of Psi
   {
     const DataMesh transformed_Psi2x = MobiusTransform(Psi, theta, phi, sb, z2,
@@ -409,7 +400,7 @@ if(thetap[a]<1.e-5){
     std::cout << NormalizeAKVAtAllPoints(sb, transformed_Psi2y, theta, phi, rotated_v1, mRad, false)
             << std::endl;
   } //end additional tests for factors of Psi
-
+*/
 
 } //end if for z-symmetry
 //end Mobius transform test for z-symmetry
