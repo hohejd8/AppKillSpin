@@ -24,7 +24,7 @@ namespace ComputeItems {
     mAKVGuess   = p.Get<MyVector<double> >("AKVGuess");//must be three-dimensional
       REQUIRE(mAKVGuess.Size()==3,"AKVGuess has Size " << mAKVGuess.Size() 
                                   << ", should be 3.");
-    mRad        = p.Get<double>("Radius");
+    //mRad        = p.Get<double>("Radius");
     mSolver     = p.Get<std::string>("Solver","Newton");
     mVerbose    = p.Get<bool>("Verbose",false);
     mPrintResiduals = p.Get<bool>("PrintResiduals",false);
@@ -51,10 +51,10 @@ namespace ComputeItems {
     mPrintSteps = p.Get<bool>("PrintSteps",false);
     mPrintBisectionResults = p.Get<bool>("PrintBisectionResults",false);
     mFindPoles = p.Get<bool>("FindPoles",false);
-    mTestTheta = p.Get<double>("TestTheta",0.);
+    /*mTestTheta = p.Get<double>("TestTheta",0.);
     mTestPhi = p.Get<double>("TestPhi",0.);
     mTestEqTheta = p.Get<double>("TestEqTheta",-1);
-    mTestEqPhi = p.Get<double>("TestEqPhi",-1);
+    mTestEqPhi = p.Get<double>("TestEqPhi",-1);*/
     mPrintAllFormsOfv = p.Get<bool>("PrintAllFormsOfv",false);
     printDiagnostic = MyVector<bool>(MV::Size(6), true);
     if(p.OptionIsDefined("DivNorm")) printDiagnostic[0]=p.Get<bool>("DivNorm");
@@ -69,11 +69,20 @@ namespace ComputeItems {
   
   void ComputeAKV::RecomputeData(const DataBoxAccess& boxa) const {
     delete mResult;
-    std::cout << "With Ricci scaling = " << mWithRicciScaling << std::endl;
     const StrahlkorperWithMesh& skwm = boxa.Get<StrahlkorperWithMesh>(mSkwm);
     const SurfaceBasis sb(skwm.Grid().Basis());
     const DataMesh theta = boxa.Get<StrahlkorperWithMesh>(mSkwm).Grid().SurfaceCoords()(0);
     const DataMesh phi = boxa.Get<StrahlkorperWithMesh>(mSkwm).Grid().SurfaceCoords()(1);
+
+    //check that surface is a coordinate sphere
+    const DataMesh rSurface = skwm.Radius();
+    const DataMesh rcoefs = sb.ComputeCoefficients(rSurface);
+    SpherePackIterator it = sb.Iterator();
+    const double rad = sqrt(0.125)*rcoefs[it(0,0,SpherePackIterator::a)];
+    for(++it;it;++it) REQUIRE(fabs(rcoefs[it()])<1.e-12,
+	      "Surface is not a coordinate sphere");
+
+
 
 /*
   //use this for mapping in GNUplot
@@ -96,23 +105,21 @@ namespace ComputeItems {
 
 //end test Mobius transformation
 
-      DataBox localBox("ComputeAKV DataBox");
-      DataBoxInserter localBoxInserter(localBox, POSITION);
-      DataBoxAccess lba(localBox, "ComputeAKV");
+    DataBox localBox("ComputeAKV DataBox");
+    DataBoxInserter localBoxInserter(localBox, POSITION);
+    DataBoxAccess lba(localBox, "ComputeAKV");
     //if Psi needs to be interpolated onto the surface
     if(mInterpolateConformalFactor){
       const DataBoxAccess& rootDBA = boxa.Root();
       const Domain& D=rootDBA.Get<Domain>("Domain");
       MyVector<std::string> TensorsToInterp(MV::fill, mConformalFactor);
-      std::string mSpatialCoordMap="";
+      //std::string mSpatialCoordMap="";
       StrahlkorperDataSuppliers::StrahlkorperParallelInterpolation
           supplier(D, rootDBA, D.Communicator(),
-                   TensorsToInterp, mSpatialCoordMap,"Spectral");
-      //DataBox localBox("ComputeAKV DataBox");
-      //DataBoxInserter localBoxInserter(localBox, POSITION);
+                   TensorsToInterp, "","Spectral");
       for(int i=0; i<TensorsToInterp.Size(); i++){
         localBoxInserter.AddVolatileItem(TensorsToInterp[i],
-                             supplier.Supply(skwm, TensorsToInterp[i]));
+                                         supplier.Supply(skwm, TensorsToInterp[i]));
       }
       //DataBoxAccess lba(localBox, "ComputeAKV");
       //const DataMesh& Psi(lba.Get<Tensor<DataMesh> >(mConformalFactor)());
@@ -120,10 +127,11 @@ namespace ComputeItems {
       localBoxInserter.AddVolatileItem(mConformalFactor,
                   Tensor<DataMesh>(1,"1",boxa.Get<DataMesh>(mConformalFactor)));
     }
-    const DataMesh& Psi(lba.Get<Tensor<DataMesh> >(mConformalFactor)());
 
-    //compute some useful quantities
-    const DataMesh rp2 = mRad * Psi * Psi;
+
+    //Some useful quantities
+    const DataMesh& Psi(lba.Get<Tensor<DataMesh> >(mConformalFactor)());
+    const DataMesh rp2 = rad * Psi * Psi;
     const DataMesh r2p4 = rp2*rp2;
     const DataMesh llncf = sb.ScalarLaplacian(log(Psi));
     const DataMesh Ricci = 2.0 * (1.0-2.0*llncf) / r2p4;
@@ -258,12 +266,13 @@ namespace ComputeItems {
 
       //perform diagnostics
       //Psi and xi are unscaled and unrotated
-      KillingDiagnostics(sb, L, Psi, xi[a], mRad, printDiagnostic);
+      KillingDiagnostics(sb, L, Psi, xi[a], rad, printDiagnostic);
 
       //rotate v, Psi for analysis
       rotated_v[a] = RotateOnSphere(v[a],theta,phi,
                                           sb,thetap[a],phip[a]);
-      DataMesh rotated_Psi = RotateOnSphere(Psi,theta,phi,
+        std::cout << POSITION << std::endl;
+      DataMesh rotated_Psi = RotateOnSphere(r2p4,theta,phi,
                                             sb,thetap[a],phip[a]);
 
       //Mobius transform v, Psi for analysis
@@ -303,9 +312,15 @@ namespace ComputeItems {
       DataMesh transformed_phi(sb.CollocationMesh());
       transformed_v[a] = MobiusTransform(v[a], theta, phi, sb, z, 
                                          transformed_theta, transformed_phi);
-      DataMesh transformed_Psi = MobiusTransform(Psi, theta, phi, sb, z,
-                                                 transformed_theta, transformed_phi, true);
 
+      DataMesh transformed_Psi = MobiusTransform(r2p4, theta, phi, sb, z,
+                                                 transformed_theta, transformed_phi, true);
+      /*std::cout << POSITION << " compare v and Psi values" << std::endl;
+      for(int i=0; i<theta.Size(); i++){
+        std::cout << rotated_v[a][i] << "    " << transformed_v[a][i] << "     "
+                  << rotated_Psi[i] << "    " << transformed_Psi[i]   << std::endl;
+      }*/
+/*
 //begin test of Mobius transform for z-symmetry
 if(thetap[a]<1.e-5){
   //assume z-axis symmetry
@@ -318,12 +333,12 @@ if(thetap[a]<1.e-5){
   //standard rotation of v, Psi
   const DataMesh rotated_v1 = RotateOnSphere(v[a],theta,phi,
                                           sb,smallThetap,smallPhip);
-  const DataMesh rotated_Psi1 = RotateOnSphere(Psi,theta,phi,
-                                            sb,smallThetap,phip[a]);
+  const DataMesh rotated_Psi1 = RotateOnSphere(r2p4,theta,phi,
+                                            sb,smallThetap,smallPhip);
 
   //print scale factor for standard rotation
   std::cout << "Rotated:" << std::endl;
-  std::cout << NormalizeAKVAtAllPoints(sb, rotated_Psi1, theta, phi, rotated_v1, mRad, false)
+  std::cout << NormalizeAKVAtAllPoints(sb, rotated_Psi1, theta, phi, rotated_v1, rad, false)
             << std::endl;
 
   //setup Mobius rotation (transformation, but with a simple rotation)
@@ -334,15 +349,10 @@ if(thetap[a]<1.e-5){
   //Mobius rotation of v, Psi
   const DataMesh transformed_v1 = MobiusTransform(v[a], theta, phi, sb, z1, 
                                          transformed_theta, transformed_phi);
-  const DataMesh transformed_Psi1a = MobiusTransform(Psi, theta, phi, sb, z1,
+  const DataMesh transformed_Psi1a = MobiusTransform(r2p4, theta, phi, sb, z1,
                                    transformed_theta, transformed_phi, true);// w/ Mobius CF
-  const DataMesh transformed_Psi1b = MobiusTransform(Psi, theta, phi, sb, z1,
-                                   transformed_theta, transformed_phi, false);// w/o Mobius CF
   std::cout << "Rotation, Transformed w/ MobiusCF:" << std::endl;
-  std::cout << NormalizeAKVAtAllPoints(sb, transformed_Psi1a, theta, phi, rotated_v1, mRad, false)
-            << std::endl;
-  std::cout << "Rotation, Transformed w/o MobiusCF:" << std::endl;
-  std::cout << NormalizeAKVAtAllPoints(sb, transformed_Psi1b, theta, phi, rotated_v1, mRad, false)
+  std::cout << NormalizeAKVAtAllPoints(sb, transformed_Psi1a, theta, phi, transformed_v1, rad, false)
             << std::endl;
 
   //setup Mobius transformation
@@ -352,65 +362,38 @@ if(thetap[a]<1.e-5){
                           M_PI-smallThetap,
                           smallPhip);
   //Mobius transform of v, Psi
+
   const DataMesh transformed_v2 = MobiusTransform(v[a], theta, phi, sb, z2, 
                                          transformed_theta, transformed_phi);
-  std::cout << "Transform, Transformed w/ MobiusCF^1:" << std::endl;
-  std::cout << "Transformed CF*CF w/ MobiusCF KillingPath" << std::endl;
-  const DataMesh transformed_Psi2a = MobiusTransform(Psi, theta, phi, sb, z2,
+
+  std::cout << "Transform, Transformed w/ MobiusCF:" << std::endl;
+  const DataMesh transformed_Psi2a = MobiusTransform(r2p4, theta, phi, sb, z2,
                                    transformed_theta, transformed_phi, true);// w/ Mobius CF
-  std::cout << "Transformed CF*CF coefficients (w/ MobiusCF^1)" << std::endl;
-  DataMesh tmp_coeff = sb.ComputeCoefficients(transformed_Psi2a);
-  YlmSpherepack ylm = YlmSpherepack(sb.L()+1, 2*sb.M());
-  ylm.PrintSpectralCoefficientsFromSpec(tmp_coeff.Data(),1,1.e-20,true);
   std::cout << NormalizeAKVAtAllPoints(sb, transformed_Psi2a,
-                        theta, phi, rotated_v1, mRad, true)
+                        theta, phi, transformed_v2, rad, false)
             << std::endl;
-
-  std::cout << "Transform, Transformed w/o MobiusCF:" << std::endl;
-  std::cout << "Transformed CF*CF w/o MobiusCF KillingPath" << std::endl;
-  const DataMesh transformed_Psi2b = MobiusTransform(Psi, theta, phi, sb, z2,
-                                   transformed_theta, transformed_phi, true);// w/o Mobius CF
-  std::cout << "Transformed CF*CF coefficients (w/o MobiusCF)" << std::endl;
-  tmp_coeff = sb.ComputeCoefficients(transformed_Psi2b);
-  ylm.PrintSpectralCoefficientsFromSpec(tmp_coeff.Data(),1,1.e-20,true);
-  std::cout << NormalizeAKVAtAllPoints(sb, transformed_Psi2b, theta, phi, rotated_v1, mRad, true)
-            << std::endl;
-
-/*
-  //setup additional tests for factors of Psi
-  {
-    const DataMesh transformed_Psi2x = MobiusTransform(Psi, theta, phi, sb, z2,
-                                             transformed_theta, transformed_phi, true, -1);
-    const DataMesh transformed_Psi2y = MobiusTransform(Psi, theta, phi, sb, z2,
-                                             transformed_theta, transformed_phi, true, -2);
-    const DataMesh transformed_Psi2z = MobiusTransform(Psi, theta, phi, sb, z2,
-                                             transformed_theta, transformed_phi, true, 2);
-    const DataMesh transformed_Psi2w = MobiusTransform(Psi, theta, phi, sb, z2,
-                                             transformed_theta, transformed_phi, true, 4);
-    std::cout << "Transform, Transformed w/ MobiusCF^2:" << std::endl;
-    std::cout << NormalizeAKVAtAllPoints(sb, transformed_Psi2z, theta, phi, rotated_v1, mRad, false)
-            << std::endl;
-    std::cout << "Transform, Transformed w/ MobiusCF^4:" << std::endl;
-    std::cout << NormalizeAKVAtAllPoints(sb, transformed_Psi2w, theta, phi, rotated_v1, mRad, false)
-            << std::endl;
-    std::cout << "Transform, Transformed w/ MobiusCF^-1:" << std::endl;
-    std::cout << NormalizeAKVAtAllPoints(sb, transformed_Psi2x, theta, phi, rotated_v1, mRad, false)
-            << std::endl;
-    std::cout << "Transform, Transformed w/ MobiusCF^-2:" << std::endl;
-    std::cout << NormalizeAKVAtAllPoints(sb, transformed_Psi2y, theta, phi, rotated_v1, mRad, false)
-            << std::endl;
-  } //end additional tests for factors of Psi
-*/
 
 } //end if for z-symmetry
 //end Mobius transform test for z-symmetry
-
+*/
       //determine scale factors
       double scale = 0.0;
       if(mPrintSurfaceNormalization)
         std::cout << "Scale factor:       RMS deviation:" << std::endl;
       if(mScaleFactor=="Equator"){
-        scale = NormalizeAKVAtOnePoint(sb, rotated_Psi, rotated_v[a], mRad, M_PI/2., 0.0, mPrintSteps);
+        //std::cout << POSITION << std::endl;
+        /*if(a==1) scale = NormalizeAKVAtAllPoints(sb, rotated_Psi,
+                        theta, phi, rotated_v[a], rad, false);
+        else*/
+          scale = NormalizeAKVAtOnePoint(sb, rotated_Psi, rotated_v[a], rad, M_PI/2., 0.0, 
+                                         mPrintSteps);
+          double s1 = NormalizeAKVAtOnePoint(sb, transformed_Psi, transformed_v[a], rad, M_PI/2., 0.0, 
+                                         mPrintSteps);
+          //std::cout << POSITION << "     s1 = " << s1 << std::endl;
+        /*std::cout << "scale: " << scale << std::endl;
+        std::cout << "scale has been changed" << std::endl;
+        scale = 1.0;*/
+        std::cout << POSITION << std::endl;
       } else if(mScaleFactor=="InnerProduct1"){
         scale = InnerProductScaleFactors(v[a], v[a], Ricci, r2p4, sb,true)[0];
       } else if(mScaleFactor=="InnerProduct2"){
@@ -436,82 +419,84 @@ if(thetap[a]<1.e-5){
         //scale = scaleIPNoRicci[0];
           if(a==0){
             std::cout << "IP1 Rotated" << std::endl;
-            PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleIP[0],mRad,print);
+            PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleIP[0],rad,print);
           }
           std::cout << "IP1 Transformed" << std::endl;
-          PrintSurfaceNormalization(sb,transformed_Psi,theta,phi,transformed_v[a],scaleIP[0],mRad,print);
+          PrintSurfaceNormalization(sb,transformed_Psi,theta,phi,transformed_v[a],scaleIP[0],rad,print);
           if(a==0){
             std::cout << "IP2 Rotated" << std::endl;
-            PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleIP[1],mRad,print);
+            PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleIP[1],rad,print);
           }
           std::cout << "IP2 Transformed" << std::endl;
-          PrintSurfaceNormalization(sb,transformed_Psi,theta,phi,transformed_v[a],scaleIP[1],mRad,print);
+          PrintSurfaceNormalization(sb,transformed_Psi,theta,phi,transformed_v[a],scaleIP[1],rad,print);
           if(a==0){
             std::cout << "IP3 Rotated" << std::endl;
-            PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleIP[2],mRad,print);
+            PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleIP[2],rad,print);
           }
           std::cout << "IP3 Transformed" << std::endl;
-          PrintSurfaceNormalization(sb,transformed_Psi,theta,phi,transformed_v[a],scaleIP[2],mRad,print);
+          PrintSurfaceNormalization(sb,transformed_Psi,theta,phi,transformed_v[a],scaleIP[2],rad,print);
           if(a==0){
             std::cout << "IP4 Rotated" << std::endl;
             PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],
-                                      scaleIPNoRicci[0],mRad,print);
+                                      scaleIPNoRicci[0],rad,print);
           }
           std::cout << "IP4 Transformed" << std::endl;
           PrintSurfaceNormalization(sb,transformed_Psi,theta,phi,transformed_v[a],
-                                    scaleIPNoRicci[0],mRad,print);
+                                    scaleIPNoRicci[0],rad,print);
           if(a==0){
             std::cout << "IP5 Rotated" << std::endl;
             PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],
-                                      scaleIPNoRicci[1],mRad,print);
+                                      scaleIPNoRicci[1],rad,print);
           }
           std::cout << "IP5 Transformed" << std::endl;
           PrintSurfaceNormalization(sb,transformed_Psi,theta,phi,transformed_v[a],
-                                    scaleIPNoRicci[1],mRad,print);
+                                    scaleIPNoRicci[1],rad,print);
           if(a==0){
             std::cout << "IP6 Rotated" << std::endl;
             PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],
-                                      scaleIPNoRicci[2],mRad,print);
+                                      scaleIPNoRicci[2],rad,print);
           }
           std::cout << "IP6 Transformed" << std::endl;
           PrintSurfaceNormalization(sb,transformed_Psi,theta,phi,transformed_v[a],
-                                    scaleIPNoRicci[2],mRad,print);
+                                    scaleIPNoRicci[2],rad,print);
 
       } else if(mScaleFactor=="Optimize"){
         const double scaleAtEquator
-              = NormalizeAKVAtOnePoint(sb, rotated_Psi, rotated_v[a], mRad, M_PI/2., 0.0, mPrintSteps);
+              = NormalizeAKVAtOnePoint(sb, rotated_Psi, rotated_v[a], rad, M_PI/2., 0.0, mPrintSteps);
         const MyVector<double> scaleIP 
               = InnerProductScaleFactors(v[a], v[a], Ricci, r2p4, sb,true);
         const MyVector<double> scaleIPNoRicci
               = InnerProductScaleFactors(v[a], v[a], Ricci, r2p4, sb,false);
-        scale = OptimizeScaleFactor(rotated_v[a], rotated_Psi, mRad, sb, theta,
+        scale = OptimizeScaleFactor(rotated_v[a], rotated_Psi, rad, sb, theta,
                                phi, scaleAtEquator, scaleIP[0], scaleIP[1], scaleIP[2],
                                mPrintSteps,mPrintBisectionResults);
         if(mPrintSurfaceNormalization){
           std::cout << "Equator " << std::endl;
           PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,
-                                    rotated_v[a],scaleAtEquator,mRad,mPrintSteps);
+                                    rotated_v[a],scaleAtEquator,rad,mPrintSteps);
           std::cout << "IP1 " << std::endl;
-          PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleIP[0],mRad,mPrintSteps);
+          PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleIP[0],rad,mPrintSteps);
           std::cout << "IP2 " << std::endl;
-          PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleIP[1],mRad,mPrintSteps);
+          PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleIP[1],rad,mPrintSteps);
           std::cout << "IP3 " << std::endl;
-          PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleIP[2],mRad,mPrintSteps);
+          PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scaleIP[2],rad,mPrintSteps);
           std::cout << "IP4 " << std::endl;
           PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],
-                                    scaleIPNoRicci[0],mRad,mPrintSteps);
+                                    scaleIPNoRicci[0],rad,mPrintSteps);
           std::cout << "IP5 " << std::endl;
           PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],
-                                    scaleIPNoRicci[1],mRad,mPrintSteps);
+                                    scaleIPNoRicci[1],rad,mPrintSteps);
           std::cout << "IP6 " << std::endl;
           PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],
-                                    scaleIPNoRicci[2],mRad,mPrintSteps);
+                                    scaleIPNoRicci[2],rad,mPrintSteps);
         } //end printing of surface normalization details
       } //end mScaleFactor=="Optimize"
 
       if(mPrintSurfaceNormalization){
+        std::cout << POSITION << std::endl;
         std::cout << mScaleFactor << std::endl;
-        PrintSurfaceNormalization(sb,transformed_Psi,theta,phi,transformed_v[a],scale,mRad,mPrintSteps);
+        PrintSurfaceNormalization(sb,rotated_Psi,theta,phi,rotated_v[a],scale,rad,mPrintSteps);
+        std::cout << POSITION << std::endl;
       }
 
       //scale v
@@ -528,13 +513,14 @@ if(thetap[a]<1.e-5){
         std::cout << "This was a bad / repeated solution, and will be recomputed." << std::endl;
       }
       std::cout << std::endl;
+        std::cout << POSITION << std::endl;
     }//end loop over perpendicular AKV axes
 
     std::cout << "\n" << std::endl;
   
 
     //approximate Killing vector
-    const DataMesh norm = 1.0 / (Psi*Psi*Psi*Psi*mRad);
+    const DataMesh norm = 1.0 / (Psi*Psi*Psi*Psi*rad);
     Tensor<DataMesh> xi_vec(3,"1",DataMesh::Empty);
     xi_vec(0) =  norm * ( cos(theta)*cos(phi)*xi[0](0) - sin(phi)*xi[0](1) );
     xi_vec(1) =  norm * ( cos(theta)*sin(phi)*xi[0](0) + cos(phi)*xi[0](1) );

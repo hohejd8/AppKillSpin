@@ -8,7 +8,7 @@ DoMultipleRuns -c "/usr/local/mpi/bin/mpirun -np 2 /home/hohejd8/SpEC/AppKillSpi
 /home/hohejd8/SpEC/Support/ApplyObservers/Executables/ApplyObservers -t ConformalFactor,Shift,LapseTimesConformalFactor -r Scalar,1,Scalar -NoDomainHistory ApplyObservers.input
 
 //for ComputeAKV test using ApplyObservers
-/home/hohejd8/SpEC/Support/ApplyObservers/Executables/ApplyObservers -UseTimes=0 ApplyObservers.input
+/home/hohejd8/SpEC/Support/ApplyObservers/Executables/ApplyObservers -UseTimes=0 ApplyObservers.input > OUTPUT.out 2>&1
 
 
 

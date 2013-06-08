@@ -9,6 +9,9 @@
 #include <gsl/gsl_roots.h>
 #include <stdlib.h>
 #include <complex>
+#include "Utils/IO/FileExists.hpp"
+//#include "stdio.h"
+#include "Utils/IO/CachedOfStream.hpp"
 
 //Is the Killing path centered on the axis after the appropriate (theta, phi) rotation?
 //If not, return false *and* return the relative position of the axis
@@ -53,6 +56,7 @@ void PrintSurfaceNormalization(const SurfaceBasis& sb,
                       const double& rad,
                       const bool& printSteps)
 {
+        std::cout << POSITION << std::endl;
   const double scaleOverSurface =
      NormalizeAKVAtAllPoints(sb, rotated_Psi, theta, phi, rotated_v*scaleFactor, rad, printSteps);
   std::cout << std::setprecision(15) 
@@ -678,10 +682,11 @@ double eqPhi //default = -1
   MyVector<std::complex<double> > z(MV::Size(3),std::complex<double>(0.,0.));
 
   //create z1
-  z[0] = std::complex<double> (tan(nPoleTheta/2.)*cos(nPolePhi), tan(nPoleTheta/2.)*sin(nPolePhi));//o
-
+  //z[0] = std::complex<double> (tan(nPoleTheta/2.)*cos(nPolePhi), tan(nPoleTheta/2.)*sin(nPolePhi));//o
+  z[0] = tan(nPoleTheta/2.)*exp(std::complex<double>(0.0,nPolePhi));
   //create z2
-  z[1] = std::complex<double> (tan(sPoleTheta/2.)*cos(sPolePhi), tan(sPoleTheta/2.)*sin(sPolePhi));//o
+  //z[1] = std::complex<double> (tan(sPoleTheta/2.)*cos(sPolePhi), tan(sPoleTheta/2.)*sin(sPolePhi));//o
+  z[1] = tan(sPoleTheta/2.)*exp(std::complex<double>(0.0,sPolePhi));
 
   //check to see if eqTheta, eqPhi = -1, which is a flag to make z3 halfway between z1 and z2
   if(eqTheta==-1. && eqPhi==-1. && fmod(nPoleTheta,M_PI)<1.e-6){
@@ -704,23 +709,30 @@ double eqPhi //default = -1
         eqPhi = nPolePhi;
       } else {
         eqTheta = M_PI/2. - nPoleTheta;
-        eqPhi = nPolePhi+M_PI;
+        if(nPolePhi > M_PI){
+          eqPhi = nPolePhi-M_PI;
+        } else {
+          eqPhi = nPolePhi+M_PI;
+        }
       }
     } else {
       eqTheta = atan2(sqrt(cx*cx+cy*cy),cz);
       eqPhi = atan2(cy,cx);
     }
   }
-  std::cout << "(nt, np) = (" << nPoleTheta << ", " << nPolePhi
+  /*std::cout << "(nt, np) = (" << nPoleTheta << ", " << nPolePhi
             << ") (st, sp) = (" << sPoleTheta << ", " << sPolePhi << ")"
             << ") (eqt, eqp) = (" << eqTheta << ", " << eqPhi << ")"
-            << std::endl;
-        std::cout << POSITION << std::endl;
+            << std::endl;*/
+        //std::cout << POSITION << std::endl;
   /*std::cout << "[" << minPoint[0] << ", " << minPoint[1] << ", "
                 << maxPoint[0] << ", " << maxPoint[1] << ", "
                 << eqPoint[0] << ", " << eqPoint[1] << ", " << std::endl;*/
   //create z3
-  z[2] = std::complex<double> (tan(eqTheta/2.)*cos(eqPhi), tan(eqTheta/2.)*sin(eqPhi));
+  //z[2] = std::complex<double> (tan(eqTheta/2.)*cos(eqPhi), tan(eqTheta/2.)*sin(eqPhi));
+  z[2] = tan(eqTheta/2.)*exp(std::complex<double>(0.,eqPhi));
+
+
   /*std::cout << POSITION << " z[0] = " << z[0] 
             << "; z[1] = " << z[1] << "; z[2] = " << z[2] << std::endl;
   std::cout << POSITION << " abs(z[0]) = " << abs(z[0]) 
@@ -767,59 +779,58 @@ std::complex<double> InvMobius(const MyVector<std::complex<double> > z,
 double MobiusConformalFactor(const MyVector<std::complex<double> > z,
                              const std::complex<double> w)
 {
-  double cf;
-/*
+  double cf2;
+  std::complex<double> z4;
+
   //Mobius CF for forward transformation, z4->w
   //computes Psi^2
   if(abs(z[1])>1.e10){
-    cf = abs(z4-z[0])*abs(z4-z[0]) + abs(z[0]-z[2])*abs(z[0]-z[2]);
-    cf /= (1.+abs(z4)*abs(z4)) * abs(z[0]-z[2]);
+    z4 = w*(z[2]-z[0]) + z[0];
+    cf2 = norm(z4-z[0]) + norm(z[0]-z[2]);
+    cf2 /= (1.+norm(z4)) * abs(z[0]-z[2]);
   } else if(abs(z[0])>1.e10){
-    cf = abs(z4-z[1])*abs(z4-z[1]) + abs(z[1]-z[2])*abs(z[1]-z[2]);
-    cf /= (1.+abs(z4)*abs(z4)) * abs(z[1]-z[2]);
+    z4 = 0.5*(z[2]-z[1]) + z[1];
+    cf2 = norm(z4-z[1]) + norm(z[1]-z[2]);
+    cf2 /= (1.+norm(z4)) * abs(z[1]-z[2]);
   } else if(abs(z[2])>1.e10){
-    cf = abs(z4-z[0])*abs(z4-z[0]) + abs(z4-z[1])*abs(z4-z[1]);
-    cf /= (1.+abs(z4)*abs(z4)) * abs(z[0]-z[1]);
+    z4 = (w*z[1]-z[0])/(w-1.0);
+    cf2 = norm(z4-z[0]) + norm(z4-z[1]);
+    cf2 /= (1.+norm(z4)) * abs(z[0]-z[1]);
   } else {
-    cf = abs(z4-z[0])*abs(z4-z[0])*abs(z[1]-z[2])*abs(z[1]-z[2])
-       + abs(z4-z[1])*abs(z4-z[1])*abs(z[0]-z[2])*abs(z[0]-z[2]);
-    cf /= (1.+abs(z4)*abs(z4)) * abs(z[0]-z[1]) * abs(z[0]-z[2])* abs(z[1]-z[2]);
+    std::complex<double> zden = w*(z[2]-z[0])-(z[2]-z[1]);
+    if(norm(zden) < 1.e-10) {
+      //zinf = true;
+      z4 = 0.0;
+      cf2 = (norm(z[1]-z[2])+norm(z[0]-z[2]))/(abs(z[0]-z[1])*abs(z[0]-z[2])*abs(z[1]-z[2]));
+    } else {
+      z4 = (w*z[1]*(z[2]-z[0])-z[0]*(z[2]-z[1]))/(w*(z[2]-z[0])-(z[2]-z[1]));
+      cf2 = norm(z4-z[0])*norm(z[1]-z[2])
+         + norm(z4-z[1])*norm(z[0]-z[2]);
+      cf2 /= (1.+norm(z4)) * abs(z[0]-z[1]) * abs(z[0]-z[2])* abs(z[1]-z[2]);
+    }
   }
-*/
+
 
   //Mobius CF for inverse transformation, w->z4
   //computes Psi^2
-  if(abs(z[1])>1.e10){
-    std::cout << POSITION << " UNSIMPLIFIED z[1] term" << std::endl;
-    cf = (1.+abs(w)*abs(w)) * abs(z[0]-z[1]) * abs(z[0]-z[2]) * abs(z[1]-z[2]);
-    cf /= abs((z[2]-z[0])*w-(z[2]-z[1])) * abs((z[2]-z[0])*w-(z[2]-z[1]))
-       + abs(-z[1]*w*(z[2]-z[0]) + z[0]*(z[2]-z[1]))*abs(-z[1]*w*(z[2]-z[0]) + z[0]*(z[2]-z[1]));
-  } else if(abs(z[0])>1.e10){
-    std::cout << POSITION << " UNSIMPLIFIED z[0] term" << std::endl;
-    cf = (1.+abs(w)*abs(w)) * abs(z[0]-z[1]) * abs(z[0]-z[2]) * abs(z[1]-z[2]);
-    cf /= abs((z[2]-z[0])*w-(z[2]-z[1])) * abs((z[2]-z[0])*w-(z[2]-z[1]))
-       + abs(-z[1]*w*(z[2]-z[0]) + z[0]*(z[2]-z[1]))*abs(-z[1]*w*(z[2]-z[0]) + z[0]*(z[2]-z[1]));
-  } else if(abs(z[2])>1.e10){
-    std::cout << POSITION << " UNSIMPLIFIED z[2] term" << std::endl;
-    cf = (1.+abs(w)*abs(w)) * abs(z[0]-z[1]) * abs(z[0]-z[2]) * abs(z[1]-z[2]);
-    cf /= abs((z[2]-z[0])*w-(z[2]-z[1])) * abs((z[2]-z[0])*w-(z[2]-z[1]))
-       + abs(-z[1]*w*(z[2]-z[0]) + z[0]*(z[2]-z[1]))*abs(-z[1]*w*(z[2]-z[0]) + z[0]*(z[2]-z[1]));
-  } else {
-    cf = (1.+abs(w)*abs(w)) * abs(z[0]-z[1]) * abs(z[0]-z[2]) * abs(z[1]-z[2]);
-    cf /= abs((z[2]-z[0])*w-(z[2]-z[1])) * abs((z[2]-z[0])*w-(z[2]-z[1]))
+  double cfa = (1.+abs(w)*abs(w)) * abs(z[0]-z[1]) * abs(z[0]-z[2]) * abs(z[1]-z[2]);
+  cfa /= abs((z[2]-z[0])*w-(z[2]-z[1])) * abs((z[2]-z[0])*w-(z[2]-z[1]))
        + abs(-z[1]*w*(z[2]-z[0])+z[0]*(z[2]-z[1])) * abs(-z[1]*w*(z[2]-z[0])+z[0]*(z[2]-z[1]));
-  }
+
+  //std::cout << cf2 << " " << cfa << " " << cf2-cfa << std::endl;
+
 
   //return cf;
   //std::cout << "z = " << z4 << " z1 = " << z[0] << " z2 = " << z[1] << " z3 = " << z[2]
   //          << " Psi = " << cf << std::endl;
-  return sqrt(cf);
+  //return cf2*cf2;
+  return cfa*cfa;
 }
 
 //Mobius transformation on a sphere
 DataMesh MobiusTransform(const DataMesh& collocationvalues,
-                         const DataMesh& thetaGrid,
-                         const DataMesh& phiGrid,
+                         const DataMesh& uGrid,
+                         const DataMesh& vGrid,
                          const SurfaceBasis& sb,
                          const MyVector<std::complex<double> > z,
                          DataMesh& thetaMobius,
@@ -830,29 +841,66 @@ DataMesh MobiusTransform(const DataMesh& collocationvalues,
   DataMesh MobiusCF(sb.CollocationMesh());
   DataMesh result(sb.CollocationMesh());
 
-  for(int i=0; i<thetaGrid.Size(); i++){
-    const std::complex<double> 
-          w(tan(thetaGrid[i]/2.)*cos(phiGrid[i]), tan(thetaGrid[i]/2.)*sin(phiGrid[i]));
-    //const std::complex<double> w = Mobius(z, z4);
+  /*if(isConformalFactor) std::cout << "thetaGrid phiGrid thetaMobius phiMobius MobiusCF result" << std::endl;*/
+
+  for(int i=0; i<uGrid.Size(); i++){
+    /*const std::complex<double> 
+          w(tan(uGrid[i]/2.)*cos(vGrid[i]), tan(uGrid[i]/2.)*sin(vGrid[i]));*/
+    const std::complex<double> w = tan(0.5*uGrid[i])*
+	                             exp(std::complex<double>(0.0,vGrid[i]));
     const std::complex<double> z4 = InvMobius(z, w);
     thetaMobius[i] = 2. * atan(abs(z4));
     phiMobius[i] = arg(z4);
+    result[i] = sb.Evaluate(collocationvalues, thetaMobius[i], phiMobius[i]);
     if(isConformalFactor){
+      //std::cout << "cf2 | cfa | cf2-cfa" << std::endl;
+      MobiusCF[i] = MobiusConformalFactor(z, w); //original, correct(?)
+      //MobiusCF[i] = MobiusConformalFactor(z, z4); //just for kicks
 
-      MobiusCF[i] = MobiusConformalFactor(z, w);
 
       /*std::cout << thetaGrid[i] << ", " << phiGrid[i] << "] " << MobiusCF[i] 
                 //<< MobiusCF[i]
                 //<< " z4 = " << z4 << " abs(z4) = " << abs(z4) 
                 << std::endl;*/
+      /*std::cout << thetaGrid[i] << "   " << phiGrid[i] << "   "
+                << thetaMobius[i] << "   " << phiMobius[i] << "   "
+                << MobiusCF[i] << "   " << result[i] << std::endl;*/
+      //result[i] = result[i]*pow(MobiusCF[i],exponent); //used for testing purposes
+      result[i] = result[i]*MobiusCF[i];
     }
-    result[i] = sb.Evaluate(collocationvalues, thetaMobius[i], phiMobius[i]);
+
   }
-
-
+/*
+  if(isConformalFactor){
+    std::cout << "MobiusTransform: ThetaGrid" << std::endl;
+    for(int i=0; i<uGrid.Size(); i++){
+      std::cout << uGrid[i] << std::endl;
+    }
+    std::cout << "MobiusTransform: PhiGrid" << std::endl;
+    for(int i=0; i<vGrid.Size(); i++){
+      std::cout << vGrid[i] << std::endl;
+    }
+    std::cout << "MobiusTransform: thetaMobius" << std::endl;
+    for(int i=0; i<thetaMobius.Size(); i++){
+      std::cout << thetaMobius[i] << std::endl;
+    }
+    std::cout << "MobiusTransform: phiMobius" << std::endl;
+    for(int i=0; i<phiMobius.Size(); i++){
+      std::cout << phiMobius[i] << std::endl;
+    }
+    std::cout << "MobiusTransform: SphericalCF" << std::endl;
+    for(int i=0; i<collocationvalues.Size(); i++){
+      std::cout << collocationvalues[i] << std::endl;
+    }
+    std::cout << "MobiusTransform: MobiusCF" << std::endl;
+    for(int i=0; i<MobiusCF.Size(); i++){
+      std::cout << MobiusCF[i] << std::endl;
+    }
+  }
+*/
 
   //if(isConformalFactor) result = result*MobiusCF; //original
-  if(isConformalFactor) result = result*pow(MobiusCF,exponent); //used for testing purposes
+  //if(isConformalFactor) result = result*pow(MobiusCF,exponent); //used for testing purposes
   return result;
 }
 
@@ -868,7 +916,7 @@ DataMesh RotateOnSphere
           const double Phi) 
 {
   DataMesh result(sb.CollocationMesh());
-
+        //std::cout << POSITION << std::endl;
   const double Cb = cos(Theta);
   const double Sb = sin(Theta);
   const double Ca = cos(Phi);
@@ -904,6 +952,7 @@ DataMesh RotateOnSphere
     }*/
     result[i] = sb.Evaluate(collocationvalues, newTheta, newPhi);
   }
+        //std::cout << POSITION << std::endl;
   return result;
 }
 
@@ -1034,17 +1083,26 @@ double NormalizeAKVAtAllPoints(const SurfaceBasis& sb,
   //create storage
   DataMesh scaleFactor(Mesh(theta.Extents()));
 
+  if(printSteps) std::cout << "theta phi scale-1   v   CF" << std::endl;
+  std::cout << POSITION << " scaleFactor w/0 -1 term" << std::endl;
+  //std::cout << POSITION << " `MobiusPaths'" << std::endl;
   for(int i=0; i<scaleFactor.Size(); i++){
     //std::cout << POSITION << " Testing " << i 
     //          << " of " << scaleFactor.Size() << std::endl; //can be deleted
-    scaleFactor[i] = NormalizeAKVAtOnePoint(sb,Psi,xi,rad,theta[i],phi[i],printSteps)-1.;
+    scaleFactor[i] = NormalizeAKVAtOnePoint(sb,Psi,xi,rad,theta[i],phi[i],printSteps);//-1.; 
+    /*std::cout << theta[i] << " " << phi[i] << " " << Psi[i] << " " 
+              << xi(0)[i] << " " << xi(1)[i] << " " <<  scaleFactor[i]+1. << std::endl;*/
+    if(printSteps){
+      std::cout << "(" << theta[i] << " " << ", " << phi[i] << ") : " 
+                << scaleFactor[i] << "   " << v[i] << "   " << Psi[i] << std::endl;
+    }
   }
 
   scaleFactor *= scaleFactor;
   const DataMesh r2p4 = rad*rad*Psi*Psi*Psi*Psi;
   const double area = sb.ComputeCoefficients(r2p4)[0];
 
-  return sqrt(sb.ComputeCoefficients(scaleFactor*r2p4)[0])/area;
+  return sqrt(sb.ComputeCoefficients(scaleFactor*r2p4)[0]/area);
 }
 
 //determines the path length of following the approximate
@@ -1064,7 +1122,7 @@ double NormalizeAKVAtOnePoint(const SurfaceBasis& sb,
   Tensor<DataMesh> xi(2,"1",DataMesh::Empty);
   xi(0) = tmp_xi(1);
   xi(1) = -tmp_xi(0);
-
+        //std::cout << POSITION << std::endl;
   return NormalizeAKVAtOnePoint(sb, rotated_Psi, xi, rad, thetap, phip, printSteps);
 }
 
@@ -1087,10 +1145,7 @@ double NormalizeAKVAtOnePoint(const SurfaceBasis& sb,
                                thetaOffAxis, phiOffAxis, printSteps);
   REQUIRE(goodtheta, "Killing trajectory did not close " << POSITION); //original diagnostic
 
-  const double scale = t/(2.0*M_PI); //original
-  //double scale = t/(2.0*M_PI); //I'd rather go back to the const version
-
-  //if(!goodtheta) scale = -1.;
+  const double scale = t/(2.0*M_PI);
 
   return scale;
 } //end normalizeKillingVector
@@ -1180,7 +1235,8 @@ bool KillingPath(const SurfaceBasis& sb,
 
   const gsl_odeiv2_step_type *const T = gsl_odeiv2_step_rkck;
   gsl_odeiv2_step *const s = gsl_odeiv2_step_alloc (T, 2);
-  gsl_odeiv2_control *const c = gsl_odeiv2_control_y_new (1e-12, 1.e-12);
+  //gsl_odeiv2_control_y_new sets (absolute error, relative error)
+  gsl_odeiv2_control *const c = gsl_odeiv2_control_y_new (1e-13, 1.e-13);
   gsl_odeiv2_evolve *const e = gsl_odeiv2_evolve_alloc (2);
   gsl_odeiv2_system sys = {PathDerivs, NULL, 2, &params};
      
@@ -1197,17 +1253,24 @@ bool KillingPath(const SurfaceBasis& sb,
   double pathTotal[2] = {0.,0.};
   double pathAvg[2] = {0.,0.};
 
+  //tmp edit for directing output
+    std::string FileName = "KillingPath.dat";
+    bool newfile = !FileExists(FileName);
+    CachedOfStream& Out1=GetCachedOfStream(FileName);
+    if(printSteps && newfile) {
+      Out1 << "# KillingPath\n";
+      Out1 << "# theta phi\n";
+    }
 
-/*
-//keep this following segment for final production
+
   if(printSteps){
     std::cout << "START: y = ( " 
 	      << std::setprecision(8) << std::setw(10) << y[0] << " , " 
 	      << std::setprecision(8) << std::setw(10) << y[1]+2.*M_PI << " ); h = " 
 	      << std::setprecision(8) << std::setw(10) << h 
-	      << std::endl; 
+	      << std::endl;
   }
-*/     
+    
   int iter = 0;
   const int iterMax = 100000;
   while (true && iter<iterMax) {
@@ -1219,19 +1282,9 @@ bool KillingPath(const SurfaceBasis& sb,
 						&sys, 
 						&t, t1,
 						&h, y);
-/*
-    if(iter == 1){
-      std::cout << "y = ( "
-  	        << std::setprecision(8) << std::setw(10) << y[0] << " , " 
-  	        << std::setprecision(8) << std::setw(10) << y[1]+2.*M_PI << " )" 
-                << std::endl;
-    }
-*/
-/*
-    //if(printSteps){
-    //if(printSteps && y[1]+2.*M_PI<.0){
-    //if(iter > 0.9*iterMax){
-    if(h < 1.e-7){
+
+
+    if(printSteps){
       std::cout << "iter = " << iter << " t = " 
     	        << std::setprecision(8) << std::setw(10) << t 
   	        << " : y = ( " 
@@ -1240,37 +1293,21 @@ bool KillingPath(const SurfaceBasis& sb,
   	        << std::setprecision(8) << std::setw(10) << h 
   	        << std::endl;
     }
-*/
+
     if(printSteps){
       //note that this gives output appropriate for gnuplot's splot function
-      std::cout << std::setprecision(8) << std::setw(10) <<  y[1]+2.*M_PI
-      << " " << std::setprecision(8) << std::setw(10) << -(y[0]-M_PI/2.) << std::endl;
+      //std::cout 
+      Out1 << std::setprecision(8) << std::setw(10) <<  y[1]+2.*M_PI
+           << " " << std::setprecision(8) << std::setw(10) << -(y[0]-M_PI/2.) << "\n";
+      //<< std::endl;
     }
-/*
-    if(y[1]>0 && iter%100==0){
-      std::cout << "iter = " << iter << " t = " 
-    	        << std::setprecision(8) << std::setw(10) << t 
-  	        << " : y = ( " 
-  	        << std::setprecision(8) << std::setw(10) << y[0] << " , " 
-  	        << std::setprecision(8) << std::setw(10) << y[1]+2.*M_PI << " ); h = " 
-  	        << std::setprecision(8) << std::setw(10) << h 
-  	        << std::endl;
-    }
-*/
+
     ASSERT(status==GSL_SUCCESS,"Path Integration failed");
 
     if(limit_h && h > hmax) h = hmax;
     if(fabs(y[1] - phi) < 1.e-12) break; //original condition assuming navigation about the pole
     //if a path brings you back to the original point,
     //you have closure, and that's what we're interested in
-/*    if(   fabs(y[1]+2.*M_PI - phi) < 1.e-6      //close to original phi
-       && t > 1.e-2 ){
-       //&& printSteps){
-      std::cout << POSITION << " Off-axis closure rules have been triggered." << std::endl;
-      std::cout << "Path average (theta, phi) = (" << pathTotal[0]
-                << ", " << pathTotal[1]/(2.*M_PI)-M_PI << ")" << std::endl;
-      break;
-    }*/
     else if(y[1] > phi) { //if solver went too far...
       if(!limit_h) hmax = h;
       limit_h = true;
@@ -1278,15 +1315,7 @@ bool KillingPath(const SurfaceBasis& sb,
       y[0] = ysave[0]; y[1] = ysave[1]; t = tsave; //return variables to previous state
       gsl_odeiv2_evolve_reset(e); //return solver to previous state
     } //end ifs
-/*    //alternative else if
-    else if(ysave[1] < phi-2.*M_PI && y[1]>phi-2.*M_PI){ //Killing path has been followed too far
-      //std::cout << POSITION << " Off-axis overstepping rules have been triggered." << std::endl;
-      if(!limit_h) hmax = h;
-      limit_h = true;
-      h = hmax *= 0.5; //...reset h, hmax
-      y[0] = ysave[0]; y[1] = ysave[1]; t = tsave; iter--; //return variables to previous state
-      gsl_odeiv2_evolve_reset(e); //return solver to previous state
-    }*/
+
     if(h > hmax2) h = hmax2;
 
     //diagnostics on average (theta, phi) position.
@@ -1327,8 +1356,11 @@ int PathDerivs(double t_required_by_solver, const double y[], double f[], void *
   double psiAtPoint = sb.EvaluateFromCoefficients(Psi_ha, y[0], y[1]);
   MyVector<double> result = sb.EvaluateVectorFromCoefficients(xi_ha, y[0], y[1]);
 
-  const double norm = 1.0 / (psiAtPoint*psiAtPoint*psiAtPoint*psiAtPoint
-                             *rad*rad);
+  /*const double norm = 1.0 / (psiAtPoint*psiAtPoint*psiAtPoint*psiAtPoint
+                             *rad*rad);//original*/
+
+  const double norm = 1.0 / (psiAtPoint);
+
   f[0] = result[0]*norm;
   f[1] = result[1]*norm/sin(y[0]);
 
